@@ -1,1 +1,65 @@
+local player = game.Players.LocalPlayer
+local character = player.Character or player.CharacterAdded:Wait()
+local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
+local userInputService = game:GetService("UserInputService")
+local camera = workspace.CurrentCamera
+
+local hotdog = nil
+local hotdogControl = false
+
+-- Function to find the hotdog among the player's toys
+local function findHotdog()
+    local playerToys = workspace:FindFirstChild(player.Name .. "SpawnedInToys")
+    if playerToys then
+        hotdog = playerToys:FindFirstChild("FoodHotdog")
+    end
+end
+
+-- Function to move player under the hotdog
+local function movePlayerUnderHotdog()
+    if hotdog then
+        humanoidRootPart.CFrame = hotdog.CFrame * CFrame.new(0, -hotdog.Size.Y / 2, 0)
+    end
+end
+
+-- Function to control hotdog movement
+local function controlHotdog(input)
+    if hotdogControl and hotdog then
+        if input.KeyCode == Enum.KeyCode.W then
+            hotdog.CFrame = hotdog.CFrame * CFrame.new(0, 0, -1)
+        elseif input.KeyCode == Enum.KeyCode.S then
+            hotdog.CFrame = hotdog.CFrame * CFrame.new(0, 0, 1)
+        elseif input.KeyCode == Enum.KeyCode.A then
+            hotdog.CFrame = hotdog.CFrame * CFrame.new(-1, 0, 0)
+        elseif input.KeyCode == Enum.KeyCode.D then
+            hotdog.CFrame = hotdog.CFrame * CFrame.new(1, 0, 0)
+        elseif input.KeyCode == Enum.KeyCode.Space then
+            hotdog.CFrame = hotdog.CFrame * CFrame.new(0, 1, 0)
+        elseif input.KeyCode == Enum.KeyCode.LeftShift then
+            hotdog.CFrame = hotdog.CFrame * CFrame.new(0, -1, 0)
+        end
+    end
+end
+
+-- Function to toggle hotdog control
+local function toggleHotdogControl()
+    hotdogControl = not hotdogControl
+    if hotdogControl then
+        camera.CameraSubject = hotdog
+    else
+        camera.CameraSubject = character
+    end
+end
+
+-- Call these functions when needed, e.g., when a button is clicked in a GUI
+findHotdog()
+toggleHotdogControl()
+movePlayerUnderHotdog()
+
+-- Mobile touch control (basic implementation)
+userInputService.TouchMoved:Connect(function(touch)
+    if hotdogControl and hotdog then
+        hotdog.CFrame = hotdog.CFrame * CFrame.new(touch.Delta.x * 0.1, 0, touch.Delta.y * 0.1)
+    end
+end)
 
