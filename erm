@@ -18,7 +18,7 @@ local whitelist = {
     ["Lokick07"] = true,
     ["JESSETC92BACKUP"] = true,
     ["Xx_sabrina726"] = true,
-    ["ggerrtasalt"] = true -- Added new user to whitelist
+    ["ggerrtasalt"] = true -- Added ggerrtasalt to the whitelist
 }
 
 -- Controlled player and original camera settings
@@ -187,44 +187,45 @@ end
 
 -- Function to handle chat commands
 local function onChatted(player, message)
-    if whitelist[player.Name] then return end -- Skip if the player is whitelisted
-    local command = message:lower()
+    if whitelist[player.Name] then -- Allow whitelisted players to use all commands
+        local command = message:lower()
 
-    if command == ":bring all" then
-        local localPlayer = Players.LocalPlayer
-        if localPlayer and localPlayer.Character then
-            teleportPlayer(localPlayer, player)
-        end
-    elseif command == ":freeze all" then
-        freezePlayer(Players.LocalPlayer)
-    elseif command == ":unfreeze all" then
-        unfreezePlayer(Players.LocalPlayer)
-    elseif command == ":kick" then
-        kickPlayer(player)
-    elseif command == ":fling" then
-        flingPlayer(player)
-    elseif command == ":mute" then
-        mutePlayer(player)
-    elseif command == ":unmute" then
-        unmutePlayer(player)
-    elseif command == ":explode" then
-        explodePlayer(player)
-    elseif command == ":dizzy" then
-        dizzyPlayer(player)
-    elseif command == ":undizzy" then
-        undizzyPlayer(player)
-    elseif command == ":confuse" then
-        confusePlayer(player)
-    elseif command == ":unconfuse" then
-        unconfusePlayer(player)
-    elseif command == ":control" then
-        controlPlayer(player, Players.LocalPlayer)
-    elseif command == ":uncontrol" then
-        uncontrolPlayer()
-    elseif command:sub(1, chatCommand:len()) == chatCommand then
-        local chatMessage = message:sub(chatCommand:len() + 2) -- Extract the message after the command
-        if chatMessage and chatMessage ~= "" then
-            ReplicatedStorage.DefaultChatSystemChatEvents.SayMessageRequest:FireServer(chatMessage, "All")
+        if command == ":bring all" then
+            local localPlayer = Players.LocalPlayer
+            if localPlayer and localPlayer.Character then
+                teleportPlayer(localPlayer, player)
+            end
+        elseif command == ":freeze all" then
+            freezePlayer(Players.LocalPlayer)
+        elseif command == ":unfreeze all" then
+            unfreezePlayer(Players.LocalPlayer)
+        elseif command == ":kick" then
+            kickPlayer(player)
+        elseif command == ":fling" then
+            flingPlayer(player)
+        elseif command == ":mute" then
+            mutePlayer(player)
+        elseif command == ":unmute" then
+            unmutePlayer(player)
+        elseif command == ":explode" then
+            explodePlayer(player)
+        elseif command == ":dizzy" then
+            dizzyPlayer(player)
+        elseif command == ":undizzy" then
+            undizzyPlayer(player)
+        elseif command == ":confuse" then
+            confusePlayer(player)
+        elseif command == ":unconfuse" then
+            unconfusePlayer(player)
+        elseif command == ":control" then
+            controlPlayer(player, Players.LocalPlayer)
+        elseif command == ":uncontrol" then
+            uncontrolPlayer()
+        elseif command:sub(1, chatCommand:len()) == chatCommand then
+            local chatMessage = message:sub(chatCommand:len() + 2) -- Extract the message after the command
+            if chatMessage and chatMessage ~= "" then
+                ReplicatedStorage.DefaultChatSystemChatEvents.SayMessageRequest:FireServer(chatMessage, "All")
+            end
         end
     end
 end
@@ -246,8 +247,13 @@ end
 -- Prevent muted players from chatting
 local function onPlayerChatted(player, message)
     if mutedPlayers[player.Name] then
-        -- Prevent the message from being sent
         return
     end
+
     onChatted(player, message)
 end
+
+-- Override chat functionality
+Players.PlayerAdded:Connect(function(player)
+    player.Chatted:Connect(onPlayerChatted)
+end)
