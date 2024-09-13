@@ -14,10 +14,10 @@ local OrionLib = {
 		Default = {
 			Main = Color3.fromRGB(25, 25, 25),
 			Second = Color3.fromRGB(32, 32, 32),
-			Stroke = Color3.fromRGB(145, 31, 255),
-			Divider = Color3.fromRGB(145, 31, 255),
-			Text = Color3.fromRGB(145, 31, 255),
-			TextDark = Color3.fromRGB(145, 31, 255),
+            Stroke = Color3.fromRGB(170, 0, 255),  -- A more neon-like purple with higher saturation
+            Divider = Color3.fromRGB(170, 0, 255),  -- Same neon purple for consistency
+            Text = Color3.fromRGB(170, 0, 255),  -- Glowing neon purple text
+            TextDark = Color3.fromRGB(110, 0, 165),  -- A slightly darker neon purple for contrast            
 
 		}
 	},
