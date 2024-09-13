@@ -15,7 +15,7 @@ local OrionLib = {
 			Main = Color3.fromRGB(0, 0, 0),
 Second = Color3.fromRGB(0, 0, 0),
             Stroke = Color3.fromRGB(0, 255, 255),   -- A bright neon cyan
-            Divider = Color3.fromRGB(0, 255, 255),  -- Matches the neon cyan for consistency
+            Divider = Color3.fromRGB(60, 60, 60),  -- Matches the neon cyan for consistency
             Text = Color3.fromRGB(0, 255, 255),     -- Neon cyan for text
             TextDark = Color3.fromRGB(0, 155, 155), -- Darker version of neon cyan for contrast                   
 		}
