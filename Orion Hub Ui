@@ -12,12 +12,12 @@ local OrionLib = {
 	Flags = {},
 	Themes = {
 		Default = {
-			Main = Color3.fromRGB(25, 25, 25),
-			Second = Color3.fromRGB(32, 32, 32),
-            Stroke = Color3.fromRGB(199, 0, 255),   -- A brighter neon purple
-            Divider = Color3.fromRGB(199, 0, 255),  -- Matches the neon purple for consistency
-            Text = Color3.fromRGB(199, 0, 255),     -- Neon purple for text
-            TextDark = Color3.fromRGB(120, 0, 155), -- Darker version of neon purple for contrast            
+			Main = Color3.fromRGB(0, 0, 0),
+Second = Color3.fromRGB(0, 0, 0),
+            Stroke = Color3.fromRGB(0, 255, 255),   -- A bright neon cyan
+            Divider = Color3.fromRGB(0, 255, 255),  -- Matches the neon cyan for consistency
+            Text = Color3.fromRGB(0, 255, 255),     -- Neon cyan for text
+            TextDark = Color3.fromRGB(0, 155, 155), -- Darker version of neon cyan for contrast                   
 		}
 	},
 	SelectedTheme = "Default",
