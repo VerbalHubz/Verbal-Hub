@@ -1,0 +1,152 @@
+-- Get services
+local TweenService = game:GetService("TweenService")
+local Workspace = game:GetService("Workspace")
+local Lighting = game:GetService("Lighting")
+local RunService = game:GetService("RunService")
+
+-- Sky customization (Black Sky with Blue Neon Stars)
+local sky = Instance.new("Sky")
+sky.Parent = Lighting
+sky.SkyboxBk = "rbxassetid://0"  -- Set to black
+sky.SkyboxDn = "rbxassetid://0"
+sky.SkyboxFt = "rbxassetid://0"
+sky.SkyboxLf = "rbxassetid://0"
+sky.SkyboxRt = "rbxassetid://0"
+sky.SkyboxUp = "rbxassetid://0"
+
+-- Create Blue Neon Stars
+local function createBlueNeonStar(position)
+    local star = Instance.new("Part")
+    star.Position = position
+    star.Anchored = true
+    star.CanCollide = false
+    star.Size = Vector3.new(0.5, 0.5, 0.5) -- Small star
+    star.Shape = Enum.PartType.Ball  -- Make the star spherical
+    star.BrickColor = BrickColor.new("Bright blue")
+    star.Material = Enum.Material.Neon -- Neon material for glow effect
+    star.Parent = Workspace
+end
+
+-- Create stars at random positions without any boxes
+for i = 1, 50 do  -- Create 50 cool blue neon stars
+    local randomPosition = Vector3.new(math.random(-500, 500), math.random(100, 300), math.random(-500, 500))
+    createBlueNeonStar(randomPosition)
+end
+
+-- Create and move the moon
+local moon = Instance.new("Part")
+moon.Size = Vector3.new(10, 10, 10)  -- Large moon
+moon.Shape = Enum.PartType.Ball  -- Spherical moon
+moon.BrickColor = BrickColor.new("Institutional white")
+moon.Material = Enum.Material.SmoothPlastic
+moon.Anchored = true
+moon.Parent = Workspace
+
+-- Rainbow color change for the moon
+local function changeMoonColor()
+    local tweenInfo = TweenInfo.new(10, Enum.EasingStyle.Linear, Enum.EasingDirection.InOut, -1, true) -- Loop and reverse
+    local goal = {}
+    
+    goal.Color = Color3.fromHSV(0, 1, 1)  -- Start at red (Hue 0)
+    
+    local rainbowTween = TweenService:Create(moon, tweenInfo, goal)
+    rainbowTween:Play()
+
+    rainbowTween.Completed:Connect(function()
+        goal.Color = Color3.fromHSV((tick() % 1), 1, 1) -- Smoothly cycle through rainbow hues
+        rainbowTween:Play()
+    end)
+end
+
+-- Move the moon across the sky in a circular path
+local moonRadius = 300  -- Distance from the center
+local moonSpeed = 0.01  -- Speed of movement
+local centerPosition = Vector3.new(0, 150, 0)  -- Center of the circular path (above the map)
+
+RunService.Stepped:Connect(function(_, deltaTime)
+    local time = tick() * moonSpeed
+    local moonX = math.cos(time) * moonRadius
+    local moonZ = math.sin(time) * moonRadius
+    moon.Position = centerPosition + Vector3.new(moonX, 50, moonZ)  -- Adjust Y for elevation
+end)
+
+-- Start the moon color change
+changeMoonColor()
+
+-- Moving Clouds
+local clouds = Workspace.Terrain:FindFirstChild("Clouds") or Instance.new("Clouds", Workspace.Terrain)
+clouds.Cover = 0.5  -- Adjust cloud density
+clouds.Color = Color3.new(1, 1, 1) -- White clouds
+clouds.Parent = Workspace.Terrain
+
+-- Move clouds slowly across the sky
+local moveSpeed = 0.01
+RunService.Stepped:Connect(function()
+    clouds.Offset += Vector2.new(moveSpeed, 0) -- Moving clouds horizontally
+end)
+
+-- Map lighting with realistic shadows
+Lighting.Brightness = 2  -- Adjust brightness
+Lighting.OutdoorAmbient = Color3.fromRGB(255, 255, 255) -- White light for ambient
+Lighting.GlobalShadows = true
+Lighting.ClockTime = 20  -- Set to night for black sky effect
+Lighting.FogEnd = 1000  -- Add depth with fog
+Lighting.FogColor = Color3.fromRGB(0, 0, 30) -- Dark blue fog for contrast
+Lighting.Ambient = Color3.fromRGB(255, 255, 255) -- White ambient light like a light bulb
+Lighting.ColorShift_Top = Color3.fromRGB(255, 255, 255) -- No color shift, pure white
+Lighting.ShadowColor = Color3.fromRGB(0, 0, 0) -- Darker shadows
+
+-- Create realistic ocean waves
+local ocean = Workspace.Map.AlwaysHereTweenedObjects:FindFirstChild("Ocean") or Instance.new("Part")
+ocean.Size = Vector3.new(500, 1, 500)  -- Adjust size as needed
+ocean.Position = Vector3.new(0, 0, 0)  -- Adjust position for the ocean
+ocean.Anchored = true
+ocean.Material = Enum.Material.SmoothPlastic  -- Smooth finish for ocean
+ocean.BrickColor = BrickColor.new("Bright blue")
+ocean.Parent = Workspace.Map.AlwaysHereTweenedObjects
+
+-- Function to create waves
+local function createWaves()
+    local waveHeight = 0.5
+    local waveSpeed = 1
+
+    RunService.RenderStepped:Connect(function()
+        local time = tick() * waveSpeed
+        ocean.Position = Vector3.new(0, math.sin(time) * waveHeight, 0)
+    end)
+end
+
+-- Start creating waves
+createWaves()
+
+-- Add small image decals to the sky
+local function createSkyDecal(position)
+    local decalPart = Instance.new("Part")
+    decalPart.Anchored = true
+    decalPart.CanCollide = false
+    decalPart.Transparency = 1  -- Make the part itself invisible
+    decalPart.Size = Vector3.new(5, 5, 1)  -- Small, flat part to hold the decal
+    decalPart.Position = position
+    decalPart.Material = Enum.Material.SmoothPlastic  -- Smooth finish for the decal holder
+    decalPart.Parent = Workspace
+
+    -- Create the decal
+    local decal = Instance.new("Decal")
+    decal.Texture = "rbxassetid://18919749220"  -- Set decal to the image ID
+    decal.Face = Enum.NormalId.Front  -- Apply decal to the front face
+    decal.Parent = decalPart
+end
+
+-- Create multiple image decals at different positions in the sky
+for i = 1, 10 do  -- Adjust the number of decals (10 in this case)
+    local randomPosition = Vector3.new(math.random(-400, 400), math.random(150, 200), math.random(-400, 400))
+    createSkyDecal(randomPosition)
+end
+
+-- Make all parts in the workspace smooth
+for _, obj in pairs(Workspace:GetChildren()) do
+    if obj:IsA("Part") or obj:IsA("MeshPart") then
+        obj.Material = Enum.Material.SmoothPlastic  -- Set to smooth plastic
+        obj.BrickColor = BrickColor.new("Institutional white")  -- Optional: change color for uniformity
+    end
+end
