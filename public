@@ -35,7 +35,7 @@ end
 
 -- Create and move the moon
 local moon = Instance.new("Part")
-moon.Size = Vector3.new(10, 10, 10)  -- Large moon
+moon.Size = Vector3.new(25,25, 25)  -- Large moon
 moon.Shape = Enum.PartType.Ball  -- Spherical moon
 moon.BrickColor = BrickColor.new("Institutional white")
 moon.Material = Enum.Material.SmoothPlastic
@@ -60,7 +60,7 @@ end
 
 -- Move the moon across the sky in a circular path
 local moonRadius = 300  -- Distance from the center
-local moonSpeed = 0.01  -- Speed of movement
+local moonSpeed = 0.1  -- Speed of movement
 local centerPosition = Vector3.new(0, 150, 0)  -- Center of the circular path (above the map)
 
 RunService.Stepped:Connect(function(_, deltaTime)
