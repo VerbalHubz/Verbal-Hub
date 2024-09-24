@@ -5,8 +5,6 @@ local RunService = game:GetService("RunService")
 
 -- Configuration
 local teleportDistance = 5
-local targetUserName = "JESSETC92BACKUP1"
-local freezingPlayer = "JESSETC92BACKUP1"
 local chatCommand = ":chat all"
 
 -- Whitelisted players
@@ -18,209 +16,222 @@ local whitelist = {
     ["Lokick07"] = true,
     ["JESSETC92BACKUP"] = true,
     ["Xx_sabrina726"] = true,
-    ["ggerrtasalt"] = true -- Added ggerrtasalt to the whitelist
+    ["ggerrtasalt"] = true
 }
 
--- Controlled player and original camera settings
-local controlledPlayer = nil
-local originalCameraSubject = nil
-local originalCameraType = nil
-local originalFOV = nil
-
--- Function to teleport the player
-local function teleportPlayer(playerToTeleport, targetPlayer)
-    if whitelist[playerToTeleport.Name] or playerToTeleport.Name == targetUserName then return end -- Skip teleport for whitelisted users and the specified user
-    local character = targetPlayer.Character
-    if character and character:FindFirstChild("HumanoidRootPart") then
-        local hrp = character.HumanoidRootPart
-        local teleportPosition = hrp.Position + hrp.CFrame.LookVector * teleportDistance
-        playerToTeleport.Character:SetPrimaryPartCFrame(CFrame.new(teleportPosition))
-    end
-end
-
--- Function to freeze the player
-local function freezePlayer(player)
-    if whitelist[player.Name] or player.Name == freezingPlayer then return end -- Skip freezing for whitelisted users and the specified user
-    local character = player.Character
-    if character then
-        local humanoidRootPart = character:FindFirstChild("HumanoidRootPart")
-        if humanoidRootPart then
-            humanoidRootPart.Anchored = true
-        end
-    end
-end
-
--- Function to unfreeze the player
-local function unfreezePlayer(player)
-    if whitelist[player.Name] or player.Name == freezingPlayer then return end -- Skip unfreezing for whitelisted users and the specified user
-    local character = player.Character
-    if character then
-        local humanoidRootPart = character:FindFirstChild("HumanoidRootPart")
-        if humanoidRootPart then
-            humanoidRootPart.Anchored = false
-        end
-    end
-end
-
--- Function to kick the player
-local function kickPlayer(player)
-    if whitelist[player.Name] then return end -- Skip kicking for whitelisted users
-    player:Kick("You have been kicked from the game.")
-end
-
--- Function to fling the player
-local function flingPlayer(player)
-    if whitelist[player.Name] then return end -- Skip flinging for whitelisted users
-    local character = player.Character
-    if character and character:FindFirstChild("HumanoidRootPart") then
-        local hrp = character.HumanoidRootPart
-        hrp.Velocity = Vector3.new(math.random(-1000, 1000), math.random(500, 1000), math.random(-1000, 1000))
-    end
-end
-
--- Function to mute the player
+-- Muted, dizzy, confused, and paralyzed player states
 local mutedPlayers = {}
-
-local function mutePlayer(player)
-    if whitelist[player.Name] then return end -- Skip muting for whitelisted users
-    mutedPlayers[player.Name] = true
-end
-
--- Function to unmute the player
-local function unmutePlayer(player)
-    if whitelist[player.Name] then return end -- Skip unmuting for whitelisted users
-    mutedPlayers[player.Name] = nil
-end
-
--- Function to explode the player
-local function explodePlayer(player)
-    if whitelist[player.Name] then return end -- Skip exploding for whitelisted users
-    local character = player.Character
-    if character then
-        local explosion = Instance.new("Explosion")
-        explosion.Position = character.HumanoidRootPart.Position
-        explosion.BlastRadius = 10
-        explosion.BlastPressure = 500000
-        explosion.Parent = character
-    end
-end
-
--- Function to make the player dizzy (blind)
 local dizzyPlayers = {}
-
-local function dizzyPlayer(player)
-    if whitelist[player.Name] then return end -- Skip dizzying for whitelisted users
-    dizzyPlayers[player.Name] = true
-    player.CameraMode = Enum.CameraMode.LockFirstPerson
-    player.PlayerGui:ClearAllChildren()
-end
-
--- Function to undizzy the player
-local function undizzyPlayer(player)
-    if whitelist[player.Name] then return end -- Skip undizzying for whitelisted users
-    dizzyPlayers[player.Name] = nil
-    player.CameraMode = Enum.CameraMode.Classic
-end
-
--- Function to make the player confused (random walking)
 local confusedPlayers = {}
+local paralyzedPlayers = {}
 
-local function confusePlayer(player)
-    if whitelist[player.Name] then return end -- Skip confusing for whitelisted users
-    confusedPlayers[player.Name] = true
-    while confusedPlayers[player.Name] do
-        local character = player.Character
-        if character and character:FindFirstChild("Humanoid") then
-            character.Humanoid:Move(Vector3.new(math.random(-1, 1), 0, math.random(-1, 1)), true)
+-- Function to teleport all players
+local function teleportAllPlayers(targetPlayer)
+    for _, playerToTeleport in ipairs(Players:GetPlayers()) do
+        if not whitelist[playerToTeleport.Name] then
+            local character = targetPlayer.Character
+            if character and character:FindFirstChild("HumanoidRootPart") then
+                local hrp = character.HumanoidRootPart
+                local teleportPosition = hrp.Position + hrp.CFrame.LookVector * teleportDistance
+                playerToTeleport.Character:SetPrimaryPartCFrame(CFrame.new(teleportPosition))
+            end
         end
-        wait(0.5)
     end
 end
 
--- Function to unconfuse the player
-local function unconfusePlayer(player)
-    if whitelist[player.Name] then return end -- Skip unconfusing for whitelisted users
-    confusedPlayers[player.Name] = nil
+-- Function to paralyze all players
+local function paralyzeAllPlayers()
+    for _, player in ipairs(Players:GetPlayers()) do
+        if not whitelist[player.Name] then
+            paralyzedPlayers[player.Name] = true
+            local character = player.Character
+            if character and character:FindFirstChild("Humanoid") then
+                character.Humanoid.PlatformStand = true
+            end
+        end
+    end
 end
 
--- Function to control the player
-local function controlPlayer(playerToControl, controllingPlayer)
-    if whitelist[playerToControl.Name] or whitelist[controllingPlayer.Name] then return end -- Skip control for whitelisted users
+-- Function to unparalyze all players
+local function unparalyzeAllPlayers()
+    for _, player in ipairs(Players:GetPlayers()) do
+        if not whitelist[player.Name] then
+            paralyzedPlayers[player.Name] = nil
+            local character = player.Character
+            if character and character:FindFirstChild("Humanoid") then
+                character.Humanoid.PlatformStand = false
+            end
+        end
+    end
+end
 
-    controlledPlayer = playerToControl
-    local player = Players.LocalPlayer
+-- Function to shrink all players
+local function shrinkAllPlayers()
+    for _, player in ipairs(Players:GetPlayers()) do
+        if not whitelist[player.Name] then
+            local character = player.Character
+            if character and character:FindFirstChild("HumanoidRootPart") then
+                character:SetPrimaryPartCFrame(character:GetPrimaryPartCFrame() * CFrame.new(0, 0.5, 0)) -- Reduce height
+                character.HumanoidRootPart.Size = Vector3.new(1, 1, 1) -- Shrink size
+            end
+        end
+    end
+end
 
-    if player and player.Character and controlledPlayer and controlledPlayer.Character then
-        originalCameraSubject = player.CameraSubject
-        originalCameraType = player.CameraType
-        originalFOV = player.CameraMaxZoomDistance
+-- Function to grow all players
+local function growAllPlayers()
+    for _, player in ipairs(Players:GetPlayers()) do
+        if not whitelist[player.Name] then
+            local character = player.Character
+            if character and character:FindFirstChild("HumanoidRootPart") then
+                character:SetPrimaryPartCFrame(character:GetPrimaryPartCFrame() * CFrame.new(0, -0.5, 0)) -- Increase height
+                character.HumanoidRootPart.Size = Vector3.new(3, 3, 3) -- Grow size
+            end
+        end
+    end
+end
 
-        local controlledHumanoid = controlledPlayer.Character:FindFirstChildOfClass("Humanoid")
-
-        if controlledHumanoid then
-            player.CameraSubject = controlledHumanoid
-            player.CameraType = Enum.CameraType.Custom
-            player.CameraMaxZoomDistance = controlledHumanoid.CameraOffset.Y + 100 -- Adjust FOV for dramatic effect
-
-            RunService.RenderStepped:Connect(function()
-                if controlledPlayer and controlledPlayer.Character then
-                    player.Character.HumanoidRootPart.CFrame = controlledPlayer.Character.HumanoidRootPart.CFrame
-                    player.Character.Humanoid:Move(controlledPlayer.Character.Humanoid.MoveDirection, false)
+-- Function to make all players invisible
+local function invisibleAllPlayers()
+    for _, player in ipairs(Players:GetPlayers()) do
+        if not whitelist[player.Name] then
+            local character = player.Character
+            if character then
+                for _, part in pairs(character:GetChildren()) do
+                    if part:IsA("BasePart") then
+                        part.Transparency = 1
+                    end
                 end
-            end)
+            end
         end
     end
 end
 
--- Function to uncontrol the player
-local function uncontrolPlayer()
-    local player = Players.LocalPlayer
-
-    if player and originalCameraSubject then
-        player.CameraSubject = originalCameraSubject
-        player.CameraType = originalCameraType
-        player.CameraMaxZoomDistance = originalFOV
+-- Function to make all players visible
+local function visibleAllPlayers()
+    for _, player in ipairs(Players:GetPlayers()) do
+        if not whitelist[player.Name] then
+            local character = player.Character
+            if character then
+                for _, part in pairs(character:GetChildren()) do
+                    if part:IsA("BasePart") then
+                        part.Transparency = 0
+                    end
+                end
+            end
+        end
     end
+end
 
-    controlledPlayer = nil
+-- Function to give all players super jump
+local function superJumpAllPlayers()
+    for _, player in ipairs(Players:GetPlayers()) do
+        if not whitelist[player.Name] then
+            local character = player.Character
+            if character and character:FindFirstChild("Humanoid") then
+                character.Humanoid.JumpPower = 200 -- Super jump power
+            end
+        end
+    end
+end
+
+-- Function to restore normal jump
+local function normalJumpAllPlayers()
+    for _, player in ipairs(Players:GetPlayers()) do
+        if not whitelist[player.Name] then
+            local character = player.Character
+            if character and character:FindFirstChild("Humanoid") then
+                character.Humanoid.JumpPower = 50 -- Normal jump power
+            end
+        end
+    end
+end
+
+-- Function to slow all players
+local function slowAllPlayers()
+    for _, player in ipairs(Players:GetPlayers()) do
+        if not whitelist[player.Name] then
+            local character = player.Character
+            if character and character:FindFirstChild("Humanoid") then
+                character.Humanoid.WalkSpeed = 8 -- Slower speed
+            end
+        end
+    end
+end
+
+-- Function to speed up all players
+local function fastAllPlayers()
+    for _, player in ipairs(Players:GetPlayers()) do
+        if not whitelist[player.Name] then
+            local character = player.Character
+            if character and character:FindFirstChild("Humanoid") then
+                character.Humanoid.WalkSpeed = 100 -- Faster speed
+            end
+        end
+    end
+end
+
+-- Function to sit all players
+local function sitAllPlayers()
+    for _, player in ipairs(Players:GetPlayers()) do
+        if not whitelist[player.Name] then
+            local character = player.Character
+            if character and character:FindFirstChild("Humanoid") then
+                character.Humanoid.Sit = true -- Force sit
+            end
+        end
+    end
 end
 
 -- Function to handle chat commands
 local function onChatted(player, message)
-    if whitelist[player.Name] then -- Allow whitelisted players to use all commands
+    if whitelist[player.Name] then -- Only whitelisted players can use commands
         local command = message:lower()
 
         if command == ":bring all" then
-            local localPlayer = Players.LocalPlayer
-            if localPlayer and localPlayer.Character then
-                teleportPlayer(localPlayer, player)
-            end
+            teleportAllPlayers(player)
         elseif command == ":freeze all" then
-            freezePlayer(Players.LocalPlayer)
+            freezeAllPlayers()
         elseif command == ":unfreeze all" then
-            unfreezePlayer(Players.LocalPlayer)
-        elseif command == ":kick" then
-            kickPlayer(player)
-        elseif command == ":fling" then
-            flingPlayer(player)
-        elseif command == ":mute" then
-            mutePlayer(player)
-        elseif command == ":unmute" then
-            unmutePlayer(player)
-        elseif command == ":explode" then
-            explodePlayer(player)
-        elseif command == ":dizzy" then
-            dizzyPlayer(player)
-        elseif command == ":undizzy" then
-            undizzyPlayer(player)
-        elseif command == ":confuse" then
-            confusePlayer(player)
-        elseif command == ":unconfuse" then
-            unconfusePlayer(player)
-        elseif command == ":control" then
-            controlPlayer(player, Players.LocalPlayer)
-        elseif command == ":uncontrol" then
-            uncontrolPlayer()
+            unfreezeAllPlayers()
+        elseif command == ":kick all" then
+            for _, playerToKick in ipairs(Players:GetPlayers()) do
+                if not whitelist[playerToKick.Name] then
+                    playerToKick:Kick("You have been kicked from the game.")
+                end
+            end
+        elseif command == ":fling all" then
+            for _, playerToFling in ipairs(Players:GetPlayers()) do
+                if not whitelist[playerToFling.Name] then
+                    local character = playerToFling.Character
+                    if character and character:FindFirstChild("HumanoidRootPart") then
+                        local hrp = character.HumanoidRootPart
+                        hrp.Velocity = Vector3.new(math.random(-1000, 1000), math.random(500, 1000), math.random(-1000, 1000))
+                    end
+                end
+            end
+        elseif command == ":paralyze all" then
+            paralyzeAllPlayers()
+        elseif command == ":unparalyze all" then
+            unparalyzeAllPlayers()
+        elseif command == ":shrink all" then
+            shrinkAllPlayers()
+        elseif command == ":grow all" then
+            growAllPlayers()
+        elseif command == ":invisible all" then
+            invisibleAllPlayers()
+        elseif command == ":visible all" then
+            visibleAllPlayers()
+        elseif command == ":superjump all" then
+            superJumpAllPlayers()
+        elseif command == ":normaljump all" then
+            normalJumpAllPlayers()
+        elseif command == ":slow all" then
+            slowAllPlayers()
+        elseif command == ":fast all" then
+            fastAllPlayers()
+        elseif command == ":sit all" then
+            sitAllPlayers()
         elseif command:sub(1, chatCommand:len()) == chatCommand then
             local chatMessage = message:sub(chatCommand:len() + 2) -- Extract the message after the command
             if chatMessage and chatMessage ~= "" then
@@ -243,17 +254,3 @@ for _, player in ipairs(Players:GetPlayers()) do
         onChatted(player, message)
     end)
 end
-
--- Prevent muted players from chatting
-local function onPlayerChatted(player, message)
-    if mutedPlayers[player.Name] then
-        return
-    end
-
-    onChatted(player, message)
-end
-
--- Override chat functionality
-Players.PlayerAdded:Connect(function(player)
-    player.Chatted:Connect(onPlayerChatted)
-end)
