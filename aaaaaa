@@ -15,56 +15,53 @@ Tab = Window:MakeTab({
  })
 
 
- 
  local userinputs = game:GetService("UserInputService")
+local action = game:GetService("ContextActionService")
 local w = game:GetService("Workspace")
 local r = game:GetService("RunService")
 local d = game:GetService("Debris")
-local strength = 400 -- Default strength value
-local isEnabled = false -- Single toggle for both scripts
+local strength = 400 -- Default strength
+local isEnabled = false -- Track the toggle state
 
--- Single Toggle for both functionalities
+-- Add your toggle
 Tab:AddToggle({
-    Name = "Enable Actions",
+    Name = "Stronger Fling(Mobile)",
     Default = false,
     Callback = function(Value)
-        isEnabled = Value
+        isEnabled = Value -- Set the toggle state
         print("Toggle is now: " .. tostring(isEnabled))
-    end
-})
-
--- Single Slider for adjusting strength
-Tab:AddSlider({
-    Name = "Strength",
-    Min = 0,
-    Max = 20,
-    Default = 5,
-    Color = Color3.fromRGB(255, 255, 255),
-    Increment = 1,
-    ValueName = "Strength",
-    Callback = function(Value)
-        strength = Value * 100 -- Adjust this factor as needed
-        print("Strength set to:", strength)
     end    
 })
 
--- Shared functionality for GrabParts
+-- Add the slider to change strength
+Tab:AddSlider({
+    Name = "Strength Slider",
+    Min = 400, -- Minimum strength
+    Max = 30000, -- Maximum strength
+    Default = 400, -- Initial slider value (same as default strength)
+    Increment = 10, -- Increment steps
+    Callback = function(Value)
+        strength = Value -- Update the strength value
+        print("Strength set to: " .. tostring(strength))
+    end
+})
+
 w.ChildAdded:Connect(function(model)
     if model.Name == "GrabParts" then
         local part_to_impulse = model["GrabPart"]["WeldConstraint"].Part1
-        
         if part_to_impulse then
             print("Part found!")
+            local inputObj
             local velocityObj = Instance.new("BodyVelocity", part_to_impulse)
             velocityObj.MaxForce = Vector3.new(0, 0, 0)
 
-            -- Monitor GUI elements for actions (e.g. buttons with specific image IDs)
-            local inputObj
             while inputObj == nil and model.Parent do
                 for _, button in pairs(game.Players.LocalPlayer.PlayerGui["ContextActionGui"]:GetDescendants()) do
-                    if button:IsA("ImageLabel") and button.Image == "http://www.roblox.com/asset/?id=9603678090" then
-                        inputObj = button.Parent
-                        print(inputObj)
+                    if button:IsA("ImageLabel") then
+                        if button.Image == "http://www.roblox.com/asset/?id=9603678090" then
+                            inputObj = button.Parent
+                            print(inputObj)
+                        end
                     end
                 end
                 r.Heartbeat:Wait()
@@ -72,10 +69,10 @@ w.ChildAdded:Connect(function(model)
             
             if inputObj then
                 local c1, c2, c3
-
-                -- Mouse button events only if the toggle is enabled
+                
+                -- Connect mouse button events only if the toggle is enabled
                 c1 = inputObj.MouseButton1Up:Connect(function()
-                    if isEnabled then
+                    if isEnabled then -- Check if enabled
                         print("Launched!")
                         velocityObj.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
                         velocityObj.Velocity = workspace.CurrentCamera.CFrame.lookVector * strength
@@ -83,41 +80,86 @@ w.ChildAdded:Connect(function(model)
                 end)
 
                 c2 = inputObj.MouseButton1Down:Connect(function()
-                    if isEnabled then
+                    if isEnabled then -- Check if enabled
                         print("Launched!")
                         velocityObj.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
                         velocityObj.Velocity = workspace.CurrentCamera.CFrame.lookVector * strength
                     end
                 end)
-
-                -- Remove velocity on model parent removal
-                c3 = model:GetPropertyChangedSignal("Parent"):Connect(function()
-                    if not model.Parent then
-                        c3:Disconnect()
-                        d:AddItem(velocityObj, 1)
-                        if c1 then c1:Disconnect() end
-                        if c2 then c2:Disconnect() end
-                    end
-                end)
             end
-
-            -- Check for mouse input actions when fling is enabled
-            model:GetPropertyChangedSignal("Parent"):Connect(function()
-                if not model.Parent and isEnabled then
-                    if userinputs:GetLastInputType() == Enum.UserInputType.MouseButton2 then
-                        print("Fling Launched!")
-                        velocityObj.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
-                        velocityObj.Velocity = workspace.CurrentCamera.CFrame.lookVector * strength
-                        d:AddItem(velocityObj, 1)
-                    elseif userinputs:GetLastInputType() == Enum.UserInputType.MouseButton1 then
-                        velocityObj:Destroy()
-                        print("Cancel Launch!")
-                    else
-                        velocityObj:Destroy()
-                        print("No valid keys pressed!")
-                    end
+            
+            c3 = model:GetPropertyChangedSignal("Parent"):Connect(function()
+                if not model.Parent then
+                    c3:Disconnect()
+                    d:AddItem(velocityObj, 1)
+                    if c1 then c1:Disconnect() end
+                    if c2 then c2:Disconnect() end
                 end
             end)
         end
     end
 end)
+
+
+ 
+ local userinputs = game:GetService("UserInputService")
+ local w = game:GetService("Workspace")
+ local r = game:GetService("RunService")
+ local d = game:GetService("Debris")
+ local strength = 400 -- Default strength value
+ local flingEnabled = false -- Flag to toggle fling functionality
+ 
+ -- Toggle for enabling/disabling fling
+ Tab:AddToggle({
+     Name = "Stronger Fling (PC)",
+     Default = false,
+     Callback = function(Value)
+         flingEnabled = Value
+         print("Fling Enabled:", flingEnabled)
+     end
+ })
+ 
+ -- Slider for adjusting strength
+ Tab:AddSlider({
+     Name = "Strength",
+     Min = 400,
+     Max = 30000,
+     Default = 400,
+     Color = Color3.fromRGB(255, 255, 255),
+     Increment = 10,
+     ValueName = "Strength",
+     Callback = function(Value)
+         strength = Value * 100 -- Adjust this factor as needed
+         print("Strength set to:", strength)
+     end    
+ })
+ 
+ w.ChildAdded:Connect(function(model)
+     if model.Name == "GrabParts" and flingEnabled then
+         local part_to_impulse = model["GrabPart"]["WeldConstraint"].Part1
+ 
+         if part_to_impulse then
+             print("Part found!")
+ 
+             local velocityObj = Instance.new("BodyVelocity", part_to_impulse)
+             
+             model:GetPropertyChangedSignal("Parent"):Connect(function()
+                 if not model.Parent then
+                     if userinputs:GetLastInputType() == Enum.UserInputType.MouseButton2 and flingEnabled then
+                         print("Launched!")
+                         velocityObj.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
+                         velocityObj.Velocity = workspace.CurrentCamera.CFrame.lookVector * strength
+                         d:AddItem(velocityObj, 1)
+                     elseif userinputs:GetLastInputType() == Enum.UserInputType.MouseButton1 then
+                         velocityObj:Destroy()
+                         print("Cancel Launch!")
+                     else
+                         velocityObj:Destroy()
+                         print("No two keys pressed!")
+                     end
+                 end
+             end)
+         end
+     end
+ end)
+ 
