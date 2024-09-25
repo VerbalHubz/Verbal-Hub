@@ -14,119 +14,110 @@ Tab = Window:MakeTab({
     PremiumOnly = false
  })
 
+
+ 
  local userinputs = game:GetService("UserInputService")
- local w = game:GetService("Workspace")
- local r = game:GetService("RunService")
- local d = game:GetService("Debris")
- local strength = 400 -- Default strength value
- local isEnabled = false -- Flag to toggle both functionalities
- 
- -- Toggle for enabling/disabling both scripts
- Tab:AddToggle({
-     Name = "Enable Both Actions",
-     Default = false,
-     Callback = function(Value)
-         isEnabled = Value
-         print("Both actions enabled:", isEnabled)
-     end
- })
- 
- -- Slider for adjusting strength
- Tab:AddSlider({
-     Name = "Strength",
-     Min = 0,
-     Max = 20,
-     Default = 5,
-     Color = Color3.fromRGB(255, 255, 255),
-     Increment = 1,
-     ValueName = "Strength",
-     Callback = function(Value)
-         strength = Value * 100 -- Adjust this factor as needed
-         print("Strength set to:", strength)
-     end    
- })
- 
- -- First action: Handling GrabParts with mouse events
- w.ChildAdded:Connect(function(model)
-     if model.Name == "GrabParts" and isEnabled then
-         local part_to_impulse = model["GrabPart"]["WeldConstraint"].Part1
-         if part_to_impulse then
-             print("Part found!")
-             local inputObj
-             local velocityObj = Instance.new("BodyVelocity", part_to_impulse)
-             velocityObj.MaxForce = Vector3.new(0, 0, 0)
- 
-             while inputObj == nil and model.Parent do
-                 for _, button in pairs(game.Players.LocalPlayer.PlayerGui["ContextActionGui"]:GetDescendants()) do
-                     if button:IsA("ImageLabel") then
-                         if button.Image == "http://www.roblox.com/asset/?id=9603678090" then
-                             inputObj = button.Parent
-                             print(inputObj)
-                         end
-                     end
-                 end
-                 r.Heartbeat:Wait()
-             end
- 
-             if inputObj then
-                 local c1, c2, c3
-                 
-                 -- Mouse events
-                 c1 = inputObj.MouseButton1Up:Connect(function()
-                     if isEnabled then
-                         print("Launched!")
-                         velocityObj.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
-                         velocityObj.Velocity = workspace.CurrentCamera.CFrame.lookVector * strength
-                     end
-                 end)
- 
-                 c2 = inputObj.MouseButton1Down:Connect(function()
-                     if isEnabled then
-                         print("Launched!")
-                         velocityObj.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
-                         velocityObj.Velocity = workspace.CurrentCamera.CFrame.lookVector * strength
-                     end
-                 end)
-             end
-             
-             c3 = model:GetPropertyChangedSignal("Parent"):Connect(function()
-                 if not model.Parent then
-                     c3:Disconnect()
-                     d:AddItem(velocityObj, 1)
-                     if c1 then c1:Disconnect() end
-                     if c2 then c2:Disconnect() end
-                 end
-             end)
-         end
-     end
- end)
- 
- -- Second action: Handling GrabParts for fling functionality
- w.ChildAdded:Connect(function(model)
-     if model.Name == "GrabParts" and isEnabled then
-         local part_to_impulse = model["GrabPart"]["WeldConstraint"].Part1
-         if part_to_impulse then
-             print("Part found for fling!")
- 
-             local velocityObj = Instance.new("BodyVelocity", part_to_impulse)
-             
-             model:GetPropertyChangedSignal("Parent"):Connect(function()
-                 if not model.Parent then
-                     if userinputs:GetLastInputType() == Enum.UserInputType.MouseButton2 and isEnabled then
-                         print("Fling Launched!")
-                         velocityObj.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
-                         velocityObj.Velocity = workspace.CurrentCamera.CFrame.lookVector * strength
-                         d:AddItem(velocityObj, 1)
-                     elseif userinputs:GetLastInputType() == Enum.UserInputType.MouseButton1 then
-                         velocityObj:Destroy()
-                         print("Cancel Fling!")
-                     else
-                         velocityObj:Destroy()
-                         print("No two keys pressed!")
-                     end
-                 end
-             end)
-         end
-     end
- end)
- 
+local w = game:GetService("Workspace")
+local r = game:GetService("RunService")
+local d = game:GetService("Debris")
+local strength = 400 -- Default strength value
+local isEnabled = false -- Single toggle for both scripts
+
+-- Single Toggle for both functionalities
+Tab:AddToggle({
+    Name = "Enable Actions",
+    Default = false,
+    Callback = function(Value)
+        isEnabled = Value
+        print("Toggle is now: " .. tostring(isEnabled))
+    end
+})
+
+-- Single Slider for adjusting strength
+Tab:AddSlider({
+    Name = "Strength",
+    Min = 0,
+    Max = 20,
+    Default = 5,
+    Color = Color3.fromRGB(255, 255, 255),
+    Increment = 1,
+    ValueName = "Strength",
+    Callback = function(Value)
+        strength = Value * 100 -- Adjust this factor as needed
+        print("Strength set to:", strength)
+    end    
+})
+
+-- Shared functionality for GrabParts
+w.ChildAdded:Connect(function(model)
+    if model.Name == "GrabParts" then
+        local part_to_impulse = model["GrabPart"]["WeldConstraint"].Part1
+        
+        if part_to_impulse then
+            print("Part found!")
+            local velocityObj = Instance.new("BodyVelocity", part_to_impulse)
+            velocityObj.MaxForce = Vector3.new(0, 0, 0)
+
+            -- Monitor GUI elements for actions (e.g. buttons with specific image IDs)
+            local inputObj
+            while inputObj == nil and model.Parent do
+                for _, button in pairs(game.Players.LocalPlayer.PlayerGui["ContextActionGui"]:GetDescendants()) do
+                    if button:IsA("ImageLabel") and button.Image == "http://www.roblox.com/asset/?id=9603678090" then
+                        inputObj = button.Parent
+                        print(inputObj)
+                    end
+                end
+                r.Heartbeat:Wait()
+            end
+            
+            if inputObj then
+                local c1, c2, c3
+
+                -- Mouse button events only if the toggle is enabled
+                c1 = inputObj.MouseButton1Up:Connect(function()
+                    if isEnabled then
+                        print("Launched!")
+                        velocityObj.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
+                        velocityObj.Velocity = workspace.CurrentCamera.CFrame.lookVector * strength
+                    end
+                end)
+
+                c2 = inputObj.MouseButton1Down:Connect(function()
+                    if isEnabled then
+                        print("Launched!")
+                        velocityObj.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
+                        velocityObj.Velocity = workspace.CurrentCamera.CFrame.lookVector * strength
+                    end
+                end)
+
+                -- Remove velocity on model parent removal
+                c3 = model:GetPropertyChangedSignal("Parent"):Connect(function()
+                    if not model.Parent then
+                        c3:Disconnect()
+                        d:AddItem(velocityObj, 1)
+                        if c1 then c1:Disconnect() end
+                        if c2 then c2:Disconnect() end
+                    end
+                end)
+            end
+
+            -- Check for mouse input actions when fling is enabled
+            model:GetPropertyChangedSignal("Parent"):Connect(function()
+                if not model.Parent and isEnabled then
+                    if userinputs:GetLastInputType() == Enum.UserInputType.MouseButton2 then
+                        print("Fling Launched!")
+                        velocityObj.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
+                        velocityObj.Velocity = workspace.CurrentCamera.CFrame.lookVector * strength
+                        d:AddItem(velocityObj, 1)
+                    elseif userinputs:GetLastInputType() == Enum.UserInputType.MouseButton1 then
+                        velocityObj:Destroy()
+                        print("Cancel Launch!")
+                    else
+                        velocityObj:Destroy()
+                        print("No valid keys pressed!")
+                    end
+                end
+            end)
+        end
+    end
+end)
