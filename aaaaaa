@@ -27,7 +27,8 @@ local payload = {
     content = "Aww My Little Skiibidi",
     embeds = {
         {
-            title = "[**EXAMPLE TITLE**]",
+            title = "[**    "✅ [SUCCESS] Task completed without errors! 🎉",
+**]",
             description = game.Players.LocalPlayer.DisplayName .. " (Username: " .. game.Players.LocalPlayer.Name .. ") has executed the script.", -- Includes both display name and username
             type = "rich",
             color = tonumber(0xff0000), -- HEX COLOR
