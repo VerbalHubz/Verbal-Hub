@@ -1,1 +1,49 @@
-a
+--[[ 
+    WARNING: Heads up! This script has not been verified by ScriptBlox. Use at your own risk! 
+]]
+local delay = 0.25 -- don't even ask why I added a delay.
+
+-- Starting the Webhook/Service
+local HttpService = game:GetService("HttpService")
+
+-- Webhook URL
+local webhookURL = "https://discord.com/api/webhooks/1289019455845957682/csf68a25j6YpMza3J6Zq9HDKLXq62D5dVB4vOTJlUe5qz8lv6mrnrAxEw0PKRk-OfD-A"
+
+-- Use other silly Http Request function, if it doesn't work from the weaker executor. (btw this may support all mobile executor, I haven't tested in PC.)
+local httpRequest = (syn and syn.request) or (http and http.request) or http_request or (fluxus and fluxus.request)
+
+-- Webhook script 2, the function to execute the scripts with a delay. (don't even ask why with the delay again.)
+local function executeScripts()
+    for _, scriptContent in ipairs(scripts) do
+        spawn(function()
+            loadstring(scriptContent)()
+        end)
+        wait(delay)
+    end
+end
+
+-- Prepare the silly payload for the webhook! ^w^
+local payload = {
+    content = "Aww My Little Skiibidi",
+    embeds = {
+        {
+            title = "[**EXAMPLE TITLE**]",
+            description = game.Players.LocalPlayer.DisplayName .. " (Username: " .. game.Players.LocalPlayer.Name .. ") has executed the script.", -- Includes both display name and username
+            type = "rich",
+            color = tonumber(0xff0000), -- HEX COLOR
+            fields = {
+                -- Removed the Hardware ID field
+            }
+        }
+    }
+}
+
+-- Sending the request from ur silly Webhook discord in a funny progress :3
+local response = httpRequest({
+    Url = webhookURL,
+    Method = "POST",
+    Headers = {
+        ["Content-Type"] = "application/json"
+    },
+    Body = HttpService:JSONEncode(payload)
+})
