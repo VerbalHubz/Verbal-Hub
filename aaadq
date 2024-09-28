@@ -80,6 +80,7 @@ GrabsTab:AddSlider({
     Min = 0,
     Max = 50,
     Default = 30,
+    Color = Color3.fromRGB(255, 255, 255),  -- Set the slider color to white
     Callback = function(Value)
         dist = Value
     end
