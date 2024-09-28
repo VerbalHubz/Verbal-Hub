@@ -1,0 +1,94 @@
+OrionLib = loadstring(game:HttpGet("https://raw.githubusercontent.com/VerbalHubz/Verbal-Hub/main/Orion%20Hub%20Ui", true))()
+
+Window = OrionLib:MakeWindow({
+    Name = "Verbal Hub Sigma Advance Ftap ",
+    HidePremium = false,
+    SaveConfig = true,
+    IntroEnabled = true,
+    IntroText = "Welcome To Verbal Sigma Hub Ftap",
+    IntroIcon = "rbxassetid://121559441445555",
+    ConfigFolder = "OrionTest"
+})
+
+GrabsTab = Window:MakeTab({
+    Name = "Silent Aim",
+    Icon = "rbxassetid://87851318303275",
+    PremiumOnly = false
+})
+
+-- services
+local PS = game:GetService("Players")
+local R = game:GetService("RunService")
+local Cam = workspace.CurrentCamera
+
+local localPlayer = PS.LocalPlayer
+local Target
+local dist = 30
+local SIL
+
+local Hitbox = {"Head", "Torso", "Left Leg", "Right Leg"}
+
+local function GetClosest()
+    local closestPlayer, closestDistance = nil, math.huge
+    
+    for _, player in pairs(PS:GetPlayers()) do
+        if player.Name ~= localPlayer.Name and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+            local distance = (localPlayer.Character.HumanoidRootPart.Position - player.Character.HumanoidRootPart.Position).magnitude
+            
+            if distance < closestDistance then
+                closestDistance = distance
+                closestPlayer = player
+            end
+        end
+    end
+    
+    return closestPlayer
+end
+
+R.RenderStepped:Connect(function()
+    Target = GetClosest()
+end)
+
+local function CalculateDirection(Origin, Destination, Length)
+    return (Destination - Origin).Unit * Length
+end
+
+local __namecall
+__namecall = hookmetamethod(game, "__namecall", function(...)
+    local args = {...}
+    local self = args[1]
+    local method = getnamecallmethod()
+
+    if self == workspace and not checkcaller() and method == "Raycast" and Target and Target.Character and Target.Character.HumanoidRootPart and localPlayer.Character.HumanoidRootPart and Target.Character.Humanoid and Target.Character.Humanoid.Health > 0 and SIL then
+        local playerPosition = localPlayer.Character.HumanoidRootPart.Position
+        local targetPosition = Target.Character.HumanoidRootPart.Position
+        local distance = (playerPosition - targetPosition).magnitude
+
+        if distance <= dist then
+            args[3] = CalculateDirection(args[2], targetPosition, 1000)
+            args[4] = RaycastParams.new()
+            args[4].FilterDescendantsInstances = {Target.Character}
+            args[4].FilterType = Enum.RaycastFilterType.Include
+        end
+    end
+
+    return __namecall(unpack(args))
+end)
+
+GrabsTab:AddSlider({
+    Name = "Reach Silent Aim",
+    Min = 0,
+    Max = 50,
+    Default = 30,
+    Callback = function(Value)
+        dist = Value
+    end
+})
+
+GrabsTab:AddToggle({
+    Name = "Silent Aim",
+    Default = false,
+    Callback = function(Value)
+        SIL = Value
+    end
+})
