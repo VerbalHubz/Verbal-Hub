@@ -11,18 +11,18 @@ Window = OrionLib:MakeWindow({
 })
 
 -- Services
-local PS = game:GetService("Players")
-local R = game:GetService("RunService")
-local Cam = workspace.CurrentCamera
+ PS = game:GetService("Players")
+ R = game:GetService("RunService")
+ Cam = workspace.CurrentCamera
 
 -- Player
-local localPlayer = PS.LocalPlayer
+ localPlayer = PS.LocalPlayer
 
 -- Silent Aim Variables
 local SIL
-local dist = 30
+ dist = 30
 
-local function STS()
+ function STS()
     local Hitbox = {"Head", "Torso", "Left Leg", "Right Leg"}
 
     local function GetClosest()
@@ -81,12 +81,8 @@ local function STS()
     end)
 end
 
-local GrabsTab = Window:MakeTab({
-    Name = "Grabs",
-    PremiumOnly = false
-})
 
-GrabsTab:AddSlider({
+Tab:AddSlider({
     Name = "Reach Silent Aim",
     Min = 0,
     Max = 50,
@@ -96,7 +92,7 @@ GrabsTab:AddSlider({
     end
 })
 
-GrabsTab:AddToggle({
+Tab:AddToggle({
     Name = "Silent Aim",
     Default = false,
     Callback = function(Value)
@@ -104,4 +100,4 @@ GrabsTab:AddToggle({
     end
 })
 
-STS()
+
