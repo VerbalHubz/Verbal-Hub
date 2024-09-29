@@ -1,16 +1,20 @@
--- Script to kick player with custom anti-cheat message
-
--- Function to display the kick message and kick the player
-local function antiCheatKick()
-    local player = game.Players.LocalPlayer -- Get the local player
-    local message = "Horomori Anti-Cheat has kicked you, please stop hacking"
+-- Function to kick the player with a message
+local function kickPlayer()
+    -- Display the kick message
+    game.StarterGui:SetCore("ChatMakeSystemMessage", {
+        Text = "Horomori Anti-Cheat has kicked you, please stop hacking";
+        Color = Color3.fromRGB(255, 0, 0); -- Red text for the warning
+        Font = Enum.Font.SourceSansBold;
+        TextSize = 18;
+    })
     
-    -- Display the message
-    warn(message) -- Logs the message in the developer console (you can use print() as well)
+    -- Wait 3 seconds before kicking for the player to see the message
+    wait(3)
     
     -- Kick the player
-    player:Kick(message) -- Kicks the player with the custom message
+    local player = game.Players.LocalPlayer
+    player:Kick("Horomori Anti-Cheat has detected hacking activities. Please stop hacking.")
 end
 
--- Call the function when the script is executed
-antiCheatKick()
+-- Execute the kick function
+kickPlayer()
