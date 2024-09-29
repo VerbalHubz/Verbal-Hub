@@ -1,23 +1,21 @@
+local RunService = game:GetService("RunService")
+
 -- Function to reset the lighting to original settings
 local function resetLighting()
     local Lighting = game:GetService("Lighting")
-
     -- Reset ambient lighting
     Lighting.Ambient = Color3.fromRGB(255, 255, 255) -- Default white ambient
     Lighting.OutdoorAmbient = Color3.fromRGB(128, 128, 128) -- Default gray outdoor ambient
     Lighting.Brightness = 2 -- Default brightness
-
     -- Reset fog settings
     Lighting.FogColor = Color3.fromRGB(255, 255, 255) -- Default white fog
     Lighting.FogStart = 0 -- Fog starts at 0
     Lighting.FogEnd = 1000 -- Default fog end
-
     -- Reset sky to default
     if Lighting:FindFirstChild("Sky") then
         Lighting.Sky:Destroy() -- Remove the custom sky
     end
-
-    -- Optionally, you can add back the default sky
+    -- Add back the default sky
     local defaultSky = Instance.new("Sky")
     defaultSky.SkyboxBk = "rbxassetid://0" -- Default skybox
     defaultSky.SkyboxDn = "rbxassetid://0"
@@ -28,41 +26,80 @@ local function resetLighting()
     defaultSky.Parent = Lighting
 end
 
--- Function to create colorful sparkler effects
+-- Function to create colorful moving sparkler effects
 local function createSparklers()
-    for i = 1, 5 do -- Create multiple sparklers
+    local sparklerList = {} -- Keep track of sparklers
+
+    for i = 1, 10 do -- Increase the number of sparklers
         local sparkler = Instance.new("Part")
         sparkler.Size = Vector3.new(0.5, 0.5, 0.5) -- Size of the sparkler
-        sparkler.Position = Vector3.new(math.random(-50, 50), 5, math.random(-50, 50)) -- Set sparkler lower
-        sparkler.Anchored = true
+        -- Randomly position the sparkler within a wider range
+        sparkler.Position = Vector3.new(math.random(-100, 100), math.random(5, 50), math.random(-100, 100)) -- Wider random position
+        sparkler.Anchored = false -- Make the sparkler moveable
         sparkler.CanCollide = false
         sparkler.Name = "Sparkler" -- Set name for identification
         sparkler.Parent = workspace
 
+        -- Create BodyVelocity to move the sparkler
+        local bodyVelocity = Instance.new("BodyVelocity")
+        bodyVelocity.Velocity = Vector3.new(0, 0, 0) -- Start with zero velocity
+        bodyVelocity.MaxForce = Vector3.new(500, 500, 500) -- Adjust force to keep it moving
+        bodyVelocity.Parent = sparkler
+
         local particleEmitter = Instance.new("ParticleEmitter")
-        particleEmitter.Color = ColorSequence.new(Color3.new(1, 1, 0), Color3.new(1, 0, 0), Color3.new(0, 0, 1)) -- Brighter neon colors
+        particleEmitter.Color = ColorSequence.new(Color3.new(1, 0, 0), Color3.new(0, 1, 0), Color3.new(0, 0, 1), Color3.new(1, 0, 1)) -- Neon colors
         particleEmitter.Lifetime = NumberRange.new(1, 2) -- Lifetime of particles
         particleEmitter.Rate = 200 -- Increased particles per second for more brightness
         particleEmitter.Speed = NumberRange.new(50, 100) -- Speed of particles
         particleEmitter.VelocityInheritance = 0.5 -- How much velocity particles inherit from the part
         particleEmitter.Size = NumberSequence.new(1, 3) -- Increase size of particles
         particleEmitter.Parent = sparkler
+
+        -- Change colors of the sparkler particles randomly
+        coroutine.wrap(function()
+            while sparkler do
+                particleEmitter.Color = ColorSequence.new(
+                    Color3.new(math.random(), math.random(), math.random()), 
+                    Color3.new(math.random(), math.random(), math.random()),
+                    Color3.new(math.random(), math.random(), math.random())
+                )
+                wait(0.5) -- Wait a moment before changing color
+            end
+        end)()
+
+        table.insert(sparklerList, sparkler) -- Add sparkler to the list
     end
+
+    -- Sync the sparkler movement with the song
+    local audioPlaying = true -- Flag to control audio state
+
+    RunService.Heartbeat:Connect(function()
+        if audioPlaying then
+            for _, sparkler in ipairs(sparklerList) do
+                -- Apply random scattered movement
+                local scatterFactor = math.random(-5, 5)
+                sparkler.BodyVelocity.Velocity = Vector3.new(
+                    scatterFactor, 
+                    scatterFactor * 0.5, 
+                    scatterFactor
+                )
+            end
+        end
+    end)
+
+    return sparklerList
 end
 
 -- Halloween Theme Setup
 local Lighting = game:GetService("Lighting")
-
 -- Set the ambient lighting to create an overall illumination
 Lighting.Ambient = Color3.fromRGB(255, 140, 0) -- Orange ambient
 Lighting.OutdoorAmbient = Color3.fromRGB(10, 10, 10) -- Dark shadowy outdoor ambient
 Lighting.Brightness = 2 -- Increased brightness for overall illumination
-
 -- Reduced fog settings for a lighter feel
 Lighting.FogColor = Color3.fromRGB(255, 100, 0) -- Light orange fog
 Lighting.FogStart = 200 -- Fog starts far away
 Lighting.FogEnd = 800 -- More visibility, minimal fog
-
 -- Add a custom skybox with an orange and black theme
 local sky = Instance.new("Sky")
 sky.SkyboxBk = "rbxassetid://159454299" -- Replace with a black/orange skybox asset
@@ -74,8 +111,7 @@ sky.SkyboxUp = "rbxassetid://159454299"
 sky.Parent = Lighting
 
 -- Sound Setup (Plays only once)
-local audioId = "rbxassetid://15689450026" -- Your audio ID
-
+local audioId = "rbxassetid://16190782786" -- Your audio ID
 local sound = Instance.new("Sound")
 sound.SoundId = audioId
 sound.Looped = false -- Play only once
@@ -97,7 +133,7 @@ end
 sound:Play()
 
 -- Create sparklers in the sky
-createSparklers()
+local sparklers = createSparklers()
 
 -- Wait for 5 seconds before making the player jump
 wait(5)
@@ -110,9 +146,7 @@ jumpPlayer(player)
 -- Reset lighting and remove sparkler effects when the song ends
 sound.Ended:Connect(function()
     resetLighting() -- Call the function to reset lighting
-    for _, obj in ipairs(workspace:GetChildren()) do
-        if obj:IsA("Part") and obj.Name == "Sparkler" then
-            obj:Destroy() -- Remove sparkler when the song ends
-        end
+    for _, sparkler in ipairs(sparklers) do
+        sparkler:Destroy() -- Remove sparklers when the song ends
     end
 end)
