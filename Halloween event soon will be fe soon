@@ -1,0 +1,88 @@
+-- Function to reset the lighting to original settings
+local function resetLighting()
+    local Lighting = game:GetService("Lighting")
+
+    -- Reset ambient lighting
+    Lighting.Ambient = Color3.fromRGB(255, 255, 255) -- Default white ambient
+    Lighting.OutdoorAmbient = Color3.fromRGB(128, 128, 128) -- Default gray outdoor ambient
+    Lighting.Brightness = 2 -- Default brightness
+
+    -- Reset fog settings
+    Lighting.FogColor = Color3.fromRGB(255, 255, 255) -- Default white fog
+    Lighting.FogStart = 0 -- Fog starts at 0
+    Lighting.FogEnd = 1000 -- Default fog end
+
+    -- Reset sky to default
+    if Lighting:FindFirstChild("Sky") then
+        Lighting.Sky:Destroy() -- Remove the custom sky
+    end
+
+    -- Optionally, you can add back the default sky
+    local defaultSky = Instance.new("Sky")
+    defaultSky.SkyboxBk = "rbxassetid://0" -- Default skybox asset ID
+    defaultSky.SkyboxDn = "rbxassetid://0"
+    defaultSky.SkyboxFt = "rbxassetid://0"
+    defaultSky.SkyboxLf = "rbxassetid://0"
+    defaultSky.SkyboxRt = "rbxassetid://0"
+    defaultSky.SkyboxUp = "rbxassetid://0"
+    defaultSky.Parent = Lighting
+end
+
+-- Halloween Theme Setup
+local Lighting = game:GetService("Lighting")
+
+-- Set the ambient lighting to create an overall illumination
+Lighting.Ambient = Color3.fromRGB(255, 140, 0) -- Orange ambient
+Lighting.OutdoorAmbient = Color3.fromRGB(10, 10, 10) -- Dark shadowy outdoor ambient
+Lighting.Brightness = 2 -- Increased brightness for overall illumination
+
+-- Reduced fog settings for a lighter feel
+Lighting.FogColor = Color3.fromRGB(255, 100, 0) -- Light orange fog
+Lighting.FogStart = 200 -- Fog starts far away
+Lighting.FogEnd = 800 -- More visibility, minimal fog
+
+-- Add a custom skybox with an orange and black theme
+local sky = Instance.new("Sky")
+sky.SkyboxBk = "rbxassetid://159454299" -- Replace with a black/orange skybox asset
+sky.SkyboxDn = "rbxassetid://159454299"
+sky.SkyboxFt = "rbxassetid://159454299"
+sky.SkyboxLf = "rbxassetid://159454299"
+sky.SkyboxRt = "rbxassetid://159454299"
+sky.SkyboxUp = "rbxassetid://159454299"
+sky.Parent = Lighting
+
+-- Sound Setup (Plays only once)
+local audioId = "rbxassetid://15689450026" -- Your audio ID
+
+local sound = Instance.new("Sound")
+sound.SoundId = audioId
+sound.Looped = false -- Play only once
+sound.Volume = 1
+sound.Parent = game.Workspace
+
+-- Function to make the player jump
+local function jumpPlayer(player)
+    local character = player.Character
+    if character and character:FindFirstChild("Humanoid") then
+        for i = 1, 6 do
+            character.Humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
+            wait(0.2) -- Wait a moment between jumps
+        end
+    end
+end
+
+-- Play the sound
+sound:Play()
+
+-- Wait for 5 seconds before making the player jump
+wait(5)
+
+-- Get the local player
+local player = game.Players.LocalPlayer
+-- Make the player jump
+jumpPlayer(player)
+
+-- Reset lighting settings when the song ends
+sound.Ended:Connect(function()
+    resetLighting() -- Call the function to reset lighting
+end)
