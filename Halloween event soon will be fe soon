@@ -19,13 +19,35 @@ local function resetLighting()
 
     -- Optionally, you can add back the default sky
     local defaultSky = Instance.new("Sky")
-    defaultSky.SkyboxBk = "rbxassetid://0" -- Default skybox asset ID
+    defaultSky.SkyboxBk = "rbxassetid://0" -- Default skybox
     defaultSky.SkyboxDn = "rbxassetid://0"
     defaultSky.SkyboxFt = "rbxassetid://0"
     defaultSky.SkyboxLf = "rbxassetid://0"
     defaultSky.SkyboxRt = "rbxassetid://0"
     defaultSky.SkyboxUp = "rbxassetid://0"
     defaultSky.Parent = Lighting
+end
+
+-- Function to create colorful sparkler effects
+local function createSparklers()
+    for i = 1, 5 do -- Create multiple sparklers
+        local sparkler = Instance.new("Part")
+        sparkler.Size = Vector3.new(0.5, 0.5, 0.5) -- Size of the sparkler
+        sparkler.Position = Vector3.new(math.random(-50, 50), 5, math.random(-50, 50)) -- Set sparkler lower
+        sparkler.Anchored = true
+        sparkler.CanCollide = false
+        sparkler.Name = "Sparkler" -- Set name for identification
+        sparkler.Parent = workspace
+
+        local particleEmitter = Instance.new("ParticleEmitter")
+        particleEmitter.Color = ColorSequence.new(Color3.new(1, 1, 0), Color3.new(1, 0, 0), Color3.new(0, 0, 1)) -- Brighter neon colors
+        particleEmitter.Lifetime = NumberRange.new(1, 2) -- Lifetime of particles
+        particleEmitter.Rate = 200 -- Increased particles per second for more brightness
+        particleEmitter.Speed = NumberRange.new(50, 100) -- Speed of particles
+        particleEmitter.VelocityInheritance = 0.5 -- How much velocity particles inherit from the part
+        particleEmitter.Size = NumberSequence.new(1, 3) -- Increase size of particles
+        particleEmitter.Parent = sparkler
+    end
 end
 
 -- Halloween Theme Setup
@@ -74,6 +96,9 @@ end
 -- Play the sound
 sound:Play()
 
+-- Create sparklers in the sky
+createSparklers()
+
 -- Wait for 5 seconds before making the player jump
 wait(5)
 
@@ -82,7 +107,12 @@ local player = game.Players.LocalPlayer
 -- Make the player jump
 jumpPlayer(player)
 
--- Reset lighting settings when the song ends
+-- Reset lighting and remove sparkler effects when the song ends
 sound.Ended:Connect(function()
     resetLighting() -- Call the function to reset lighting
+    for _, obj in ipairs(workspace:GetChildren()) do
+        if obj:IsA("Part") and obj.Name == "Sparkler" then
+            obj:Destroy() -- Remove sparkler when the song ends
+        end
+    end
 end)
