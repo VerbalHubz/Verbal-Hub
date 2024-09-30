@@ -166,7 +166,6 @@ sound:Play()
 local fireworkList = createFireworks()
 createSparklers(fireworkList)
 
--- Reset lighting after the sound finishes playing
-sound.Ended:Connect(function()
-    resetLighting()
-end)
+-- Reset lighting after 60 seconds
+wait(60)
+resetLighting()
