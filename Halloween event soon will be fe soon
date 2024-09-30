@@ -3,23 +3,20 @@ local Lighting = game:GetService("Lighting")
 
 -- Function to reset the lighting to original settings
 local function resetLighting()
+    -- Remove existing sky
+    for _, child in pairs(Lighting:GetChildren()) do
+        if child:IsA("Sky") then
+            child:Destroy()
+        end
+    end
+
+    -- Remove all lighting effects
     Lighting.Ambient = Color3.fromRGB(255, 255, 255)
     Lighting.OutdoorAmbient = Color3.fromRGB(128, 128, 128)
     Lighting.Brightness = 2
     Lighting.FogColor = Color3.fromRGB(255, 255, 255)
     Lighting.FogStart = 0
     Lighting.FogEnd = 1000
-    if Lighting:FindFirstChild("Sky") then
-        Lighting.Sky:Destroy()
-    end
-    local defaultSky = Instance.new("Sky")
-    defaultSky.SkyboxBk = "rbxassetid://0"
-    defaultSky.SkyboxDn = "rbxassetid://0"
-    defaultSky.SkyboxFt = "rbxassetid://0"
-    defaultSky.SkyboxLf = "rbxassetid://0"
-    defaultSky.SkyboxRt = "rbxassetid://0"
-    defaultSky.SkyboxUp = "rbxassetid://0"
-    defaultSky.Parent = Lighting
 end
 
 -- Function to create colorful firework effects that change color smoothly
@@ -42,11 +39,6 @@ local function createFireworks()
         particleEmitter.Speed = NumberRange.new(50, 100)
         particleEmitter.Size = NumberSequence.new(2, 4)
         particleEmitter.Parent = firework
-
-        local bodyPosition = Instance.new("BodyPosition")
-        bodyPosition.MaxForce = Vector3.new(0, math.huge, 0)
-        bodyPosition.Position = firework.Position
-        bodyPosition.Parent = firework
 
         coroutine.wrap(function()
             while firework do
@@ -75,7 +67,7 @@ local function createFireworks()
     return fireworkList
 end
 
--- Function to create cool additional fireworks around sparklers
+-- Function to create additional fireworks around sparklers
 local function createAdditionalFireworks(parentPart)
     for i = 1, 3 do -- Multiple effects per sparkler
         local additionalFirework = Instance.new("Part")
@@ -94,15 +86,6 @@ local function createAdditionalFireworks(parentPart)
         burstEmitter.Speed = NumberRange.new(40, 60)
         burstEmitter.Size = NumberSequence.new(1.5, 2)
         burstEmitter.Parent = additionalFirework
-
-        -- Star-shaped effect
-        local starEmitter = Instance.new("ParticleEmitter")
-        starEmitter.Texture = "rbxassetid://75418583814408" -- Star-shaped particle texture
-        starEmitter.Lifetime = NumberRange.new(0.5, 1)
-        starEmitter.Rate = 100
-        starEmitter.Speed = NumberRange.new(20, 40)
-        starEmitter.Size = NumberSequence.new(1, 1.5)
-        starEmitter.Parent = additionalFirework
 
         -- Randomized color bursts
         coroutine.wrap(function()
@@ -166,6 +149,15 @@ sound:Play()
 local fireworkList = createFireworks()
 createSparklers(fireworkList)
 
--- Reset lighting after 60 seconds
-wait(60)
+-- Wait for the song to finish and then reset everything
+sound.Ended:Wait()  -- Wait until the sound ends
+
+-- Remove all fireworks
+for _, firework in ipairs(workspace:GetChildren()) do
+    if firework.Name == "Firework" or firework.Name == "AdditionalFirework" or firework.Name == "Sparkler" then
+        firework:Destroy()
+    end
+end
+
+-- Reset lighting and remove all lighting effects
 resetLighting()
