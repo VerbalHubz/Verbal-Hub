@@ -183,7 +183,7 @@ local player = Players.LocalPlayer
 local character = player.Character or player.CharacterAdded:Wait()
 local humanoid = character:WaitForChild("Humanoid")
 
-local jumpDuration = 10
+local jumpDuration = 15
 local startTime = tick()
 
 while tick() - startTime < jumpDuration do
