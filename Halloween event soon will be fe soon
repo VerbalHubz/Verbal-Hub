@@ -165,19 +165,31 @@ local function createMusicVisualizer(sound)
     return visualizerParts
 end
 
-local function makePlayerJump()
-    local jumpDuration = 10 -- Jumping duration in seconds
-    local startTime = tick()
+-- Function to create disco lights that change colors of the map
+local function createDiscoLights(sound)
+    local parts = workspace:GetDescendants()
+    local discoParts = {} -- Store parts for cleanup
 
-    while tick() - startTime < jumpDuration do
-        humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
-        wait(0.5) -- Adjust frequency of jumps
+    for _, part in ipairs(parts) do
+        if part:IsA("BasePart") and part.CanCollide then
+            table.insert(discoParts, part)
+        end
     end
+
+    -- Change colors in a loop
+    coroutine.wrap(function()
+        while sound.Playing do
+            local hue = tick() % 5 / 5 -- Create a rainbow effect
+            local color = Color3.fromHSV(hue, 1, 1)
+            for _, part in ipairs(discoParts) do
+                part.Color = color -- Change part color
+            end
+            wait(0.1) -- Adjust for performance
+        end
+    end)()
+
+    return discoParts
 end
-
-
-
-
 
 -- Lighting Effects for Theme
 Lighting.Ambient = Color3.fromRGB(255, 140, 0)
@@ -225,6 +237,16 @@ end
 
 
 
+local function makePlayerJump()
+    local jumpDuration = 10 -- Jumping duration in seconds
+    local startTime = tick()
+
+    while tick() - startTime < jumpDuration do
+        humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
+        wait(0.5) -- Adjust frequency of jumps
+    end
+end
+
 
 -- Sound Setup
 local audioId = "rbxassetid://16190782786"
@@ -241,6 +263,8 @@ local swirlParts = createSwirlingParticles()  -- Create swirling particles
 local laserList = createLaserShow()          -- Create a laser show
 local visualizerParts = createMusicVisualizer(sound) -- Create music visualizer
 local tornado = createTornado(sound)          -- Create tornado effect
+local discoParts = createDiscoLights(sound)
+
 -- Start jumping in sync with the song
 makePlayerJump()
 
@@ -258,12 +282,15 @@ for _, swirlPart in ipairs(swirlParts) do
     swirlPart:Destroy()
 end
 
-
+local discoParts = createDiscoLights(sound)
 
 for _, laser in ipairs(laserList) do
     laser:Destroy()
 end
 
+ for _, part in pairs(discoParts) do
+        part.Color = Color3.new(1, 1, 1) -- Reset to white
+    end
 
 for _, visualizerPart in ipairs(visualizerParts) do
     visualizerPart:Destroy()
