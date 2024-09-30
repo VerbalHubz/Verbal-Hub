@@ -237,15 +237,6 @@ end
 
 
 
-local function makePlayerJump()
-    local jumpDuration = 10 -- Jumping duration in seconds
-    local startTime = tick()
-
-    while tick() - startTime < jumpDuration do
-        humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
-        wait(0.5) -- Adjust frequency of jumps
-    end
-end
 
 
 -- Sound Setup
@@ -265,8 +256,6 @@ local visualizerParts = createMusicVisualizer(sound) -- Create music visualizer
 local tornado = createTornado(sound)          -- Create tornado effect
 local discoParts = createDiscoLights(sound)
 
--- Start jumping in sync with the song
-makePlayerJump()
 
 
 
@@ -289,7 +278,6 @@ for _, laser in ipairs(laserList) do
 end
 
  for _, part in pairs(discoParts) do
-        part.Color = Color3.new(1, 1, 1) -- Reset to white
     end
 
 for _, visualizerPart in ipairs(visualizerParts) do
