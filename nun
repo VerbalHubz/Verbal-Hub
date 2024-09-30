@@ -1,38 +1,57 @@
--- Create a ScreenGui
+-- Variables
+local player = game.Players.LocalPlayer
+local playerGui = player:WaitForChild("PlayerGui")
+
+-- Function to create neon rainbow text
 local function createNeonText()
+    -- Create a ScreenGui
     local screenGui = Instance.new("ScreenGui")
-    screenGui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
+    screenGui.Parent = playerGui
+    
+    -- Create the TextLabel for the neon effect
+    local neonText = Instance.new("TextLabel")
+    neonText.Parent = screenGui
+    neonText.Size = UDim2.new(0, 500, 0, 100) -- Adjust the size as needed
+    neonText.Position = UDim2.new(0.5, -250, 0.5, -50) -- Center of the screen
+    neonText.Text = "Thank you for 100K views on verbal hub heres a event for you ;) !"
+    neonText.Font = Enum.Font.GothamBold -- Use a bold font for neon effect
+    neonText.TextSize = 50
+    neonText.TextStrokeTransparency = 0 -- To give a neon outline
+    neonText.BackgroundTransparency = 1 -- Remove background
+    neonText.TextColor3 = Color3.fromRGB(255, 255, 255) -- Starting color
 
-    -- Create a TextLabel for the neon effect
-    local textLabel = Instance.new("TextLabel")
-    textLabel.Parent = screenGui
-    textLabel.Text = "Thank you for 100K views On Verbal Hub Heres A Event For you"
-    textLabel.Size = UDim2.new(0, 400, 0, 100)
-    textLabel.Position = UDim2.new(0.5, -200, 0.5, -50)  -- Centered position
-    textLabel.BackgroundTransparency = 1  -- No box behind the text
-    textLabel.Font = Enum.Font.GothamBlack
-    textLabel.TextScaled = true
-    textLabel.TextStrokeTransparency = 0.5  -- Neon glow effect
-    textLabel.TextStrokeColor3 = Color3.new(1, 1, 1)  -- White outline
-    textLabel.TextColor3 = Color3.new(1, 0, 0)  -- Start with red
+    -- TweenService for color changing
+    local TweenService = game:GetService("TweenService")
+    local colorChange = {
+        Color3.fromRGB(255, 0, 0),    -- Red
+        Color3.fromRGB(255, 165, 0),  -- Orange
+        Color3.fromRGB(255, 255, 0),  -- Yellow
+        Color3.fromRGB(0, 255, 0),    -- Green
+        Color3.fromRGB(0, 0, 255),    -- Blue
+        Color3.fromRGB(75, 0, 130),   -- Indigo
+        Color3.fromRGB(238, 130, 238) -- Violet
+    }
 
-    -- Rainbow color effect function
-    local function rainbowEffect()
-        local hue = 0
-        while textLabel.Parent do  -- Keep running as long as the label exists
-            hue = (hue + 1) % 360
-            textLabel.TextColor3 = Color3.fromHSV(hue / 360, 1, 1)  -- Change color continuously
-            wait(0.05)  -- Speed of color change
+    -- Function to tween through rainbow colors
+    local function cycleColors()
+        for _, color in ipairs(colorChange) do
+            local tween = TweenService:Create(neonText, TweenInfo.new(0.5), {TextColor3 = color})
+            tween:Play()
+            tween.Completed:Wait()
         end
     end
 
-    -- Start the rainbow effect
-    spawn(rainbowEffect)
+    -- Keep changing colors while the text is on screen
+    spawn(function()
+        while screenGui.Parent do
+            cycleColors()
+        end
+    end)
 
-    -- Remove the text after 10 seconds
-    wait(10)
+    -- Remove text after 60 seconds
+    wait(60)
     screenGui:Destroy()
 end
 
--- Call the function to create the neon text
+-- Call the function to display the neon text
 createNeonText()
