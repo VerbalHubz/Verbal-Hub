@@ -145,6 +145,32 @@ local function createRainbowRain()
     end
 end
 
+-- Function to create blue fire effects around the map
+local function createBlueFire()
+    local fireList = {}
+    for i = 1, 20 do  -- Adjust the number of fire effects
+        local fire = Instance.new("Part")
+        fire.Size = Vector3.new(1, 1, 1)
+        fire.Position = Vector3.new(math.random(-100, 100), 1, math.random(-100, 100))  -- Position near the ground
+        fire.Anchored = true
+        fire.CanCollide = false
+        fire.BrickColor = BrickColor.new(Color3.fromRGB(0, 0, 255))  -- Blue color
+        fire.Material = Enum.Material.Neon
+        fire.Parent = workspace
+
+        local particleEmitter = Instance.new("ParticleEmitter")
+        particleEmitter.Color = ColorSequence.new(Color3.fromRGB(0, 0, 255), Color3.fromRGB(0, 0, 150))
+        particleEmitter.Lifetime = NumberRange.new(1, 2)
+        particleEmitter.Rate = 100
+        particleEmitter.Speed = NumberRange.new(0, 1)
+        particleEmitter.Size = NumberSequence.new(0.5, 1) -- Size of the particles
+        particleEmitter.Parent = fire
+        
+        table.insert(fireList, fire)
+    end
+    return fireList
+end
+
 -- Lighting Effects for Theme
 Lighting.Ambient = Color3.fromRGB(255, 140, 0)
 Lighting.OutdoorAmbient = Color3.fromRGB(10, 10, 10)
@@ -172,34 +198,26 @@ sound:Play()
 
 -- Create fireworks
 local fireworkList = createFireworks()
+-- Create blue fire effects
+local fireList = createBlueFire()
 
 -- Start thunder effects
-local thunderCoroutine = coroutine.wrap(createThunderEffect)()
-local rainCoroutine = coroutine.wrap(createRainbowRain)()
-local discoBall = createDiscoBall()
+local thunderCoroutine = coroutine.create(createThunderEffect)
+coroutine.resume(thunderCoroutine)
 
--- Sync player jumps for 10 seconds while the song plays
-local player = Players.LocalPlayer
-local character = player.Character or player.CharacterAdded:Wait()
-local humanoid = character:WaitForChild("Humanoid")
+-- Start disco ball effect
+createDiscoBall()
 
-local jumpDuration = 10
-local startTime = tick()
+-- Start rainbow rain effect
+createRainbowRain()
 
-while tick() - startTime < jumpDuration do
-    humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
-    wait(0.5) -- Adjust jump frequency
-end
-
--- Wait for the song to finish and then reset everything
-sound.Ended:Wait()  -- Wait until the sound ends
-
--- Remove all fireworks, rain, thunder effects, and disco ball
-for _, drop in pairs(workspace:GetChildren()) do
-    if drop.Name == "Firework" or drop.Name == "DiscoBall" then
-        drop:Destroy()
+-- Reset everything after the song is done
+sound.Ended:Connect(function()
+    resetLighting()
+    for _, fire in ipairs(fireList) do
+        fire:Destroy()
     end
-end
-
--- Reset lighting and remove all lighting effects
-resetLighting()
+    for _, firework in ipairs(fireworkList) do
+        firework:Destroy()
+    end
+end)
