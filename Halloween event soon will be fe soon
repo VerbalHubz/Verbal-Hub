@@ -1,6 +1,16 @@
 local RunService = game:GetService("RunService")
 local Lighting = game:GetService("Lighting")
 
+-- Store original lighting settings
+local originalLighting = {
+    Ambient = Lighting.Ambient,
+    OutdoorAmbient = Lighting.OutdoorAmbient,
+    Brightness = Lighting.Brightness,
+    FogColor = Lighting.FogColor,
+    FogStart = Lighting.FogStart,
+    FogEnd = Lighting.FogEnd,
+}
+
 -- Function to reset the lighting to original settings
 local function resetLighting()
     -- Remove existing sky
@@ -10,13 +20,13 @@ local function resetLighting()
         end
     end
 
-    -- Remove all lighting effects
-    Lighting.Ambient = Color3.fromRGB(255, 255, 255)
-    Lighting.OutdoorAmbient = Color3.fromRGB(128, 128, 128)
-    Lighting.Brightness = 2
-    Lighting.FogColor = Color3.fromRGB(255, 255, 255)
-    Lighting.FogStart = 0
-    Lighting.FogEnd = 1000
+    -- Restore original lighting effects
+    Lighting.Ambient = originalLighting.Ambient
+    Lighting.OutdoorAmbient = originalLighting.OutdoorAmbient
+    Lighting.Brightness = originalLighting.Brightness
+    Lighting.FogColor = originalLighting.FogColor
+    Lighting.FogStart = originalLighting.FogStart
+    Lighting.FogEnd = originalLighting.FogEnd
 end
 
 -- Function to create colorful firework effects that change color smoothly
@@ -97,29 +107,6 @@ local function createAdditionalFireworks(parentPart)
     end
 end
 
--- Function to create sparklers around the fireworks with colorful particle effects
-local function createSparklers(fireworkList)
-    for _, firework in ipairs(fireworkList) do
-        local sparkler = Instance.new("Part")
-        sparkler.Size = Vector3.new(0.2, 0.2, 0.2)
-        sparkler.Position = firework.Position
-        sparkler.Anchored = true
-        sparkler.CanCollide = false
-        sparkler.Parent = workspace
-
-        local sparklerEmitter = Instance.new("ParticleEmitter")
-        sparklerEmitter.Color = ColorSequence.new(Color3.new(1, 1, 0), Color3.new(1, 0.5, 0))
-        sparklerEmitter.Lifetime = NumberRange.new(0.5, 1)
-        sparklerEmitter.Rate = 500
-        sparklerEmitter.Speed = NumberRange.new(10, 20)
-        sparklerEmitter.Size = NumberSequence.new(0.5, 1)
-        sparklerEmitter.Parent = sparkler
-
-        -- Add more fireworks to the sparklers
-        createAdditionalFireworks(sparkler)
-    end
-end
-
 -- Function to create dynamic thunder and lighting effects
 local function createThunderEffect()
     while true do
@@ -128,6 +115,41 @@ local function createThunderEffect()
         wait(0.1)                 -- Short flicker
         Lighting.Brightness = 2   -- Return to normal
     end
+end
+
+-- Function to create rainbow rain effect
+local function createRainbowRain()
+    local rain = Instance.new("Part")
+    rain.Size = Vector3.new(0.1, 0.1, 0.1) -- Size of droplets
+    rain.Position = Vector3.new(0, 100, 0)  -- Positioning the rain above the map
+    rain.Anchored = true
+    rain.CanCollide = false
+    rain.Parent = workspace
+
+    local rainEmitter = Instance.new("ParticleEmitter")
+    rainEmitter.Color = ColorSequence.new(
+        Color3.fromRGB(255, 0, 0),
+        Color3.fromRGB(255, 127, 0),
+        Color3.fromRGB(255, 255, 0),
+        Color3.fromRGB(0, 255, 0),
+        Color3.fromRGB(0, 0, 255),
+        Color3.fromRGB(75, 0, 130),
+        Color3.fromRGB(148, 0, 211)
+    )
+    rainEmitter.Lifetime = NumberRange.new(0.5, 1)
+    rainEmitter.Rate = 1000
+    rainEmitter.Speed = NumberRange.new(10, 20)
+    rainEmitter.Size = NumberSequence.new(0.1, 0.3)
+    rainEmitter.VelocityInheritance = 0.5
+    rainEmitter.Parent = rain
+
+    -- Control the position to create a falling effect
+    coroutine.wrap(function()
+        while true do
+            rain.Position = rain.Position - Vector3.new(0, 1, 0) -- Move downward
+            wait(0.1)
+        end
+    end)()
 end
 
 -- Lighting Effects for Theme
@@ -162,13 +184,18 @@ createSparklers(fireworkList)
 -- Start thunder effects
 coroutine.wrap(createThunderEffect)()
 
+-- Create rainbow rain effect
+createRainbowRain()
+
 -- Wait for the song to finish and then reset everything
 sound.Ended:Wait()  -- Wait until the sound ends
 
--- Remove all fireworks
-for _, firework in ipairs(workspace:GetChildren()) do
-    if firework.Name == "Firework" or firework.Name == "AdditionalFirework" or firework.Name == "Sparkler" then
-        firework:Destroy()
+-- Remove all fireworks and rain
+for _, item in ipairs(workspace:GetChildren()) do
+    if item:IsA("Part") and (item.Name == "Firework" or item.Name == "AdditionalFirework" or item.Name == "Sparkler") then
+        item:Destroy()
+    elseif item.Name == "rain" then
+        item:Destroy()
     end
 end
 
