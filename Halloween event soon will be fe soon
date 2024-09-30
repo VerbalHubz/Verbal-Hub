@@ -1,4 +1,4 @@
-local RunService = game:GetService("RunService")
+local RunService = game:GetService("RunService") 
 local Lighting = game:GetService("Lighting")
 local Players = game:GetService("Players")
 
@@ -76,16 +76,6 @@ local function createFireworks()
     end)
 
     return fireworkList
-end
-
--- Function to create dynamic thunder and lightning effects
-local function createThunderEffect()
-    while true do
-        wait(math.random(2, 5))  -- Wait between strikes
-        Lighting.Brightness = 10  -- Increase brightness to simulate lightning
-        wait(0.1)                 -- Short flicker
-        Lighting.Brightness = 2   -- Return to normal
-    end
 end
 
 -- Function to create a disco ball effect with changing light colors
@@ -173,8 +163,7 @@ sound:Play()
 -- Create fireworks
 local fireworkList = createFireworks()
 
--- Start thunder effects
-local thunderCoroutine = coroutine.wrap(createThunderEffect)()
+-- Start rainbow rain effects
 local rainCoroutine = coroutine.wrap(createRainbowRain)()
 local discoBall = createDiscoBall()
 
@@ -194,7 +183,7 @@ end
 -- Wait for the song to finish and then reset everything
 sound.Ended:Wait()  -- Wait until the sound ends
 
--- Remove all fireworks, rain, thunder effects, and disco ball
+-- Remove all fireworks, rain, and disco ball
 for _, drop in pairs(workspace:GetChildren()) do
     if drop.Name == "Firework" or drop.Name == "DiscoBall" then
         drop:Destroy()
