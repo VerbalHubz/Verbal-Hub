@@ -1,5 +1,8 @@
 local RunService = game:GetService("RunService")
 local Lighting = game:GetService("Lighting")
+local Players = game:GetService("Players")
+local player = Players.LocalPlayer
+local character = player.Character or player.CharacterAdded:Wait()
 
 -- Store original lighting settings
 local originalLighting = {
@@ -62,24 +65,12 @@ local function createFireworks()
         table.insert(fireworkList, firework)
     end
 
-    -- Sync fireworks with the song
-    local audioPlaying = true
-
-    RunService.Heartbeat:Connect(function()
-        if audioPlaying then
-            for _, firework in ipairs(fireworkList) do
-                local bobbingHeight = math.sin(tick() * 2) * 5
-                firework.Position = firework.Position + Vector3.new(0, bobbingHeight, 0)
-            end
-        end
-    end)
-
     return fireworkList
 end
 
 -- Function to create additional fireworks around sparklers
 local function createAdditionalFireworks(parentPart)
-    for i = 1, 3 do -- Multiple effects per sparkler
+    for i = 1, 3 do
         local additionalFirework = Instance.new("Part")
         additionalFirework.Size = Vector3.new(0.5, 0.5, 0.5)
         additionalFirework.Position = parentPart.Position + Vector3.new(math.random(-5, 5), math.random(10, 15), math.random(-5, 5))
@@ -88,7 +79,6 @@ local function createAdditionalFireworks(parentPart)
         additionalFirework.Name = "AdditionalFirework"
         additionalFirework.Parent = workspace
 
-        -- Burst effect
         local burstEmitter = Instance.new("ParticleEmitter")
         burstEmitter.Color = ColorSequence.new(Color3.new(1, 0, 0), Color3.new(0, 1, 0), Color3.new(0, 0, 1), Color3.new(1, 0.5, 0))
         burstEmitter.Lifetime = NumberRange.new(1, 1.5)
@@ -97,7 +87,6 @@ local function createAdditionalFireworks(parentPart)
         burstEmitter.Size = NumberSequence.new(1.5, 2)
         burstEmitter.Parent = additionalFirework
 
-        -- Randomized color bursts
         coroutine.wrap(function()
             while additionalFirework do
                 burstEmitter.Color = ColorSequence.new(Color3.fromHSV(math.random(), 1, 1))
@@ -110,46 +99,37 @@ end
 -- Function to create dynamic thunder and lighting effects
 local function createThunderEffect()
     while true do
-        wait(math.random(2, 5))  -- Wait between strikes
-        Lighting.Brightness = 10  -- Increase brightness to simulate lightning
-        wait(0.1)                 -- Short flicker
-        Lighting.Brightness = 2   -- Return to normal
+        wait(math.random(2, 5))
+        Lighting.Brightness = 10
+        wait(0.1)
+        Lighting.Brightness = 2
     end
 end
 
--- Function to create rainbow rain effect
+-- Function to create rainbow rain
 local function createRainbowRain()
-    local rain = Instance.new("Part")
-    rain.Size = Vector3.new(0.1, 0.1, 0.1) -- Size of droplets
-    rain.Position = Vector3.new(0, 100, 0)  -- Positioning the rain above the map
-    rain.Anchored = true
-    rain.CanCollide = false
-    rain.Parent = workspace
+    local rainDrops = 0
+    while rainDrops < 5000 do
+        wait(0.1) -- Change the interval for more or less rain
+        local r = Instance.new("Part")
+        r.Size = Vector3.new(0.2, 2, 0.2)
+        r.BrickColor = BrickColor.Random()
+        r.Material = Enum.Material.Neon
+        r.CanCollide = false
+        r.Anchored = true
+        r.CFrame = CFrame.new(math.random(-100, 100), 100, math.random(-100, 100))
+        r.Parent = workspace
+        rainDrops = rainDrops + 1
+    end
+end
 
-    local rainEmitter = Instance.new("ParticleEmitter")
-    rainEmitter.Color = ColorSequence.new(
-        Color3.fromRGB(255, 0, 0),
-        Color3.fromRGB(255, 127, 0),
-        Color3.fromRGB(255, 255, 0),
-        Color3.fromRGB(0, 255, 0),
-        Color3.fromRGB(0, 0, 255),
-        Color3.fromRGB(75, 0, 130),
-        Color3.fromRGB(148, 0, 211)
-    )
-    rainEmitter.Lifetime = NumberRange.new(0.5, 1)
-    rainEmitter.Rate = 1000
-    rainEmitter.Speed = NumberRange.new(10, 20)
-    rainEmitter.Size = NumberSequence.new(0.1, 0.3)
-    rainEmitter.VelocityInheritance = 0.5
-    rainEmitter.Parent = rain
-
-    -- Control the position to create a falling effect
-    coroutine.wrap(function()
-        while true do
-            rain.Position = rain.Position - Vector3.new(0, 1, 0) -- Move downward
-            wait(0.1)
-        end
-    end)()
+-- Function to create jump sync for the player
+local function jumpSync(duration)
+    local jumpTime = tick() + duration
+    while tick() < jumpTime do
+        character:Move(Vector3.new(0, 50, 0), true) -- Make the player jump
+        wait(0.5) -- Adjust the jump interval
+    end
 end
 
 -- Lighting Effects for Theme
@@ -179,23 +159,23 @@ sound:Play()
 
 -- Create fireworks and sparklers
 local fireworkList = createFireworks()
-createSparklers(fireworkList)
+
+-- Start the rain effect
+createRainbowRain()
 
 -- Start thunder effects
 coroutine.wrap(createThunderEffect)()
 
--- Create rainbow rain effect
-createRainbowRain()
+-- Make the player jump sync for 10 seconds
+coroutine.wrap(jumpSync)(10)
 
 -- Wait for the song to finish and then reset everything
-sound.Ended:Wait()  -- Wait until the sound ends
+sound.Ended:Wait()
 
 -- Remove all fireworks and rain
-for _, item in ipairs(workspace:GetChildren()) do
-    if item:IsA("Part") and (item.Name == "Firework" or item.Name == "AdditionalFirework" or item.Name == "Sparkler") then
-        item:Destroy()
-    elseif item.Name == "rain" then
-        item:Destroy()
+for _, obj in ipairs(workspace:GetChildren()) do
+    if obj.Name == "Firework" or obj.Name == "AdditionalFirework" or obj.Name == "RainbowRain" then
+        obj:Destroy()
     end
 end
 
