@@ -5,7 +5,7 @@ screenGui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
 -- Create a TextLabel for the neon effect
 local textLabel = Instance.new("TextLabel")
 textLabel.Parent = screenGui
-textLabel.Text = "Thank you for 100K views"
+textLabel.Text = "Thank you for 100K views On Verbal Hub Heres A Event For You ;)"
 textLabel.Size = UDim2.new(0, 400, 0, 100)
 textLabel.Position = UDim2.new(0.5, -200, 0.5, -50)  -- Centered position
 textLabel.BackgroundTransparency = 1  -- No box behind the text
@@ -28,6 +28,6 @@ end
 -- Start the rainbow effect
 spawn(rainbowEffect)
 
--- Remove the text after 60 seconds
-wait(60)
+-- Remove the text after 10 seconds
+wait(10)
 screenGui:Destroy()
