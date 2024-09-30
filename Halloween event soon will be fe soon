@@ -165,31 +165,7 @@ local function createMusicVisualizer(sound)
     return visualizerParts
 end
 
--- Function to create disco lights that change colors of the map
-local function createDiscoLights(sound)
-    local parts = workspace:GetDescendants()
-    local discoParts = {} -- Store parts for cleanup
 
-    for _, part in ipairs(parts) do
-        if part:IsA("BasePart") and part.CanCollide then
-            table.insert(discoParts, part)
-        end
-    end
-
-    -- Change colors in a loop
-    coroutine.wrap(function()
-        while sound.Playing do
-            local hue = tick() % 5 / 5 -- Create a rainbow effect
-            local color = Color3.fromHSV(hue, 1, 1)
-            for _, part in ipairs(discoParts) do
-                part.Color = color -- Change part color
-            end
-            wait(0.1) -- Adjust for performance
-        end
-    end)()
-
-    return discoParts
-end
 
 -- Lighting Effects for Theme
 Lighting.Ambient = Color3.fromRGB(255, 140, 0)
@@ -271,15 +247,13 @@ for _, swirlPart in ipairs(swirlParts) do
     swirlPart:Destroy()
 end
 
-local discoParts = createDiscoLights(sound)
+
 
 for _, laser in ipairs(laserList) do
     laser:Destroy()
 end
 
-for _, discoParts in ipairs(discoParts) do
-    discoParts:Destroy()
-end
+
 
 for _, visualizerPart in ipairs(visualizerParts) do
     visualizerPart:Destroy()
