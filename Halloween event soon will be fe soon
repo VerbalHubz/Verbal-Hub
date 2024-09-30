@@ -230,7 +230,7 @@ local swirlParts = createSwirlingParticles()  -- Create swirling particles
 local laserList = createLaserShow()          -- Create a laser show
 local visualizerParts = createMusicVisualizer(sound) -- Create music visualizer
 local tornado = createTornado(sound)          -- Create tornado effect
-local discoParts = createDiscoLights(sound)
+
 
 
 
