@@ -34,12 +34,13 @@ end
 local function createFireworks()
     local fireworkList = {}
 
-    for i = 1, 30 do  -- Increased the number of fireworks
+    for i = 1, 60 do  -- Increased the number of fireworks
         local firework = Instance.new("Part")
         firework.Size = Vector3.new(1, 1, 1)
         firework.Position = Vector3.new(math.random(-100, 100), math.random(40, 100), math.random(-100, 100))
         firework.Anchored = true
         firework.CanCollide = false
+        firework.Transparency = 1 -- Make the firework invisible
         firework.Name = "Firework"
         firework.Parent = workspace
 
@@ -64,74 +65,61 @@ local function createFireworks()
     end
 
     -- Sync fireworks with the song
-    local audioPlaying = true
-
     RunService.Heartbeat:Connect(function()
-        if audioPlaying then
-            for _, firework in ipairs(fireworkList) do
-                local bobbingHeight = math.sin(tick() * 2) * 5
-                firework.Position = firework.Position + Vector3.new(0, bobbingHeight, 0)
-            end
+        for _, firework in ipairs(fireworkList) do
+            local bobbingHeight = math.sin(tick() * 2) * 5
+            firework.Position = firework.Position + Vector3.new(0, bobbingHeight, 0)
         end
     end)
 
     return fireworkList
 end
 
--- Function to create a disco ball effect with changing light colors
-local function createDiscoBall()
-    local discoBall = Instance.new("Part")
-    discoBall.Size = Vector3.new(3, 3, 3)
-    discoBall.Material = Enum.Material.SmoothPlastic
-    discoBall.BrickColor = BrickColor.White()
-    discoBall.Anchored = true
-    discoBall.Position = Vector3.new(0, 50, 0)  -- Position above the ground
-    discoBall.Name = "DiscoBall"
-    discoBall.Parent = workspace
+-- Function to create a swirling particle effect
+local function createSwirlingParticles()
+    for i = 1, 20 do
+        local swirlPart = Instance.new("Part")
+        swirlPart.Size = Vector3.new(1, 1, 1)
+        swirlPart.Position = Vector3.new(math.random(-50, 50), math.random(40, 100), math.random(-50, 50))
+        swirlPart.Anchored = true
+        swirlPart.CanCollide = false
+        swirlPart.Transparency = 1 -- Make the swirl part invisible
+        swirlPart.Parent = workspace
 
-    -- SpotLight to simulate disco lighting around the ball
-    local spotLight = Instance.new("SpotLight")
-    spotLight.Parent = discoBall
-    spotLight.Range = 15
-    spotLight.Brightness = 2
-    spotLight.Angle = 45  -- Beam angle for the spotlight
-    spotLight.Color = Color3.fromRGB(255, 255, 255)  -- Initial color white
+        local particleEmitter = Instance.new("ParticleEmitter")
+        particleEmitter.Color = ColorSequence.new(Color3.new(1, 1, 1), Color3.new(0, 1, 1))
+        particleEmitter.Lifetime = NumberRange.new(1, 3)
+        particleEmitter.Rate = 200
+        particleEmitter.Speed = NumberRange.new(30, 60)
+        particleEmitter.Size = NumberSequence.new(0.5, 2)
+        particleEmitter.Parent = swirlPart
 
-    -- Rotate the disco ball for effect
-    RunService.Heartbeat:Connect(function()
-        discoBall.CFrame = discoBall.CFrame * CFrame.Angles(0, math.rad(2), 0)  -- Rotate disco ball
-        
-        -- Change light color based on time for a disco effect
-        local hue = tick() % 5 / 5  -- Cycling hue
-        spotLight.Color = Color3.fromHSV(hue, 1, 1)  -- Disco light color change
-    end)
-
-    return discoBall
+        -- Swirl animation
+        coroutine.wrap(function()
+            while swirlPart do
+                swirlPart.Position = swirlPart.Position + Vector3.new(math.sin(tick()), 0, math.cos(tick())) * 0.5
+                wait(0.05)
+            end
+        end)()
+    end
 end
 
--- Function to create rainbow rain effect
-local function createRainbowRain()
-    local rainCount = 0
-    while rainCount < 5000 do  -- Limit to a maximum number of raindrops
-        wait(0.01)  -- Adjust the drop frequency for visibility
-        local rainDrop = Instance.new("Part")
-        rainDrop.Size = Vector3.new(0.2, 1, 0.2)
-        rainDrop.BrickColor = BrickColor.new(Color3.new(math.random(), math.random(), math.random())) -- Rainbow color
-        rainDrop.Material = Enum.Material.SmoothPlastic
-        rainDrop.CanCollide = false
-        rainDrop.Position = Vector3.new(math.random(-100, 100), 200, math.random(-100, 100))  -- Start above ground
-        rainDrop.Anchored = false
-        
-        -- Make the raindrop fall
-        local bodyVelocity = Instance.new("BodyVelocity", rainDrop)
-        bodyVelocity.Velocity = Vector3.new(0, -50, 0)  -- Falling speed
-        bodyVelocity.MaxForce = Vector3.new(0, math.huge, 0) -- Allow it to fall
-        rainCount = rainCount + 1
-        rainDrop.Parent = workspace
+-- Function to create a colorful laser show
+local function createLaserShow()
+    for i = 1, 100 do
+        local laser = Instance.new("Part")
+        laser.Size = Vector3.new(0.1, 100, 0.1)
+        laser.Position = Vector3.new(math.random(-100, 100), 50, math.random(-100, 100))
+        laser.Anchored = true
+        laser.CanCollide = false
+        laser.BrickColor = BrickColor.Random()
+        laser.Transparency = 1 -- Make the laser part invisible
+        laser.Parent = workspace
 
-        -- Clean up raindrop after it falls
-        wait(2)  -- Time before cleaning up, adjust as needed
-        rainDrop:Destroy()
+        local tweenService = game:GetService("TweenService")
+        local tweenInfo = TweenInfo.new(1, Enum.EasingStyle.Linear, Enum.EasingDirection.InOut, -1, true)
+        local tween = tweenService:Create(laser, tweenInfo, {Size = Vector3.new(0.1, 0, 0.1)})
+        tween:Play()
     end
 end
 
@@ -162,30 +150,15 @@ sound:Play()
 
 -- Create fireworks
 local fireworkList = createFireworks()
-
--- Start rainbow rain effects
-local rainCoroutine = coroutine.wrap(createRainbowRain)()
-local discoBall = createDiscoBall()
-
--- Sync player jumps for 10 seconds while the song plays
-local player = Players.LocalPlayer
-local character = player.Character or player.CharacterAdded:Wait()
-local humanoid = character:WaitForChild("Humanoid")
-
-local jumpDuration = 15
-local startTime = tick()
-
-while tick() - startTime < jumpDuration do
-    humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
-    wait(0.5) -- Adjust jump frequency
-end
+createSwirlingParticles()  -- Create swirling particles
+createLaserShow()          -- Create a laser show
 
 -- Wait for the song to finish and then reset everything
 sound.Ended:Wait()  -- Wait until the sound ends
 
--- Remove all fireworks, rain, and disco ball
+-- Remove all fireworks, particles, lasers, and disco ball
 for _, drop in pairs(workspace:GetChildren()) do
-    if drop.Name == "Firework" or drop.Name == "DiscoBall" then
+    if drop.Name == "Firework" or drop.Name == "DiscoBall" or drop:IsA("Part") then
         drop:Destroy()
     end
 end
