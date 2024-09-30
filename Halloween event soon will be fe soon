@@ -14,13 +14,6 @@ local originalLighting = {
 
 -- Function to reset the lighting to original settings
 local function resetLighting()
-    -- Remove existing sky
-    for _, child in pairs(Lighting:GetChildren()) do
-        if child:IsA("Sky") then
-            child:Destroy()
-        end
-    end
-
     -- Restore original lighting effects
     Lighting.Ambient = originalLighting.Ambient
     Lighting.OutdoorAmbient = originalLighting.OutdoorAmbient
@@ -28,13 +21,20 @@ local function resetLighting()
     Lighting.FogColor = originalLighting.FogColor
     Lighting.FogStart = originalLighting.FogStart
     Lighting.FogEnd = originalLighting.FogEnd
+
+    -- Optionally, you can remove only specific Sky instances if needed.
+    for _, child in pairs(Lighting:GetChildren()) do
+        if child:IsA("Sky") then
+            child:Destroy()
+        end
+    end
 end
 
 -- Function to create colorful firework effects
 local function createFireworks()
     local fireworkList = {}
 
-    for i = 1, 60 do  -- Increased the number of fireworks
+    for i = 1, 60 do
         local firework = Instance.new("Part")
         firework.Size = Vector3.new(1, 1, 1)
         firework.Position = Vector3.new(math.random(-100, 100), math.random(40, 100), math.random(-100, 100))
@@ -49,7 +49,7 @@ local function createFireworks()
         particleEmitter.Lifetime = NumberRange.new(1, 2)
         particleEmitter.Rate = 150
         particleEmitter.Speed = NumberRange.new(50, 100)
-        particleEmitter.Size = NumberSequence.new(2, 5) -- Increased size of particles
+        particleEmitter.Size = NumberSequence.new(2, 5)
         particleEmitter.Parent = firework
 
         coroutine.wrap(function()
@@ -77,6 +77,8 @@ end
 
 -- Function to create a swirling particle effect
 local function createSwirlingParticles()
+    local swirlParts = {} -- Store swirl parts for cleanup
+
     for i = 1, 20 do
         local swirlPart = Instance.new("Part")
         swirlPart.Size = Vector3.new(1, 1, 1)
@@ -101,11 +103,17 @@ local function createSwirlingParticles()
                 wait(0.05)
             end
         end)()
+
+        table.insert(swirlParts, swirlPart) -- Add to list for cleanup
     end
+
+    return swirlParts -- Return the list of swirl parts
 end
 
 -- Function to create a colorful laser show
 local function createLaserShow()
+    local laserList = {} -- Store lasers for cleanup
+
     for i = 1, 100 do
         local laser = Instance.new("Part")
         laser.Size = Vector3.new(0.1, 100, 0.1)
@@ -120,7 +128,11 @@ local function createLaserShow()
         local tweenInfo = TweenInfo.new(1, Enum.EasingStyle.Linear, Enum.EasingDirection.InOut, -1, true)
         local tween = tweenService:Create(laser, tweenInfo, {Size = Vector3.new(0.1, 0, 0.1)})
         tween:Play()
+
+        table.insert(laserList, laser) -- Add to list for cleanup
     end
+
+    return laserList -- Return the list of lasers
 end
 
 -- Lighting Effects for Theme
@@ -148,20 +160,26 @@ sound.Volume = 1
 sound.Parent = workspace
 sound:Play()
 
--- Create fireworks
+-- Create fireworks and effects
 local fireworkList = createFireworks()
-createSwirlingParticles()  -- Create swirling particles
-createLaserShow()          -- Create a laser show
+local swirlParts = createSwirlingParticles()  -- Create swirling particles
+local laserList = createLaserShow()          -- Create a laser show
 
 -- Wait for the song to finish and then reset everything
 sound.Ended:Wait()  -- Wait until the sound ends
 
--- Remove all fireworks, particles, lasers, and disco ball
-for _, drop in pairs(workspace:GetChildren()) do
-    if drop.Name == "Firework" or drop.Name == "DiscoBall" or drop:IsA("Part") then
-        drop:Destroy()
-    end
+-- Remove only the created effects
+for _, firework in ipairs(fireworkList) do
+    firework:Destroy()
 end
 
--- Reset lighting and remove all lighting effects
+for _, swirlPart in ipairs(swirlParts) do
+    swirlPart:Destroy()
+end
+
+for _, laser in ipairs(laserList) do
+    laser:Destroy()
+end
+
+-- Reset lighting
 resetLighting()
