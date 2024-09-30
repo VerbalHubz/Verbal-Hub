@@ -462,33 +462,67 @@ function OrionLib:Init()
 	end	
 end	
 
-function OrionLib:MakeWindow(WindowConfig)
-	local FirstTab = true
-	local Minimized = false
-	local Loaded = false
-	local UIHidden = false
+-- Create the ScreenGui and button
+local ScreenGui = Instance.new("ScreenGui")
+local OpenCloseButton = Instance.new("TextButton")
+local MainGui = Instance.new("Frame") -- This is the GUI you want to show/hide
 
-	WindowConfig = WindowConfig or {}
-	WindowConfig.Name = WindowConfig.Name or "Orion Library"
-	WindowConfig.ConfigFolder = WindowConfig.ConfigFolder or WindowConfig.Name
-	WindowConfig.SaveConfig = WindowConfig.SaveConfig or false
-	WindowConfig.HidePremium = WindowConfig.HidePremium or false
-	if WindowConfig.IntroEnabled == nil then
-		WindowConfig.IntroEnabled = true
-	end
-	WindowConfig.IntroText = WindowConfig.IntroText or "Orion Library"
-	WindowConfig.CloseCallback = WindowConfig.CloseCallback or function() end
-	WindowConfig.ShowIcon = WindowConfig.ShowIcon or false
-	WindowConfig.Icon = WindowConfig.Icon or "rbxassetid://8834748103"
-	WindowConfig.IntroIcon = WindowConfig.IntroIcon or "rbxassetid://8834748103"
-	OrionLib.Folder = WindowConfig.ConfigFolder
-	OrionLib.SaveCfg = WindowConfig.SaveConfig
+-- Parent the elements
+ScreenGui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
+OpenCloseButton.Parent = ScreenGui
+MainGui.Parent = ScreenGui
 
-	if WindowConfig.SaveConfig then
-		if not isfolder(WindowConfig.ConfigFolder) then
-			makefolder(WindowConfig.ConfigFolder)
-		end	
-	end
+-- Set properties for the button
+OpenCloseButton.Text = "Toggle GUI"
+OpenCloseButton.Size = UDim2.new(0, 100, 0, 50) -- Adjust size
+OpenCloseButton.Position = UDim2.new(0, 100, 0, 100) -- Starting position
+OpenCloseButton.BackgroundColor3 = Color3.fromRGB(255, 170, 0) -- Button color
+
+-- Set properties for the GUI
+MainGui.Size = UDim2.new(0, 300, 0, 400) -- GUI size
+MainGui.Position = UDim2.new(0.5, -150, 0.5, -200) -- Center the GUI
+MainGui.BackgroundColor3 = Color3.fromRGB(50, 50, 50) -- GUI background color
+MainGui.Visible = false -- Initially hide the GUI
+
+-- Button functionality to toggle the GUI's visibility
+OpenCloseButton.MouseButton1Click:Connect(function()
+    MainGui.Visible = not MainGui.Visible -- Toggle GUI visibility
+end)
+
+-- Make the button moveable (drag functionality)
+local dragging = false
+local dragInput, dragStart, startPos
+
+local function update(input)
+    local delta = input.Position - dragStart
+    OpenCloseButton.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+end
+
+OpenCloseButton.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 then
+        dragging = true
+        dragStart = input.Position
+        startPos = OpenCloseButton.Position
+        
+        input.Changed:Connect(function()
+            if input.UserInputState == Enum.UserInputState.End then
+                dragging = false
+            end
+        end)
+    end
+end)
+
+OpenCloseButton.InputChanged:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseMovement then
+        dragInput = input
+    end
+end)
+
+game:GetService("UserInputService").InputChanged:Connect(function(input)
+    if dragging and input == dragInput then
+        update(input)
+    end
+end)
 
 	local TabHolder = AddThemeObject(SetChildren(SetProps(MakeElement("ScrollFrame", Color3.fromRGB(255, 255, 255), 4), {
 		Size = UDim2.new(1, 0, 1, -50)
