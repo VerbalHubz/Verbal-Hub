@@ -13,7 +13,7 @@ local function createNeonText()
     neonText.Parent = screenGui
     neonText.Size = UDim2.new(0.8, 0, 0.2, 0) -- Adjust the size to a percentage of the screen
     neonText.Position = UDim2.new(0.1, 0, 0.4, 0) -- Position towards the center
-    neonText.Text = "Thank you for 100K views on verbal hub here's an event for you ;) !"
+    neonText.Text = "Thank you for 100K views on verbal hub here's an event for you ;) ! Loading.. Pls Wait"
     neonText.Font = Enum.Font.GothamBold -- Use a bold font for neon effect
     neonText.TextScaled = true -- Automatically scale the text to fit
     neonText.TextStrokeTransparency = 0 -- To give a neon outline
