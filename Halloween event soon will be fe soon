@@ -277,8 +277,9 @@ for _, laser in ipairs(laserList) do
     laser:Destroy()
 end
 
- for _, part in pairs(discoParts) do
-    end
+for _, discoParts in ipairs(discoParts) do
+    discoParts:Destroy()
+end
 
 for _, visualizerPart in ipairs(visualizerParts) do
     visualizerPart:Destroy()
