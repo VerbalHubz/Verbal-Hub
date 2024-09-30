@@ -30,11 +30,11 @@ local function resetLighting()
     Lighting.FogEnd = originalLighting.FogEnd
 end
 
--- Function to create colorful firework effects that change color smoothly
+-- Function to create colorful firework effects
 local function createFireworks()
     local fireworkList = {}
 
-    for i = 1, 20 do  -- Increased the number of fireworks
+    for i = 1, 30 do  -- Increased the number of fireworks
         local firework = Instance.new("Part")
         firework.Size = Vector3.new(1, 1, 1)
         firework.Position = Vector3.new(math.random(-100, 100), math.random(40, 100), math.random(-100, 100))
@@ -78,7 +78,7 @@ local function createFireworks()
     return fireworkList
 end
 
--- Function to create dynamic thunder and lighting effects
+-- Function to create dynamic thunder and lightning effects
 local function createThunderEffect()
     while true do
         wait(math.random(2, 5))  -- Wait between strikes
@@ -86,6 +86,37 @@ local function createThunderEffect()
         wait(0.1)                 -- Short flicker
         Lighting.Brightness = 2   -- Return to normal
     end
+end
+
+-- Function to create a disco ball effect with changing light colors
+local function createDiscoBall()
+    local discoBall = Instance.new("Part")
+    discoBall.Size = Vector3.new(3, 3, 3)
+    discoBall.Material = Enum.Material.SmoothPlastic
+    discoBall.BrickColor = BrickColor.White()
+    discoBall.Anchored = true
+    discoBall.Position = Vector3.new(0, 50, 0)  -- Position above the ground
+    discoBall.Name = "DiscoBall"
+    discoBall.Parent = workspace
+
+    -- SpotLight to simulate disco lighting around the ball
+    local spotLight = Instance.new("SpotLight")
+    spotLight.Parent = discoBall
+    spotLight.Range = 15
+    spotLight.Brightness = 2
+    spotLight.Angle = 45  -- Beam angle for the spotlight
+    spotLight.Color = Color3.fromRGB(255, 255, 255)  -- Initial color white
+
+    -- Rotate the disco ball for effect
+    RunService.Heartbeat:Connect(function()
+        discoBall.CFrame = discoBall.CFrame * CFrame.Angles(0, math.rad(2), 0)  -- Rotate disco ball
+        
+        -- Change light color based on time for a disco effect
+        local hue = tick() % 5 / 5  -- Cycling hue
+        spotLight.Color = Color3.fromHSV(hue, 1, 1)  -- Disco light color change
+    end)
+
+    return discoBall
 end
 
 -- Function to create rainbow rain effect
@@ -143,8 +174,9 @@ sound:Play()
 local fireworkList = createFireworks()
 
 -- Start thunder effects
-coroutine.wrap(createThunderEffect)()
-coroutine.wrap(createRainbowRain)()
+local thunderCoroutine = coroutine.wrap(createThunderEffect)()
+local rainCoroutine = coroutine.wrap(createRainbowRain)()
+local discoBall = createDiscoBall()
 
 -- Sync player jumps for 10 seconds while the song plays
 local player = Players.LocalPlayer
@@ -162,13 +194,12 @@ end
 -- Wait for the song to finish and then reset everything
 sound.Ended:Wait()  -- Wait until the sound ends
 
--- Remove all fireworks and rain
+-- Remove all fireworks, rain, thunder effects, and disco ball
 for _, drop in pairs(workspace:GetChildren()) do
-    if drop.Name == "Firework" then
+    if drop.Name == "Firework" or drop.Name == "DiscoBall" then
         drop:Destroy()
     end
 end
 
 -- Reset lighting and remove all lighting effects
 resetLighting()
- 
