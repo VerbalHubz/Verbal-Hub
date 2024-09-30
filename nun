@@ -49,7 +49,7 @@ local function createNeonText()
     end)
 
     -- Remove text after 12 seconds
-    wait(10)
+    wait(5)
     screenGui:Destroy()
 end
 
