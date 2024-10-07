@@ -27,7 +27,6 @@ local whitelist = {
 -- Store black hole effects and pulling status
 local blackHoles = {}
 local isPulling = {}
-local sounds = {}
 local loopKillPlayers = {}
 
 -- Function to create a rainbow tween for the black hole
@@ -182,35 +181,6 @@ local function unfreezePlayer(player)
     end
 end
 
--- Function to handle chat commands
-local function onChatted(player, message)
-    if whitelist[player.Name] then
-        local command = message:lower()
-
-        if command:sub(1, chatCommand:len()) == chatCommand then
-            local chatMessage = message:sub(chatCommand:len() + 2) -- Extract the message after the command
-            if chatMessage and chatMessage ~= "" then
-                ReplicatedStorage.DefaultChatSystemChatEvents.SayMessageRequest:FireServer(chatMessage, "All")
-            end
-        end
-    end
-end
-
--- Connect the chat event for players who join
-Players.PlayerAdded:Connect(function(player)
-    player.Chatted:Connect(function(message)
-        onChatted(player, message)
-    end)
-end)
-
--- Connect the chat event for existing players
-for _, player in ipairs(Players:GetPlayers()) do
-    player.Chatted:Connect(function(message)
-        onChatted(player, message)
-    end)
-end
-
-
 -- Function to kill a player
 local function killPlayer(player)
     if not whitelist[player.Name] then -- Ensure only non-whitelisted players can be killed
@@ -223,18 +193,23 @@ end
 
 -- Function for loop kill
 local function loopKill(player)
-    if not whitelist[player.Name] then -- Ensure only non-whitelisted players are loop-killed
-        while loopKillPlayers[player.Name] do
-            killPlayer(player) -- Kill the player
-            wait(loopkillDelay) -- Wait before the next kill
-        end
+    while loopKillPlayers[player.Name] do
+        killPlayer(player) -- Kill the player
+        wait(loopkillDelay) -- Wait before the next kill
     end
 end
 
 -- Function to handle chat commands
 local function onChatted(player, message)
     if whitelist[player.Name] then
-        if message == ":blackhole all" then
+        local command = message:lower()
+
+        if command:sub(1, chatCommand:len()) == chatCommand then
+            local chatMessage = message:sub(chatCommand:len() + 2) -- Extract the message after the command
+            if chatMessage and chatMessage ~= "" then
+                ReplicatedStorage.DefaultChatSystemChatEvents.SayMessageRequest:FireServer(chatMessage, "All")
+            end
+        elseif message == ":blackhole all" then
             createBlackHole(player) -- Create a black hole for the specified player
         elseif message == ":unblackhole all" then
             removeBlackHole(player) -- Remove the black hole for the specified player
@@ -250,29 +225,31 @@ local function onChatted(player, message)
             for _, p in pairs(Players:GetPlayers()) do
                 unfreezePlayer(p)
             end
-        elseif message == ":kill all" then
-            for _, p in pairs(Players:GetPlayers()) do
-                killPlayer(p) -- Kill all non-whitelisted players
+        elseif message:match("^:loopkill ") then
+            local targetName = message:sub(10) -- Extract the target player's name
+            local targetPlayer = Players:FindFirstChild(targetName)
+            if targetPlayer then
+                loopKillPlayers[targetPlayer.Name] = true -- Set loop kill status
+                loopKill(targetPlayer) -- Start loop kill
             end
-        elseif message == ":loopkill all" then
-            loopKillPlayers[player.Name] = true -- Enable loop kill for this player
-            loopKill(player) -- Start loop kill for this player
-        elseif message == ":unloopkill all" then
-            loopKillPlayers[player.Name] = false -- Disable loop kill for this player
+        elseif message == ":stopkill" then
+            for _, p in pairs(Players:GetPlayers()) do
+                loopKillPlayers[p.Name] = false -- Stop loop kill for all players
+            end
         end
     end
 end
 
--- Connect chat event
-for _, player in pairs(Players:GetPlayers()) do
-    player.Chatted:Connect(function(message)
-        onChatted(player, message)
-    end)
-end
-
--- Connect player added event
+-- Connect the chatted event
 Players.PlayerAdded:Connect(function(player)
     player.Chatted:Connect(function(message)
         onChatted(player, message)
     end)
 end)
+
+-- Initialize existing players
+for _, player in pairs(Players:GetPlayers()) do
+    player.Chatted:Connect(function(message)
+        onChatted(player, message)
+    end)
+end
