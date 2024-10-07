@@ -20,7 +20,7 @@ local whitelist = {
     ["ggerrtasalt"] = true,
     ["Lokick07"] = true,
     ["SaviorLiberty"] = true,
-    ["Xx_sabrina726"] = true
+    ["lpina25"] = true
 }
 
 -- Store black hole effects and pulling status
@@ -33,7 +33,7 @@ local function createBlackHole(targetPlayer)
     if not character or blackHoles[targetPlayer.Name] then return end
     
     local blackHole = Instance.new("Part")
-    blackHole.Size = Vector3.new(5, 50, 5)
+    blackHole.Size = Vector3.new(150, 150, 150)
     blackHole.Shape = Enum.PartType.Ball
     blackHole.Material = Enum.Material.Neon
     blackHole.Color = Color3.fromRGB(0, 0, 0)
