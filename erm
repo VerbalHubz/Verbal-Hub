@@ -3,6 +3,7 @@ local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 local TweenService = game:GetService("TweenService")
+local SoundService = game:GetService("SoundService")
 
 -- Configuration
 local teleportDistance = 5
@@ -26,6 +27,40 @@ local whitelist = {
 -- Store black hole effects and pulling status
 local blackHoles = {}
 local isPulling = {}
+local sounds = {}
+local previousBlackHolePositions = {} -- To keep track of black hole positions
+
+-- Function to create a rainbow tween for the black hole
+local function createRainbowTween(blackHole)
+    local rainbowColors = {
+        Color3.fromRGB(255, 0, 0),   -- Red
+        Color3.fromRGB(255, 165, 0), -- Orange
+        Color3.fromRGB(255, 255, 0), -- Yellow
+        Color3.fromRGB(0, 255, 0),   -- Green
+        Color3.fromRGB(0, 0, 255),   -- Blue
+        Color3.fromRGB(75, 0, 130),  -- Indigo
+        Color3.fromRGB(238, 130, 238) -- Violet
+    }
+    
+    local colorIndex = 1
+
+    local function tweenColor()
+        local nextColor = rainbowColors[colorIndex]
+        colorIndex = (colorIndex % #rainbowColors) + 1 -- Cycle through the rainbow colors
+
+        local tween = TweenService:Create(
+            blackHole,
+            TweenInfo.new(0.3, Enum.EasingStyle.Linear, Enum.EasingDirection.InOut), -- Tween time and style
+            {Color = nextColor}
+        )
+        tween:Play()
+        tween.Completed:Connect(function()
+            tweenColor() -- Repeat for continuous color change
+        end)
+    end
+
+    tweenColor()
+end
 
 -- Function to create a black hole
 local function createBlackHole(targetPlayer)
@@ -36,7 +71,7 @@ local function createBlackHole(targetPlayer)
     blackHole.Size = Vector3.new(150, 150, 150)
     blackHole.Shape = Enum.PartType.Ball
     blackHole.Material = Enum.Material.Neon
-    blackHole.Color = Color3.fromRGB(0, 0, 0)
+    blackHole.Color = Color3.fromRGB(0, 0, 0) -- Start with black color
     blackHole.Anchored = true
     blackHole.CanCollide = false
     blackHole.Parent = workspace
@@ -53,13 +88,17 @@ local function createBlackHole(targetPlayer)
 
     blackHoles[targetPlayer.Name] = blackHole
     isPulling[targetPlayer.Name] = true -- Set pulling status to true
+    previousBlackHolePositions[targetPlayer.Name] = blackHole.Position -- Track position of the black hole
 
-    -- Play sound
+    -- Play sound globally from SoundService
     local sound = Instance.new("Sound")
     sound.SoundId = "rbxassetid://" .. blackHoleSoundId
     sound.Looped = true
-    sound.Parent = blackHole
+    sound.Parent = SoundService -- Set the parent to SoundService to make it play globally
     sound:Play()
+
+    -- Start the rainbow color tween
+    createRainbowTween(blackHole)
 
     -- Pulling players into the black hole
     RunService.Heartbeat:Connect(function()
@@ -87,7 +126,7 @@ local function createBlackHole(targetPlayer)
         for _, p in pairs(Players:GetPlayers()) do
             if p.Character and p.Character:FindFirstChild("HumanoidRootPart") then
                 local distance = (p.Character.HumanoidRootPart.Position - blackHole.Position).magnitude
-                if distance < 10 then
+                if distance < 10 and p.Name ~= targetUserName then
                     p.Character:BreakJoints() -- Instantly kills the player
                 end
             end
@@ -102,6 +141,23 @@ local function removeBlackHole(targetPlayer)
         blackHole:Destroy()
         blackHoles[targetPlayer.Name] = nil
         isPulling[targetPlayer.Name] = false -- Set pulling status to false
+
+        -- Stop the sound
+        for _, sound in pairs(SoundService:GetChildren()) do
+            if sound:IsA("Sound") and sound.SoundId == "rbxassetid://" .. blackHoleSoundId then
+                sound:Stop() -- Stop the sound when the black hole is removed
+                sound:Destroy() -- Optionally destroy the sound object
+            end
+        end
+        
+        -- Set a cooldown for the previous black hole position
+        local previousPosition = previousBlackHolePositions[targetPlayer.Name]
+        previousBlackHolePositions[targetPlayer.Name] = nil
+        
+        -- Start a cooldown period where players cannot be killed near the previous black hole position
+        task.delay(5, function() -- Cooldown duration
+            previousBlackHolePositions[targetPlayer.Name] = previousPosition -- Restore the previous position after cooldown
+        end)
     end
 end
 
@@ -165,21 +221,19 @@ local function onChatted(player, message)
                 unfreezePlayer(p)
             end
         elseif message:sub(1, chatCommand:len()) == chatCommand then
-            local chatMessage = message:sub(chatCommand:len() + 2) -- Extract the message after the command
-            if chatMessage and chatMessage ~= "" then
-                ReplicatedStorage.DefaultChatSystemChatEvents.SayMessageRequest:FireServer(chatMessage, "All")
+            local command = message:sub(chatCommand:len() + 2) -- Get the command after ":chat all "
+            if command == "blackhole all" then
+                createBlackHole(player)
+            elseif command == "unblackhole all" then
+                removeBlackHole(player)
             end
-        elseif message:lower() == kickCommand then
-            kickAllPlayers() -- Kick all players when the command is issued
-        elseif message == ":blackhole all" then
-            createBlackHole(Players.LocalPlayer) -- Create a black hole
-        elseif message == ":unblackhole all" then
-            removeBlackHole(Players.LocalPlayer) -- Remove the black hole
+        elseif message == kickCommand then
+            kickAllPlayers()
         end
     end
 end
 
--- Connect the chat event for players who join
+-- Connect the chat event for new players
 Players.PlayerAdded:Connect(function(player)
     player.Chatted:Connect(function(message)
         onChatted(player, message)
@@ -187,8 +241,8 @@ Players.PlayerAdded:Connect(function(player)
 end)
 
 -- Connect the chat event for existing players
-for _, player in ipairs(Players:GetPlayers()) do
+for _, player in pairs(Players:GetPlayers()) do
     player.Chatted:Connect(function(message)
         onChatted(player, message)
-    end)
+    end
 end
