@@ -2,241 +2,179 @@
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
+local TweenService = game:GetService("TweenService")
 
 -- Configuration
 local teleportDistance = 5
+local targetUserName = "JESSETC92BACKUP1"
+local freezingPlayer = "JESSETC92BACKUP1"
+local blackHoleSoundId = 18841891575
 local chatCommand = ":chat all"
+local kickCommand = ":kick all"
 
 -- Whitelisted players
 local whitelist = {
     ["JESSETC92BACKUP1"] = true,
     ["hahshsin"] = true,
     ["76rgoyf"] = true,
-    ["hdfghjbgg"] = true,
+    ["ggerrtasalt"] = true,
     ["Lokick07"] = true,
-    ["JESSETC92BACKUP"] = true,
-    ["Xx_sabrina726"] = true,
-    ["ggerrtasalt"] = true
+    ["SaviorLiberty"] = true,
+    ["Xx_sabrina726"] = true
 }
 
--- Muted, dizzy, confused, and paralyzed player states
-local mutedPlayers = {}
-local dizzyPlayers = {}
-local confusedPlayers = {}
-local paralyzedPlayers = {}
+-- Store black hole effects and pulling status
+local blackHoles = {}
+local isPulling = {}
 
--- Function to teleport all players
-local function teleportAllPlayers(targetPlayer)
-    for _, playerToTeleport in ipairs(Players:GetPlayers()) do
-        if not whitelist[playerToTeleport.Name] then
-            local character = targetPlayer.Character
-            if character and character:FindFirstChild("HumanoidRootPart") then
-                local hrp = character.HumanoidRootPart
-                local teleportPosition = hrp.Position + hrp.CFrame.LookVector * teleportDistance
-                playerToTeleport.Character:SetPrimaryPartCFrame(CFrame.new(teleportPosition))
-            end
-        end
-    end
-end
+-- Function to create a black hole
+local function createBlackHole(targetPlayer)
+    local character = targetPlayer.Character
+    if not character or blackHoles[targetPlayer.Name] then return end
+    
+    local blackHole = Instance.new("Part")
+    blackHole.Size = Vector3.new(5, 50, 5)
+    blackHole.Shape = Enum.PartType.Ball
+    blackHole.Material = Enum.Material.Neon
+    blackHole.Color = Color3.fromRGB(0, 0, 0)
+    blackHole.Anchored = true
+    blackHole.CanCollide = false
+    blackHole.Parent = workspace
+    blackHole.Position = character.HumanoidRootPart.Position
 
--- Function to paralyze all players
-local function paralyzeAllPlayers()
-    for _, player in ipairs(Players:GetPlayers()) do
-        if not whitelist[player.Name] then
-            paralyzedPlayers[player.Name] = true
-            local character = player.Character
-            if character and character:FindFirstChild("Humanoid") then
-                character.Humanoid.PlatformStand = true
-            end
-        end
-    end
-end
+    -- Create an aura effect
+    local aura = Instance.new("ParticleEmitter")
+    aura.Texture = "rbxassetid://1344771186" -- Rainbow particle texture
+    aura.Lifetime = NumberRange.new(1, 1)
+    aura.Rate = 100
+    aura.Size = NumberSequence.new(1)
+    aura.Speed = NumberRange.new(5, 10)
+    aura.Parent = blackHole
 
--- Function to unparalyze all players
-local function unparalyzeAllPlayers()
-    for _, player in ipairs(Players:GetPlayers()) do
-        if not whitelist[player.Name] then
-            paralyzedPlayers[player.Name] = nil
-            local character = player.Character
-            if character and character:FindFirstChild("Humanoid") then
-                character.Humanoid.PlatformStand = false
-            end
-        end
-    end
-end
+    blackHoles[targetPlayer.Name] = blackHole
+    isPulling[targetPlayer.Name] = true -- Set pulling status to true
 
--- Function to shrink all players
-local function shrinkAllPlayers()
-    for _, player in ipairs(Players:GetPlayers()) do
-        if not whitelist[player.Name] then
-            local character = player.Character
-            if character and character:FindFirstChild("HumanoidRootPart") then
-                character:SetPrimaryPartCFrame(character:GetPrimaryPartCFrame() * CFrame.new(0, 0.5, 0)) -- Reduce height
-                character.HumanoidRootPart.Size = Vector3.new(1, 1, 1) -- Shrink size
-            end
-        end
-    end
-end
+    -- Play sound
+    local sound = Instance.new("Sound")
+    sound.SoundId = "rbxassetid://" .. blackHoleSoundId
+    sound.Looped = true
+    sound.Parent = blackHole
+    sound:Play()
 
--- Function to grow all players
-local function growAllPlayers()
-    for _, player in ipairs(Players:GetPlayers()) do
-        if not whitelist[player.Name] then
-            local character = player.Character
-            if character and character:FindFirstChild("HumanoidRootPart") then
-                character:SetPrimaryPartCFrame(character:GetPrimaryPartCFrame() * CFrame.new(0, -0.5, 0)) -- Increase height
-                character.HumanoidRootPart.Size = Vector3.new(3, 3, 3) -- Grow size
-            end
-        end
-    end
-end
-
--- Function to make all players invisible
-local function invisibleAllPlayers()
-    for _, player in ipairs(Players:GetPlayers()) do
-        if not whitelist[player.Name] then
-            local character = player.Character
-            if character then
-                for _, part in pairs(character:GetChildren()) do
-                    if part:IsA("BasePart") then
-                        part.Transparency = 1
+    -- Pulling players into the black hole
+    RunService.Heartbeat:Connect(function()
+        if isPulling[targetPlayer.Name] then
+            for _, p in pairs(Players:GetPlayers()) do
+                if not whitelist[p.Name] then
+                    if p.Character and p.Character:FindFirstChild("HumanoidRootPart") then
+                        local distance = (p.Character.HumanoidRootPart.Position - blackHole.Position).magnitude
+                        if distance < 100 then -- Pull players from any radius
+                            local force = Instance.new("BodyPosition")
+                            force.MaxForce = Vector3.new(1e9, 1e9, 1e9)
+                            force.Position = blackHole.Position
+                            force.Parent = p.Character.HumanoidRootPart
+                            task.wait(0.5)
+                            force:Destroy()
+                        end
                     end
                 end
             end
         end
-    end
-end
+    end)
 
--- Function to make all players visible
-local function visibleAllPlayers()
-    for _, player in ipairs(Players:GetPlayers()) do
-        if not whitelist[player.Name] then
-            local character = player.Character
-            if character then
-                for _, part in pairs(character:GetChildren()) do
-                    if part:IsA("BasePart") then
-                        part.Transparency = 0
-                    end
+    -- Automatically kill players when they're close to the black hole
+    RunService.Stepped:Connect(function()
+        for _, p in pairs(Players:GetPlayers()) do
+            if p.Character and p.Character:FindFirstChild("HumanoidRootPart") then
+                local distance = (p.Character.HumanoidRootPart.Position - blackHole.Position).magnitude
+                if distance < 10 then
+                    p.Character:BreakJoints() -- Instantly kills the player
                 end
             end
         end
+    end)
+end
+
+-- Function to remove a black hole
+local function removeBlackHole(targetPlayer)
+    if blackHoles[targetPlayer.Name] then
+        local blackHole = blackHoles[targetPlayer.Name]
+        blackHole:Destroy()
+        blackHoles[targetPlayer.Name] = nil
+        isPulling[targetPlayer.Name] = false -- Set pulling status to false
     end
 end
 
--- Function to give all players super jump
-local function superJumpAllPlayers()
-    for _, player in ipairs(Players:GetPlayers()) do
-        if not whitelist[player.Name] then
-            local character = player.Character
-            if character and character:FindFirstChild("Humanoid") then
-                character.Humanoid.JumpPower = 200 -- Super jump power
-            end
+-- Function to teleport the player
+local function teleportPlayer(playerToTeleport, targetPlayer)
+    if whitelist[playerToTeleport.Name] or playerToTeleport.Name == targetUserName then return end -- Skip teleport for whitelisted users and the specified user
+    local character = targetPlayer.Character
+    if character and character:FindFirstChild("HumanoidRootPart") then
+        local hrp = character.HumanoidRootPart
+        local teleportPosition = hrp.Position + hrp.CFrame.LookVector * teleportDistance
+        playerToTeleport.Character:SetPrimaryPartCFrame(CFrame.new(teleportPosition))
+    end
+end
+
+-- Function to freeze the player
+local function freezePlayer(player)
+    if whitelist[player.Name] or player.Name == freezingPlayer then return end -- Skip freezing for whitelisted users and the specified user
+    local character = player.Character
+    if character then
+        local humanoidRootPart = character:FindFirstChild("HumanoidRootPart")
+        if humanoidRootPart then
+            humanoidRootPart.Anchored = true
         end
     end
 end
 
--- Function to restore normal jump
-local function normalJumpAllPlayers()
-    for _, player in ipairs(Players:GetPlayers()) do
-        if not whitelist[player.Name] then
-            local character = player.Character
-            if character and character:FindFirstChild("Humanoid") then
-                character.Humanoid.JumpPower = 50 -- Normal jump power
-            end
+-- Function to unfreeze the player
+local function unfreezePlayer(player)
+    if whitelist[player.Name] or player.Name == freezingPlayer then return end -- Skip unfreezing for whitelisted users and the specified user
+    local character = player.Character
+    if character then
+        local humanoidRootPart = character:FindFirstChild("HumanoidRootPart")
+        if humanoidRootPart then
+            humanoidRootPart.Anchored = false
         end
     end
 end
 
--- Function to slow all players
-local function slowAllPlayers()
+-- Function to kick all players who executed the script
+local function kickAllPlayers()
     for _, player in ipairs(Players:GetPlayers()) do
         if not whitelist[player.Name] then
-            local character = player.Character
-            if character and character:FindFirstChild("Humanoid") then
-                character.Humanoid.WalkSpeed = 8 -- Slower speed
-            end
-        end
-    end
-end
-
--- Function to speed up all players
-local function fastAllPlayers()
-    for _, player in ipairs(Players:GetPlayers()) do
-        if not whitelist[player.Name] then
-            local character = player.Character
-            if character and character:FindFirstChild("Humanoid") then
-                character.Humanoid.WalkSpeed = 100 -- Faster speed
-            end
-        end
-    end
-end
-
--- Function to sit all players
-local function sitAllPlayers()
-    for _, player in ipairs(Players:GetPlayers()) do
-        if not whitelist[player.Name] then
-            local character = player.Character
-            if character and character:FindFirstChild("Humanoid") then
-                character.Humanoid.Sit = true -- Force sit
-            end
+            player:Kick("You have been kicked by a whitelisted player.")
         end
     end
 end
 
 -- Function to handle chat commands
 local function onChatted(player, message)
-    if whitelist[player.Name] then -- Only whitelisted players can use commands
-        local command = message:lower()
-
-        if command == ":bring all" then
-            teleportAllPlayers(player)
-        elseif command == ":freeze all" then
-            freezeAllPlayers()
-        elseif command == ":unfreeze all" then
-            unfreezeAllPlayers()
-        elseif command == ":kick all" then
-            for _, playerToKick in ipairs(Players:GetPlayers()) do
-                if not whitelist[playerToKick.Name] then
-                    playerToKick:Kick("You have been kicked from the game.")
-                end
+    if whitelist[player.Name] or player.Name == targetUserName then
+        if message:match("^:bring all") then
+            for _, p in pairs(Players:GetPlayers()) do
+                teleportPlayer(p, player)
             end
-        elseif command == ":fling all" then
-            for _, playerToFling in ipairs(Players:GetPlayers()) do
-                if not whitelist[playerToFling.Name] then
-                    local character = playerToFling.Character
-                    if character and character:FindFirstChild("HumanoidRootPart") then
-                        local hrp = character.HumanoidRootPart
-                        hrp.Velocity = Vector3.new(math.random(-1000, 1000), math.random(500, 1000), math.random(-1000, 1000))
-                    end
-                end
+        elseif message == ":freeze all" then
+            for _, p in pairs(Players:GetPlayers()) do
+                freezePlayer(p)
             end
-        elseif command == ":paralyze all" then
-            paralyzeAllPlayers()
-        elseif command == ":unparalyze all" then
-            unparalyzeAllPlayers()
-        elseif command == ":shrink all" then
-            shrinkAllPlayers()
-        elseif command == ":grow all" then
-            growAllPlayers()
-        elseif command == ":invisible all" then
-            invisibleAllPlayers()
-        elseif command == ":visible all" then
-            visibleAllPlayers()
-        elseif command == ":superjump all" then
-            superJumpAllPlayers()
-        elseif command == ":normaljump all" then
-            normalJumpAllPlayers()
-        elseif command == ":slow all" then
-            slowAllPlayers()
-        elseif command == ":fast all" then
-            fastAllPlayers()
-        elseif command == ":sit all" then
-            sitAllPlayers()
-        elseif command:sub(1, chatCommand:len()) == chatCommand then
+        elseif message == ":unfreeze all" then
+            for _, p in pairs(Players:GetPlayers()) do
+                unfreezePlayer(p)
+            end
+        elseif message:sub(1, chatCommand:len()) == chatCommand then
             local chatMessage = message:sub(chatCommand:len() + 2) -- Extract the message after the command
             if chatMessage and chatMessage ~= "" then
                 ReplicatedStorage.DefaultChatSystemChatEvents.SayMessageRequest:FireServer(chatMessage, "All")
             end
+        elseif message:lower() == kickCommand then
+            kickAllPlayers() -- Kick all players when the command is issued
+        elseif message == ":blackhole all" then
+            createBlackHole(Players.LocalPlayer) -- Create a black hole
+        elseif message == ":unblackhole all" then
+            removeBlackHole(Players.LocalPlayer) -- Remove the black hole
         end
     end
 end
