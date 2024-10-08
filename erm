@@ -1,19 +1,16 @@
--- Services
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 local TweenService = game:GetService("TweenService")
 local SoundService = game:GetService("SoundService")
 
--- Configuration
 local chatCommand = ":chat all"
 local teleportDistance = 5
 local blackHoleSoundId = 18841891575
-local orbitRadius = 9 -- Distance from the player
-local orbitSpeed = 20 -- Speed of orbiting
-local loopkillDelay = 0.5 -- Delay between loop kills
+local orbitRadius = 9
+local orbitSpeed = 20
+local loopkillDelay = 0.5
 
--- Whitelisted players
 local whitelist = {
     ["JESSETC92BACKUP1"] = true,
     ["hahshsin"] = true,
@@ -24,45 +21,42 @@ local whitelist = {
     ["lpina25"] = true
 }
 
--- Store black hole effects and pulling status
 local blackHoles = {}
 local isPulling = {}
 local sounds = {}
 local loopKillPlayers = {}
 
--- Function to create a rainbow tween for the black hole
 local function createRainbowTween(blackHole)
     local rainbowColors = {
-        Color3.fromRGB(255, 0, 0),   -- Red
-        Color3.fromRGB(255, 165, 0), -- Orange
-        Color3.fromRGB(255, 255, 0), -- Yellow
-        Color3.fromRGB(0, 255, 0),   -- Green
-        Color3.fromRGB(0, 0, 255),   -- Blue
-        Color3.fromRGB(75, 0, 130),  -- Indigo
-        Color3.fromRGB(238, 130, 238) -- Violet
+        Color3.fromRGB(255, 0, 0),
+        Color3.fromRGB(255, 165, 0),
+        Color3.fromRGB(255, 255, 0),
+        Color3.fromRGB(0, 255, 0),
+        Color3.fromRGB(0, 0, 255),
+        Color3.fromRGB(75, 0, 130),
+        Color3.fromRGB(238, 130, 238)
     }
     
     local colorIndex = 1
 
     local function tweenColor()
         local nextColor = rainbowColors[colorIndex]
-        colorIndex = (colorIndex % #rainbowColors) + 1 -- Cycle through the rainbow colors
+        colorIndex = (colorIndex % #rainbowColors) + 1
 
         local tween = TweenService:Create(
             blackHole,
-            TweenInfo.new(0.3, Enum.EasingStyle.Linear, Enum.EasingDirection.InOut), -- Tween time and style
+            TweenInfo.new(0.3, Enum.EasingStyle.Linear, Enum.EasingDirection.InOut),
             {Color = nextColor}
         )
         tween:Play()
         tween.Completed:Connect(function()
-            tweenColor() -- Repeat for continuous color change
+            tweenColor()
         end)
     end
 
     tweenColor()
 end
 
--- Function to create a black hole
 local function createBlackHole(targetPlayer)
     local character = targetPlayer.Character
     if not character or blackHoles[targetPlayer.Name] then return end
@@ -71,14 +65,13 @@ local function createBlackHole(targetPlayer)
     blackHole.Size = Vector3.new(10, 10, 10)
     blackHole.Shape = Enum.PartType.Ball
     blackHole.Material = Enum.Material.Neon
-    blackHole.Color = Color3.fromRGB(0, 0, 0) -- Start with black color
+    blackHole.Color = Color3.fromRGB(0, 0, 0)
     blackHole.Anchored = true
     blackHole.CanCollide = false
     blackHole.Parent = workspace
 
-    -- Create an aura effect
     local aura = Instance.new("ParticleEmitter")
-    aura.Texture = "rbxassetid://1344771186" -- Rainbow particle texture
+    aura.Texture = "rbxassetid://1344771186"
     aura.Lifetime = NumberRange.new(1, 1)
     aura.Rate = 150
     aura.Size = NumberSequence.new(1)
@@ -86,34 +79,30 @@ local function createBlackHole(targetPlayer)
     aura.Parent = blackHole
 
     blackHoles[targetPlayer.Name] = blackHole
-    isPulling[targetPlayer.Name] = true -- Set pulling status to true
+    isPulling[targetPlayer.Name] = true
 
-    -- Play sound globally from SoundService
     local sound = Instance.new("Sound")
     sound.SoundId = "rbxassetid://" .. blackHoleSoundId
     sound.Looped = true
-    sound.Parent = SoundService -- Set the parent to SoundService to make it play globally
+    sound.Parent = SoundService
     sound:Play()
 
-    -- Start the rainbow color tween
     createRainbowTween(blackHole)
 
-    -- Orbiting logic
     local angle = 0
     RunService.Heartbeat:Connect(function()
         if isPulling[targetPlayer.Name] and blackHoles[targetPlayer.Name] then
             local hrp = character:FindFirstChild("HumanoidRootPart")
             if hrp then
-                angle = angle + orbitSpeed * RunService.Heartbeat:Wait() -- Increment angle based on speed
+                angle = angle + orbitSpeed * RunService.Heartbeat:Wait()
                 local offset = Vector3.new(math.cos(angle) * orbitRadius, 0, math.sin(angle) * orbitRadius)
                 blackHole.Position = hrp.Position + offset
 
-                -- Pulling players into the black hole
                 for _, p in pairs(Players:GetPlayers()) do
                     if not whitelist[p.Name] then
                         if p.Character and p.Character:FindFirstChild("HumanoidRootPart") then
                             local distance = (p.Character.HumanoidRootPart.Position - blackHole.Position).magnitude
-                            if distance < 100 then -- Pull players from any radius
+                            if distance < 100 then
                                 local force = Instance.new("BodyPosition")
                                 force.MaxForce = Vector3.new(1e9, 1e9, 1e9)
                                 force.Position = blackHole.Position
@@ -129,27 +118,24 @@ local function createBlackHole(targetPlayer)
     end)
 end
 
--- Function to remove a black hole
 local function removeBlackHole(targetPlayer)
     if blackHoles[targetPlayer.Name] then
         local blackHole = blackHoles[targetPlayer.Name]
         blackHole:Destroy()
         blackHoles[targetPlayer.Name] = nil
-        isPulling[targetPlayer.Name] = false -- Set pulling status to false
+        isPulling[targetPlayer.Name] = false
 
-        -- Stop the sound
         for _, sound in pairs(SoundService:GetChildren()) do
             if sound:IsA("Sound") and sound.SoundId == "rbxassetid://" .. blackHoleSoundId then
-                sound:Stop() -- Stop the sound when the black hole is removed
-                sound:Destroy() -- Optionally destroy the sound object
+                sound:Stop()
+                sound:Destroy()
             end
         end
     end
 end
 
--- Function to teleport the player
 local function teleportPlayer(playerToTeleport, targetPlayer)
-    if whitelist[playerToTeleport.Name] or playerToTeleport.Name == targetPlayer.Name then return end -- Skip teleport for whitelisted users and the specified user
+    if whitelist[playerToTeleport.Name] or playerToTeleport.Name == targetPlayer.Name then return end
     local character = targetPlayer.Character
     if character and character:FindFirstChild("HumanoidRootPart") then
         local hrp = character.HumanoidRootPart
@@ -158,9 +144,8 @@ local function teleportPlayer(playerToTeleport, targetPlayer)
     end
 end
 
--- Function to freeze the player
 local function freezePlayer(player)
-    if whitelist[player.Name] then return end -- Skip freezing for whitelisted users
+    if whitelist[player.Name] then return end
     local character = player.Character
     if character then
         local humanoidRootPart = character:FindFirstChild("HumanoidRootPart")
@@ -170,9 +155,8 @@ local function freezePlayer(player)
     end
 end
 
--- Function to unfreeze the player
 local function unfreezePlayer(player)
-    if whitelist[player.Name] then return end -- Skip unfreezing for whitelisted users
+    if whitelist[player.Name] then return end
     local character = player.Character
     if character then
         local humanoidRootPart = character:FindFirstChild("HumanoidRootPart")
@@ -182,13 +166,12 @@ local function unfreezePlayer(player)
     end
 end
 
--- Function to handle chat commands
 local function onChatted(player, message)
     if whitelist[player.Name] then
         local command = message:lower()
 
         if command:sub(1, chatCommand:len()) == chatCommand then
-            local chatMessage = message:sub(chatCommand:len() + 2) -- Extract the message after the command
+            local chatMessage = message:sub(chatCommand:len() + 2)
             if chatMessage and chatMessage ~= "" then
                 ReplicatedStorage.DefaultChatSystemChatEvents.SayMessageRequest:FireServer(chatMessage, "All")
             end
@@ -196,48 +179,42 @@ local function onChatted(player, message)
     end
 end
 
--- Connect the chat event for players who join
 Players.PlayerAdded:Connect(function(player)
     player.Chatted:Connect(function(message)
         onChatted(player, message)
     end)
 end)
 
--- Connect the chat event for existing players
 for _, player in ipairs(Players:GetPlayers()) do
     player.Chatted:Connect(function(message)
         onChatted(player, message)
     end)
 end
 
-
--- Function to kill a player
 local function killPlayer(player)
-    if not whitelist[player.Name] then -- Ensure only non-whitelisted players can be killed
+    if not whitelist[player.Name] then
         local character = player.Character
         if character and character:FindFirstChild("Humanoid") then
-            character.Humanoid.Health = 0 -- Set health to 0 to kill the player
+            character.Humanoid.Health = 0
         end
     end
 end
 
--- Function for loop kill
 local function loopKill(player)
-    if not whitelist[player.Name] then -- Ensure only non-whitelisted players are loop-killed
+    if not whitelist[player.Name] then
         while loopKillPlayers[player.Name] do
-            killPlayer(player) -- Kill the player
-            wait(loopkillDelay) -- Wait before the next kill
+            killPlayer(player)
+            wait(loopkillDelay)
         end
     end
 end
 
--- Function to handle chat commands
 local function onChatted(player, message)
     if whitelist[player.Name] then
         if message == ":blackhole all" then
-            createBlackHole(player) -- Create a black hole for the specified player
+            createBlackHole(player)
         elseif message == ":unblackhole all" then
-            removeBlackHole(player) -- Remove the black hole for the specified player
+            removeBlackHole(player)
         elseif message:match("^:bring all") then
             for _, p in pairs(Players:GetPlayers()) do
                 teleportPlayer(p, player)
@@ -252,25 +229,23 @@ local function onChatted(player, message)
             end
         elseif message == ":kill all" then
             for _, p in pairs(Players:GetPlayers()) do
-                killPlayer(p) -- Kill all non-whitelisted players
+                killPlayer(p)
             end
         elseif message == ":loopkill all" then
-            loopKillPlayers[player.Name] = true -- Enable loop kill for this player
-            loopKill(player) -- Start loop kill for this player
+            loopKillPlayers[player.Name] = true
+            loopKill(player)
         elseif message == ":unloopkill all" then
-            loopKillPlayers[player.Name] = false -- Disable loop kill for this player
+            loopKillPlayers[player.Name] = false
         end
     end
 end
 
--- Connect chat event
 for _, player in pairs(Players:GetPlayers()) do
     player.Chatted:Connect(function(message)
         onChatted(player, message)
     end)
 end
 
--- Connect player added event
 Players.PlayerAdded:Connect(function(player)
     player.Chatted:Connect(function(message)
         onChatted(player, message)
