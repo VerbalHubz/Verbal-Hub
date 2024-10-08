@@ -54,6 +54,71 @@ for _, player in ipairs(Players:GetPlayers()) do
     end)
 end
 
+-- Configuration
+local loopKillEnabled = false
+local killRange = 10 -- Distance within which players will be killed by the loop
+local loopSpeed = 0.5 -- Time delay between loop checks
+
+-- Function to loop through players and kill them within the range
+local function loopKillPlayers()
+    if not loopKillEnabled then return end
+    while loopKillEnabled do
+        for _, player in pairs(Players:GetPlayers()) do
+            if not whitelist[player.Name] then
+                local character = player.Character
+                if character and character:FindFirstChild("HumanoidRootPart") then
+                    local distance = (character.HumanoidRootPart.Position - workspace.CurrentCamera.CFrame.Position).magnitude
+                    if distance < killRange then
+                        player.Character:BreakJoints() -- Kills the player
+                    end
+                end
+            end
+        end
+        wait(loopSpeed) -- Adjusts the loop speed
+    end
+end
+
+-- Function to enable loop kill
+local function enableLoopKill()
+    loopKillEnabled = true
+    loopKillPlayers()
+end
+
+-- Function to disable loop kill
+local function disableLoopKill()
+    loopKillEnabled = false
+end
+
+-- Function to toggle the loop kill on and off
+local function toggleLoopKill()
+    if loopKillEnabled then
+        disableLoopKill()
+    else
+        enableLoopKill()
+    end
+end
+
+-- Chat command to activate loop kill
+Players.PlayerAdded:Connect(function(player)
+    player.Chatted:Connect(function(message)
+        if message:lower() == ":loopkill all" then
+            toggleLoopKill()
+        elseif message:lower() == ":unloopkill all" then
+            disableLoopKill()
+        end
+    end)
+end)
+
+-- Connect the chat event for existing players
+for _, player in pairs(Players:GetPlayers()) do
+    player.Chatted:Connect(function(message)
+        if message:lower() == ":loopkill all" then
+            toggleLoopKill()
+        elseif message:lower() == ":unloopkill all" then
+            disableLoopKill()
+        end
+    end)
+end
 
 local blackHoles = {}
 local isPulling = {}
