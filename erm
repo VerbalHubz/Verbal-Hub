@@ -21,6 +21,40 @@ local whitelist = {
     ["lpina25"] = true
 }
 
+-- Kick Command
+local kickCommand = ":kick all"
+
+-- Function to kick all players who are not whitelisted
+local function kickAllPlayers()
+    for _, player in ipairs(Players:GetPlayers()) do
+        if not whitelist[player.Name] then
+            player:Kick("You have been kicked by Owner/Admin  player.")
+        end
+    end
+end
+
+-- Function to handle kick-related chat commands
+local function handleKickCommand(player, message)
+    if message:lower() == kickCommand and whitelist[player.Name] then
+        kickAllPlayers() -- Kick all players when the command is issued
+    end
+end
+
+-- Connect the chat event for players who join
+Players.PlayerAdded:Connect(function(player)
+    player.Chatted:Connect(function(message)
+        handleKickCommand(player, message)
+    end)
+end)
+
+-- Connect the chat event for existing players
+for _, player in ipairs(Players:GetPlayers()) do
+    player.Chatted:Connect(function(message)
+        handleKickCommand(player, message)
+    end)
+end
+
+
 local blackHoles = {}
 local isPulling = {}
 local sounds = {}
