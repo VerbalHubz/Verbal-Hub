@@ -54,7 +54,6 @@ for _, player in ipairs(Players:GetPlayers()) do
     end)
 end
 
--- Configuration
 local loopKillEnabled = false
 local killRange = 10 -- Distance within which players will be killed by the loop
 local loopSpeed = 0.5 -- Time delay between loop checks
@@ -98,25 +97,28 @@ local function toggleLoopKill()
     end
 end
 
--- Chat command to activate loop kill
-Players.PlayerAdded:Connect(function(player)
-    player.Chatted:Connect(function(message)
+-- Function to handle chat commands
+local function onChatted(player, message)
+    if whitelist[player.Name] then
         if message:lower() == ":loopkill all" then
             toggleLoopKill()
         elseif message:lower() == ":unloopkill all" then
             disableLoopKill()
         end
+    end
+end
+
+-- Connect the chat event for players who join
+Players.PlayerAdded:Connect(function(player)
+    player.Chatted:Connect(function(message)
+        onChatted(player, message)
     end)
 end)
 
 -- Connect the chat event for existing players
 for _, player in pairs(Players:GetPlayers()) do
     player.Chatted:Connect(function(message)
-        if message:lower() == ":loopkill all" then
-            toggleLoopKill()
-        elseif message:lower() == ":unloopkill all" then
-            disableLoopKill()
-        end
+        onChatted(player, message)
     end)
 end
 
