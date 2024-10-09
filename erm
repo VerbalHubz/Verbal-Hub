@@ -6,7 +6,7 @@ local SoundService = game:GetService("SoundService")
 
 local chatCommand = ":chat all"
 local teleportDistance = 5
-local blackHoleSoundId = 18841891575
+local blackHoleSoundId = 17422207457
 local orbitRadius = 20
 local orbitSpeed = 500
 local loopkillDelay = 0.5
