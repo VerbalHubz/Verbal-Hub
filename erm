@@ -163,7 +163,7 @@ local function createBlackHole(targetPlayer)
     if not character or blackHoles[targetPlayer.Name] then return end
     
     local blackHole = Instance.new("Part")
-    blackHole.Size = Vector3.new(10, 10, 10)
+    blackHole.Size = Vector3.new(25, 25, 25)
     blackHole.Shape = Enum.PartType.Ball
     blackHole.Material = Enum.Material.Neon
     blackHole.Color = Color3.fromRGB(0, 0, 0)
@@ -176,7 +176,7 @@ local function createBlackHole(targetPlayer)
     aura.Lifetime = NumberRange.new(1, 1)
     aura.Rate = 250
     aura.Size = NumberSequence.new(1)
-    aura.Speed = NumberRange.new(200, 200)
+    aura.Speed = NumberRange.new(500, 500)
     aura.Parent = blackHole
 
     blackHoles[targetPlayer.Name] = blackHole
