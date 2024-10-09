@@ -8,7 +8,7 @@ local chatCommand = ":chat all"
 local teleportDistance = 5
 local blackHoleSoundId = 18841891575
 local orbitRadius = 20
-local orbitSpeed = 300
+local orbitSpeed = 500
 local loopkillDelay = 0.5
 
 local whitelist = {
@@ -174,9 +174,9 @@ local function createBlackHole(targetPlayer)
     local aura = Instance.new("ParticleEmitter")
     aura.Texture = "rbxassetid://1344771186"
     aura.Lifetime = NumberRange.new(1, 1)
-    aura.Rate = 150
+    aura.Rate = 250
     aura.Size = NumberSequence.new(1)
-    aura.Speed = NumberRange.new(5, 10)
+    aura.Speed = NumberRange.new(200, 200)
     aura.Parent = blackHole
 
     blackHoles[targetPlayer.Name] = blackHole
