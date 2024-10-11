@@ -6,38 +6,45 @@ local Mouse = LocalPlayer:GetMouse()
 local HttpService = game:GetService("HttpService")
 
 local OrionLib = {
-	Elements = {},
-	ThemeObjects = {},
-	Connections = {},
-	Flags = {},
-	Themes = {
-		Default = {
-			Main = Color3.fromRGB(0, 0, 0),
-			Second = Color3.fromRGB(0, 0, 0),
-			Stroke = Color3.fromRGB(255, 255, 255),
-			Divider = Color3.fromRGB(0, 0, 0), -- Divider color
-			Text = Color3.fromRGB(240, 240, 240),
-			TextDark = Color3.fromRGB(150, 150, 150)
-		}
-	},
-	SelectedTheme = "Default",
-	Folder = nil,
-	SaveCfg = false
+    Elements = {},
+    ThemeObjects = {},
+    Connections = {},
+    Flags = {},
+    Themes = {
+        Default = {
+            Main = Color3.fromRGB(0, 0, 0),
+            Second = Color3.fromRGB(0, 0, 0),
+            Stroke = Color3.fromRGB(255, 255, 255),
+            Divider = Color3.fromRGB(0, 0, 0),
+            DividerTransparency = 0.5,  -- Transparency for the divider
+            Text = Color3.fromRGB(240, 240, 240),
+            TextDark = Color3.fromRGB(150, 150, 150)
+        }
+    },
+    SelectedTheme = "Default",
+    Folder = nil,
+    SaveCfg = false
 }
 
--- Example Divider UI creation with transparency
-local function CreateDivider()
-	local Divider = Instance.new("Frame")
-	Divider.Size = UDim2.new(1, 0, 0, 2)  -- Set appropriate size
-	Divider.BackgroundColor3 = OrionLib.Themes[OrionLib.SelectedTheme].Divider -- Set color from theme
-	Divider.BackgroundTransparency = 0.2 -- Set transparency to 0.5
-	
-	-- Add the divider to your UI container
-	-- Example: Divider.Parent = someUIContainer
+-- Function to apply the divider color and transparency
+function OrionLib:ApplyTheme(element, property)
+    local theme = self.Themes[self.SelectedTheme]
+    
+    if property == "Divider" then
+        element.BackgroundColor3 = theme.Divider  -- Apply the divider color
+        element.BackgroundTransparency = theme.DividerTransparency  -- Apply transparency
+    elseif property == "Main" then
+        element.BackgroundColor3 = theme.Main
+    elseif property == "Second" then
+        element.BackgroundColor3 = theme.Second
+    elseif property == "Stroke" then
+        element.BorderColor3 = theme.Stroke
+    elseif property == "Text" then
+        element.TextColor3 = theme.Text
+    elseif property == "TextDark" then
+        element.TextColor3 = theme.TextDark
+    end
 end
-
--- Call CreateDivider when adding the UI divider
-CreateDivider()
 
 
 --Feather Icons https://github.com/evoincorp/lucideblox/tree/master/src/modules/util - Created by 7kayoh
