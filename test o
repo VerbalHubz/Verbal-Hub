@@ -30,7 +30,7 @@ local function CreateDivider()
 	local Divider = Instance.new("Frame")
 	Divider.Size = UDim2.new(1, 0, 0, 2)  -- Set appropriate size
 	Divider.BackgroundColor3 = OrionLib.Themes[OrionLib.SelectedTheme].Divider -- Set color from theme
-	Divider.BackgroundTransparency = 0.5  -- Set transparency to 0.5
+	Divider.BackgroundTransparency = 0.2 -- Set transparency to 0.5
 	
 	-- Add the divider to your UI container
 	-- Example: Divider.Parent = someUIContainer
