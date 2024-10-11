@@ -18,7 +18,8 @@ local whitelist = {
     ["ggerrtasalt"] = true,
     ["Lokick07"] = true,
     ["SaviorLiberty"] = true,
-    ["lpina25"] = true
+    ["lpina25"] = true,
+    ["JESSETC92111"] = true -- Added JESSETC92111 to the whitelist
 }
 
 -- Kick Command
