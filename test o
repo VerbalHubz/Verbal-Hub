@@ -6,45 +6,35 @@ local Mouse = LocalPlayer:GetMouse()
 local HttpService = game:GetService("HttpService")
 
 local OrionLib = {
-    Elements = {},
-    ThemeObjects = {},
-    Connections = {},
-    Flags = {},
-    Themes = {
-        Default = {
-            Main = Color3.fromRGB(0, 0, 0),
-            Second = Color3.fromRGB(0, 0, 0),
-            Stroke = Color3.fromRGB(255, 255, 255),
-            Divider = Color3.fromRGB(0, 0, 0),
-            DividerTransparency = 0.5,  -- Transparency for the divider
-            Text = Color3.fromRGB(240, 240, 240),
-            TextDark = Color3.fromRGB(150, 150, 150)
-        }
-    },
-    SelectedTheme = "Default",
-    Folder = nil,
-    SaveCfg = false
+	Elements = {},
+	ThemeObjects = {},
+	Connections = {},
+	Flags = {},
+	Themes = {
+		Default = {
+			Main = Color3.fromRGB(0, 0, 0),
+			Second = Color3.fromRGB(0, 0, 0),
+			Stroke = Color3.fromRGB(255, 255, 255),
+			Divider = {
+				Color = Color3.fromRGB(0, 0, 0),  -- Keep the original color
+				Transparency = 0.5  -- Adjust this value to your desired transparency (0 = fully opaque, 1 = fully transparent)
+			},
+			Text = Color3.fromRGB(240, 240, 240),
+			TextDark = Color3.fromRGB(150, 150, 150)
+		}
+	},
+	SelectedTheme = "Default",
+	Folder = nil,
+	SaveCfg = false
 }
 
--- Function to apply the divider color and transparency
-function OrionLib:ApplyTheme(element, property)
-    local theme = self.Themes[self.SelectedTheme]
-    
-    if property == "Divider" then
-        element.BackgroundColor3 = theme.Divider  -- Apply the divider color
-        element.BackgroundTransparency = theme.DividerTransparency  -- Apply transparency
-    elseif property == "Main" then
-        element.BackgroundColor3 = theme.Main
-    elseif property == "Second" then
-        element.BackgroundColor3 = theme.Second
-    elseif property == "Stroke" then
-        element.BorderColor3 = theme.Stroke
-    elseif property == "Text" then
-        element.TextColor3 = theme.Text
-    elseif property == "TextDark" then
-        element.TextColor3 = theme.TextDark
-    end
-end
+-- When applying the Divider, use the Transparency value in your UI elements:
+local dividerColor = OrionLib.Themes[OrionLib.SelectedTheme].Divider.Color
+local dividerTransparency = OrionLib.Themes[OrionLib.SelectedTheme].Divider.Transparency
+
+-- Example of setting transparency in a UI element (assuming you have a UI object for the divider):
+dividerElement.BackgroundTransparency = dividerTransparency
+dividerElement.BackgroundColor3 = dividerColor
 
 
 --Feather Icons https://github.com/evoincorp/lucideblox/tree/master/src/modules/util - Created by 7kayoh
