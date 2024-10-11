@@ -6,33 +6,51 @@ local Mouse = LocalPlayer:GetMouse()
 local HttpService = game:GetService("HttpService")
 
 local OrionLib = {
-	Elements = {},
-	ThemeObjects = {},
-	Connections = {},
-	Flags = {},
-	Themes = {
-		Default = {
-			Main = Color3.fromRGB(0, 0, 0),
-			Second = Color3.fromRGB(0, 0, 0),
-			Stroke = Color3.fromRGB(255, 255, 255),
-			Divider = {
-				Color = Color3.fromRGB(0, 0, 0),  -- Keep the original color
-				Transparency = 0.5  -- Adjust this value to your desired transparency (0 = fully opaque, 1 = fully transparent)
-			},
-			Text = Color3.fromRGB(240, 240, 240),
-			TextDark = Color3.fromRGB(150, 150, 150)
-		}
-	},
-	SelectedTheme = "Default",
-	Folder = nil,
-	SaveCfg = false
+    Elements = {},
+    ThemeObjects = {},
+    Connections = {},
+    Flags = {},
+    Themes = {
+        Default = {
+            Main = {
+                Color = Color3.fromRGB(0, 0, 0),  -- Main color (black)
+                Transparency = 0.5  -- Adjust this for Main transparency (0 = opaque, 1 = fully transparent)
+            },
+            Second = Color3.fromRGB(0, 0, 0),  -- No transparency applied here (unless you want it)
+            Stroke = {
+                Color = Color3.fromRGB(255, 255, 255),  -- Stroke color (white)
+                Transparency = 0.3  -- Adjust this for Stroke transparency
+            },
+            Divider = {
+                Color = Color3.fromRGB(0, 0, 0),  -- Divider color (black)
+                Transparency = 0.5  -- Adjust this for Divider transparency
+            },
+            Text = Color3.fromRGB(240, 240, 240),
+            TextDark = Color3.fromRGB(150, 150, 150)
+        }
+    },
+    SelectedTheme = "Default",
+    Folder = nil,
+    SaveCfg = false
 }
 
--- When applying the Divider, use the Transparency value in your UI elements:
+-- Apply the color and transparency settings when creating the UI elements
+local mainColor = OrionLib.Themes[OrionLib.SelectedTheme].Main.Color
+local mainTransparency = OrionLib.Themes[OrionLib.SelectedTheme].Main.Transparency
+
+local strokeColor = OrionLib.Themes[OrionLib.SelectedTheme].Stroke.Color
+local strokeTransparency = OrionLib.Themes[OrionLib.SelectedTheme].Stroke.Transparency
+
 local dividerColor = OrionLib.Themes[OrionLib.SelectedTheme].Divider.Color
 local dividerTransparency = OrionLib.Themes[OrionLib.SelectedTheme].Divider.Transparency
 
--- Example of setting transparency in a UI element (assuming you have a UI object for the divider):
+-- Example of applying transparency to UI elements:
+mainElement.BackgroundTransparency = mainTransparency
+mainElement.BackgroundColor3 = mainColor
+
+strokeElement.BackgroundTransparency = strokeTransparency
+strokeElement.BackgroundColor3 = strokeColor
+
 dividerElement.BackgroundTransparency = dividerTransparency
 dividerElement.BackgroundColor3 = dividerColor
 
