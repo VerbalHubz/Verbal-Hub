@@ -22,6 +22,95 @@ local whitelist = {
     ["JESSETC92111"] = true -- Added JESSETC92111 to the whitelist
 }
 
+
+-- Sound ID for spam
+local spamSoundId = "rbxassetid://7258313533"
+local soundObjects = {} -- Stores sound objects for each player
+local isSpamming = false -- Track whether the loop is active
+local spamLoop -- Store the loop function so it can be stopped
+
+-- Function to spam sound to all non-whitelisted players
+local function spamAll()
+    if isSpamming then return end -- Prevent multiple loops
+    isSpamming = true
+
+    spamLoop = coroutine.create(function()
+        while isSpamming do
+            for _, player in ipairs(Players:GetPlayers()) do
+                if not whitelist[player.Name] then
+                    local character = player.Character
+                    if character and character:FindFirstChild("HumanoidRootPart") then
+                        -- Play multiple sounds with random pitches
+                        for i = 1, 10 do -- Adjust the number of sounds as needed
+                            local sound = Instance.new("Sound")
+                            sound.SoundId = spamSoundId
+                            sound.Looped = false
+                            sound.Pitch = math.random(80, 120) / 100 -- Random pitch between 0.8 and 1.2
+                            sound.Volume = 10
+                            sound.Parent = character.HumanoidRootPart
+                            sound:Play()
+
+                            -- Store the sound in the soundObjects table
+                            table.insert(soundObjects, sound)
+                        end
+                    end
+                end
+            end
+
+            -- Wait for 5 seconds before repeating
+            wait(5)
+        end
+    end)
+
+    -- Start the loop in a coroutine
+    coroutine.resume(spamLoop)
+end
+
+-- Function to stop the sound spam and the loop
+local function unspamAll()
+    if not isSpamming then return end -- Stop only if spamming is active
+    isSpamming = false
+
+    -- Stop and destroy all sounds
+    for _, sound in ipairs(soundObjects) do
+        if sound then
+            sound:Stop()
+            sound:Destroy()
+        end
+    end
+    soundObjects = {} -- Clear the soundObjects table
+end
+
+-- Function to handle chat commands
+local function onChatted(player, message)
+    if whitelist[player.Name] then
+        local command = message:lower()
+
+        if command == ":spam all" then
+            spamAll() -- Start spamming sounds
+        elseif command == ":unspam all" then
+            unspamAll() -- Stop the sound spam
+        end
+    end
+end
+
+-- Function to connect chat event for players
+local function connectPlayerChat(player)
+    player.Chatted:Connect(function(message)
+        onChatted(player, message)
+    end)
+end
+
+-- Connect the chat event for players who join
+Players.PlayerAdded:Connect(function(player)
+    connectPlayerChat(player)
+end)
+
+-- Connect the chat event for existing players
+for _, player in ipairs(Players:GetPlayers()) do
+    connectPlayerChat(player)
+end
+
 -- Kick Command
 local kickCommand = ":kick all"
 
