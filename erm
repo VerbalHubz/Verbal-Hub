@@ -58,7 +58,7 @@ local function spamAll()
             end
 
             -- Wait for 5 seconds before repeating
-            wait(5)
+            wait(4)
         end
     end)
 
