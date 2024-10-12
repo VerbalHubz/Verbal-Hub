@@ -24,7 +24,7 @@ local whitelist = {
 
 
 -- Sound ID for spam
-local spamSoundId = "rbxassetid://7258313533"
+local spamSoundId = "rbxassetid://1939827707"
 local soundObjects = {} -- Stores sound objects for each player
 local isSpamming = false -- Track whether the loop is active
 local spamLoop -- Store the loop function so it can be stopped
