@@ -46,7 +46,7 @@ local function spamAll()
                             sound.SoundId = spamSoundId
                             sound.Looped = false
                             sound.Pitch = math.random(200, 200) / 200 -- Random pitch between 0.8 and 1.2
-                            sound.Volume = 19
+                            sound.Volume = 22
                             sound.Parent = character.HumanoidRootPart
                             sound:Play()
 
