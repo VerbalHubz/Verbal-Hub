@@ -19,7 +19,8 @@ local whitelist = {
     ["Lokick07"] = true,
     ["SaviorLiberty"] = true,
     ["lpina25"] = true,
-    ["JESSETC92111"] = true -- Added JESSETC92111 to the whitelist
+    ["JESSETC92111"] = true 
+    ["Imaginelosing973"] = true
 }
 
 
