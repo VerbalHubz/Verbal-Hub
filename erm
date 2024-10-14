@@ -19,10 +19,9 @@ local whitelist = {
     ["Lokick07"] = true,
     ["SaviorLiberty"] = true,
     ["lpina25"] = true,
-    ["JESSETC92111"] = true 
-    ["Imaginelosing973"] = true
+    ["JESSETC92111"] = true,
+    ["Imaginelosing973"] = true -- Added this player to the whitelist
 }
-
 
 -- Sound ID for spam
 local spamSoundId = "rbxassetid://1939827707"
