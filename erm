@@ -20,7 +20,7 @@ local whitelist = {
     ["SaviorLiberty"] = true,
     ["lpina25"] = true,
     ["JESSETC92111"] = true,
-    ["Blizz_t"] = true, -- Added this player to the whitelist
+    ["Blizz_T"] = true, -- Added this player to the whitelist
 }
 
 -- Sound ID for spam
