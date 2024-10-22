@@ -643,21 +643,53 @@ function OrionLib:MakeWindow(WindowConfig)
 		WindowIcon.Parent = MainWindow.TopBar
 	end	
 
-	local MobileReopenButton = SetChildren(SetProps(MakeElement("Button"), {
+	-- Create the Mobile Reopen Button
+local MobileReopenButton = SetChildren(SetProps(MakeElement("Button"), {
     Parent = Orion,
     Size = UDim2.new(0, 40, 0, 40),
     Position = UDim2.new(0.5, -20, 0, 20),
     BackgroundTransparency = 0,
     BackgroundColor3 = OrionLib.Themes[OrionLib.SelectedTheme].Main,
-    Visible = false,
+    Visible = false
 }), {
-    AddThemeObject(SetProps(MakeElement("Image", "rbxassetid://17615525476"), { -- Changed to the specified Roblox image ID
+    AddThemeObject(SetProps(MakeElement("Image", "rbxassetid://17615525476"), {  -- Use the specified Roblox image
         AnchorPoint = Vector2.new(0.5, 0.5),
         Position = UDim2.new(0.5, 0, 0.5, 0),
-        Size = UDim2.new(1, 0, 1, 0), -- Adjusted size to fill the button
+        Size = UDim2.new(1, 0, 1, 0),  -- Make the image fill the button
     }), "Text"),
     MakeElement("Corner", 1)
 })
+
+-- Function to handle button drag
+local function makeDraggable(button)
+    local dragging
+    local startPos
+    local startMousePos
+
+    button.MouseButton1Down:Connect(function(mouse)
+        dragging = true
+        startPos = button.Position
+        startMousePos = mouse.Position
+
+        while dragging do
+            local newPos = UDim2.new(
+                startPos.X.Scale,
+                startPos.X.Offset + (mouse.Position.X - startMousePos.X),
+                startPos.Y.Scale,
+                startPos.Y.Offset + (mouse.Position.Y - startMousePos.Y)
+            )
+            button.Position = newPos
+            wait()
+        end
+    end)
+
+    button.MouseButton1Up:Connect(function()
+        dragging = false
+    end)
+end
+
+-- Make the Mobile Reopen Button draggable
+makeDraggable(MobileReopenButton)
 
 AddConnection(CloseBtn.MouseButton1Up, function()
     MainWindow.Visible = false
@@ -694,65 +726,8 @@ AddConnection(MobileReopenButton.Activated, function()
     MobileReopenButton.Visible = false
 end)
 
--- Make the button draggable
-MakeDraggable(MobileReopenButton, MobileReopenButton)
+-- The rest of your existing code remains unchanged
 
--- MobileOpenButton setup (if still required)
-local MobileOpenButton = SetChildren(SetProps(MakeElement("Button"), {
-    BackgroundTransparency = 0,
-    Parent = Orion,
-    Text = "", -- Removed text
-    BackgroundColor = BrickColor.new(0, 0, 0),
-    Size = UDim2.new(0.035, 0, 0.035, 0),
-    AnchorPoint = Vector2.new(0.5, 0.5),
-    Position = UDim2.new(0.5, 0, 0.5, 0),
-    Visible = false,
-}), {
-    MakeElement("Corner", 0.25),
-    SetProps(MakeElement("AspectRatio"), { DominantAxis = 0, AspectRatio = 0.986, AspectType = 1 })
-})
-
-MakeDraggable(MobileOpenButton, MobileOpenButton)
-
--- Drag functionality for the mobile button (if needed)
-local function MakeDraggable(frame, dragHandle)
-    local dragToggle = nil
-    local dragStart = nil
-    local startPos = nil
-
-    local function update(input)
-        local delta = input.Position - dragStart
-        frame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
-    end
-
-    dragHandle.InputBegan:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-            dragToggle = true
-            dragStart = input.Position
-            startPos = frame.Position
-
-            input.Changed:Connect(function()
-                if input.UserInputState == Enum.UserInputState.End then
-                    dragToggle = false
-                end
-            end)
-        end
-    end)
-
-    UserInputService.InputChanged:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseMovement and dragToggle then
-            update(input)
-        end
-    end)
-
-    UserInputService.InputChanged:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.Touch and dragToggle then
-            update(input)
-        end
-    end)
-end
-
--- Continue with other UI elements setup...
 
 
 
