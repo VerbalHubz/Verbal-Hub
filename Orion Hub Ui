@@ -14,7 +14,7 @@ local OrionLib = {
 		Default = {
 			Main = Color3.fromRGB(0, 0, 0),
 			Second = Color3.fromRGB(0, 0, 0),
-			Stroke = Color3.fromRGB(0, 100, 0),
+			Stroke = Color3.fromRGB(0, 255, 0),
 			Divider = Color3.fromRGB(0, 0, 0),
 			Text = Color3.fromRGB(0, 255, 255),
 			TextDark = Color3.fromRGB(0, 255, 255)
@@ -678,35 +678,47 @@ function MakeDraggable(Frame, Button)
     end)
 end
 
--- Create the MobileReopenButton with image
+local UserInputService = game:GetService("UserInputService")
+local TweenService = game:GetService("TweenService")
+
+-- MobileReopenButton with Roblox image 17615525476
 local MobileReopenButton = SetChildren(SetProps(MakeElement("Button"), {
-	Parent = Orion,
-	Size = UDim2.new(0, 40, 0, 40),
-	Position = UDim2.new(0.5, -20, 0, 20),
-	BackgroundTransparency = 0,
-	BackgroundColor3 = OrionLib.Themes[OrionLib.SelectedTheme].Main,
-	Visible = false
+    Parent = Orion,
+    Size = UDim2.new(0, 40, 0, 40),
+    Position = UDim2.new(0.5, -20, 0, 20),  -- Original position
+    BackgroundTransparency = 0,
+    BackgroundColor3 = OrionLib.Themes[OrionLib.SelectedTheme].Main,
+    Visible = false,
+    AnchorPoint = Vector2.new(0.5, 0.5)
 }), {
-	-- Replace "Open" with Image
-	AddThemeObject(SetProps(MakeElement("Image", "rbxassetid://17615525476"), {
-		AnchorPoint = Vector2.new(0.5, 0.5),
-		Position = UDim2.new(0.5, 0, 0.5, 0),
-		Size = UDim2.new(0.7, 0, 0.7, 0),
-	}), "Text"),
-	MakeElement("Corner", 1)
+    AddThemeObject(SetProps(MakeElement("Image", "rbxassetid://17615525476"), {
+        AnchorPoint = Vector2.new(0.5, 0.5),
+        Position = UDim2.new(0.5, 0, 0.5, 0),
+        Size = UDim2.new(0.7, 0, 0.7, 0)
+    }), "Text"),
+    MakeElement("Corner", 1)
 })
 
--- Add dragging functionality
-function MakeDraggable(guiObject)
-    local dragging = false
-    local dragInput, mousePos, framePos
+-- Smooth drag function for MobileReopenButton
+local function MakeDraggable(button)
+    local dragging
+    local dragStart
+    local startPos
 
-    guiObject.InputBegan:Connect(function(input)
+    local function update(input)
+        local delta = input.Position - dragStart
+        local newPosition = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+
+        -- Tween for smooth movement
+        TweenService:Create(button, TweenInfo.new(0.2), {Position = newPosition}):Play()
+    end
+
+    button.InputBegan:Connect(function(input)
         if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
             dragging = true
-            mousePos = input.Position
-            framePos = guiObject.Position
-            
+            dragStart = input.Position
+            startPos = button.Position
+
             input.Changed:Connect(function()
                 if input.UserInputState == Enum.UserInputState.End then
                     dragging = false
@@ -715,34 +727,30 @@ function MakeDraggable(guiObject)
         end
     end)
 
-    guiObject.InputChanged:Connect(function(input)
+    UserInputService.InputChanged:Connect(function(input)
         if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
-            local delta = input.Position - mousePos
-            guiObject.Position = UDim2.new(framePos.X.Scale, framePos.X.Offset + delta.X, framePos.Y.Scale, framePos.Y.Offset + delta.Y)
+            update(input)
         end
     end)
 end
 
--- Make the MobileReopenButton draggable
+-- Apply draggable functionality to the button
 MakeDraggable(MobileReopenButton)
 
--- Toggle to hide and show the main window
+-- Close button function
 AddConnection(CloseBtn.MouseButton1Up, function()
-	MainWindow.Visible = false
-	MobileReopenButton.Visible = true
-	UIHidden = true
-	OrionLib:MakeNotification({
-		Name = "Interface Hidden",
-		Content = "Tap the open button to reopen the interface. Or press Key M to toggle.",
-		Time = 5
-	})
-	WindowConfig.CloseCallback()
+    MainWindow.Visible = false
+    MobileReopenButton.Visible = true
+    UIHidden = true
+    OrionLib:MakeNotification({
+        Name = "Interface Hidden",
+        Content = "Tap the open button to reopen the interface. Or Press Key M To Close Or Open",
+        Time = 5
+    })
+    WindowConfig.CloseCallback()
 end)
 
--- Track UI visibility state
-local UIHidden = true
-
--- Handle key toggle for 'M'
+-- Toggle interface visibility with 'M' key
 AddConnection(UserInputService.InputBegan, function(Input)
     if Input.KeyCode == Enum.KeyCode.M then
         if UIHidden then
@@ -757,12 +765,11 @@ AddConnection(UserInputService.InputBegan, function(Input)
     end
 end)
 
--- Button activation functionality
+-- Toggle the UI by clicking the MobileReopenButton
 AddConnection(MobileReopenButton.Activated, function()
-	MainWindow.Visible = true
-	MobileReopenButton.Visible = false
+    MainWindow.Visible = true
+    MobileReopenButton.Visible = false
 end)
-
 
 
 	AddConnection(MinimizeBtn.MouseButton1Up, function()
