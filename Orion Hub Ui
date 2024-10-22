@@ -643,10 +643,7 @@ function OrionLib:MakeWindow(WindowConfig)
 		WindowIcon.Parent = MainWindow.TopBar
 	end	
 
-	local UserInputService = game:GetService("UserInputService")
-local UserInputService = game:GetService("UserInputService")
-
-local MobileReopenButton = SetChildren(SetProps(MakeElement("Button"), {
+	local MobileReopenButton = SetChildren(SetProps(MakeElement("Button"), {
     Parent = Orion,
     Size = UDim2.new(0, 40, 0, 40),
     Position = UDim2.new(0.5, -20, 0, 20),
@@ -654,23 +651,23 @@ local MobileReopenButton = SetChildren(SetProps(MakeElement("Button"), {
     BackgroundColor3 = OrionLib.Themes[OrionLib.SelectedTheme].Main,
     Visible = false
 }), {
-    AddThemeObject(SetProps(MakeElement("Image", "rbxassetid://17615525476"), {
+    AddThemeObject(SetProps(MakeElement("Image", "rbxassetid://17615525476"), {  -- Updated to use the specified image ID
         AnchorPoint = Vector2.new(0.5, 0.5),
         Position = UDim2.new(0.5, 0, 0.5, 0),
-        Size = UDim2.new(1, 0, 1, 0),
+        Size = UDim2.new(1, 0, 1, 0),  -- Make the image fill the button
     }), "Text"),
     MakeElement("Corner", 1)
 })
 
--- Draggable functionality
-local dragging
-local dragInput
-local startPos
-local function makeDraggable(button)
+-- Function to make the button draggable
+local function MakeDraggable(button)
+    local dragging, startPos, startMousePos
+
     button.InputBegan:Connect(function(input)
         if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
             dragging = true
-            startPos = input.Position - button.Position
+            startMousePos = input.Position
+            startPos = button.Position
 
             input.Changed:Connect(function()
                 if input.UserInputState == Enum.UserInputState.End then
@@ -680,14 +677,22 @@ local function makeDraggable(button)
         end
     end)
 
-    UserInputService.InputChanged:Connect(function(input)
-        if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
-            button.Position = UDim2.new(0, input.Position.X - startPos.X, 0, input.Position.Y - startPos.Y)
+    button.InputChanged:Connect(function(input)
+        if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
+            local delta = input.Position - startMousePos
+            button.Position = startPos + UDim2.new(0, delta.X, 0, delta.Y)
+        end
+    end)
+
+    button.InputChanged:Connect(function(input)
+        if dragging and input.UserInputType == Enum.UserInputType.Touch then
+            local delta = input.Position - startMousePos
+            button.Position = startPos + UDim2.new(0, delta.X, 0, delta.Y)
         end
     end)
 end
 
-makeDraggable(MobileReopenButton)
+MakeDraggable(MobileReopenButton)
 
 AddConnection(CloseBtn.MouseButton1Up, function()
     MainWindow.Visible = false
@@ -723,6 +728,10 @@ AddConnection(MobileReopenButton.Activated, function()
     MainWindow.Visible = true
     MobileReopenButton.Visible = false
 end)
+
+-- Ensure the MobileOpenButton is draggable as well
+MakeDraggable(MobileOpenButton)
+
 
 
 	AddConnection(MinimizeBtn.MouseButton1Up, function()
