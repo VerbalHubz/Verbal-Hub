@@ -643,8 +643,7 @@ function OrionLib:MakeWindow(WindowConfig)
 		WindowIcon.Parent = MainWindow.TopBar
 	end	
 
-	-- Create the Mobile Reopen Button
-local MobileReopenButton = SetChildren(SetProps(MakeElement("Button"), {
+	local MobileReopenButton = SetChildren(SetProps(MakeElement("Button"), {
     Parent = Orion,
     Size = UDim2.new(0, 40, 0, 40),
     Position = UDim2.new(0.5, -20, 0, 20),
@@ -652,45 +651,51 @@ local MobileReopenButton = SetChildren(SetProps(MakeElement("Button"), {
     BackgroundColor3 = OrionLib.Themes[OrionLib.SelectedTheme].Main,
     Visible = false
 }), {
-    AddThemeObject(SetProps(MakeElement("Image", "rbxassetid://17615525476"), {  -- Use the specified Roblox image
+    AddThemeObject(SetProps(MakeElement("Image", "rbxassetid://17615525476"), { -- Changed to your specified asset ID
         AnchorPoint = Vector2.new(0.5, 0.5),
         Position = UDim2.new(0.5, 0, 0.5, 0),
-        Size = UDim2.new(1, 0, 1, 0),  -- Make the image fill the button
+        Size = UDim2.new(1, 0, 1, 0), -- Adjusted size to fill button
     }), "Text"),
     MakeElement("Corner", 1)
 })
 
--- Function to handle button drag
-local function makeDraggable(button)
-    local dragging
-    local startPos
-    local startMousePos
+local function MakeDraggable(Frame)
+    local UserInputService = game:GetService("UserInputService")
+    local dragging, dragInput, startPos
 
-    button.MouseButton1Down:Connect(function(mouse)
-        dragging = true
-        startPos = button.Position
-        startMousePos = mouse.Position
+    Frame.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+            dragging = true
+            startPos = input.Position
 
-        while dragging do
-            local newPos = UDim2.new(
-                startPos.X.Scale,
-                startPos.X.Offset + (mouse.Position.X - startMousePos.X),
-                startPos.Y.Scale,
-                startPos.Y.Offset + (mouse.Position.Y - startMousePos.Y)
-            )
-            button.Position = newPos
-            wait()
+            dragInput = input.Changed:Connect(function()
+                if input.UserInputState == Enum.UserInputState.End then
+                    dragging = false
+                    dragInput:Disconnect()
+                end
+            end)
         end
     end)
 
-    button.MouseButton1Up:Connect(function()
-        dragging = false
+    Frame.InputChanged:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseMovement and dragging then
+            local delta = input.Position - startPos
+            Frame.Position = UDim2.new(Frame.Position.X.Scale, Frame.Position.X.Offset + delta.X, Frame.Position.Y.Scale, Frame.Position.Y.Offset + delta.Y)
+            startPos = input.Position
+        end
+    end)
+
+    -- Mobile Touch
+    Frame.TouchTap:Connect(function(touch)
+        if dragging then
+            local delta = touch.Position - startPos
+            Frame.Position = UDim2.new(Frame.Position.X.Scale, Frame.Position.X.Offset + delta.X, Frame.Position.Y.Scale, Frame.Position.Y.Offset + delta.Y)
+            startPos = touch.Position
+        end
     end)
 end
 
--- Make the Mobile Reopen Button draggable
-makeDraggable(MobileReopenButton)
-
+-- Connect the button functions as before
 AddConnection(CloseBtn.MouseButton1Up, function()
     MainWindow.Visible = false
     MobileReopenButton.Visible = true
@@ -703,10 +708,8 @@ AddConnection(CloseBtn.MouseButton1Up, function()
     WindowConfig.CloseCallback()
 end)
 
--- Variable to track whether the UI is hidden or not
 local UIHidden = true
 
--- Function to handle the toggle with the "M" key
 AddConnection(UserInputService.InputBegan, function(Input)
     if Input.KeyCode == Enum.KeyCode.M then
         if UIHidden then
@@ -726,7 +729,7 @@ AddConnection(MobileReopenButton.Activated, function()
     MobileReopenButton.Visible = false
 end)
 
--- The rest of your existing code remains unchanged
+MakeDraggable(MobileReopenButton) -- Make the button draggable
 
 
 
