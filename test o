@@ -642,244 +642,129 @@ function OrionLib:MakeWindow(WindowConfig)
 		})
 		WindowIcon.Parent = MainWindow.TopBar
 	end	
- local MobileOpenButton = SetChildren(SetProps(MakeElement("Button"), 
-	
-	{
-		BackgroundTransparency = 0, 
-		Parent = Orion, 
-		Text =  "Open",
-		TextScaled = true,
-		TextSize = 14,
-		TextColor3 = Color3.new(0, 0, 0),
-		BackgroundColor = BrickColor.new(0, 0, 0),
-		TextStrokeColor3 = Color3.new(255, 255, 255),
-		TextStrokeTransparency = 0,
-		Size = UDim2.new(0.035, 0, 0.035, 0),
-		AnchorPoint = Vector2.new(0.5, 0.5),
-		Position = UDim2.new(0.5, 0, 0.5, 0), 
-		Visible = false, 
-		Font = Enum.Font.GothamBold
-	}), {MakeElement("Corner", 0.25), SetProps(MakeElement("AspectRatio"), {DominantAxis = 0, AspectRatio = 0.986, AspectType = 1})})
-
-	MakeDraggable(MobileOpenButton, MobileOpenButton)
-
-
-	local TabHolder = AddThemeObject(SetChildren(SetProps(MakeElement("ScrollFrame", Color3.fromRGB(255, 255, 255), 4), {
-		Size = UDim2.new(1, 0, 1, -50)
-	}), {
-		MakeElement("List"),
-		MakeElement("Padding", 8, 0, 0, 8)
-	}), "Divider")
-
-	AddConnection(TabHolder.UIListLayout:GetPropertyChangedSignal("AbsoluteContentSize"), function()
-		TabHolder.CanvasSize = UDim2.new(0, 0, 0, TabHolder.UIListLayout.AbsoluteContentSize.Y + 16)
-	end)
-
-	local CloseBtn = SetChildren(SetProps(MakeElement("Button"), {
-		Size = UDim2.new(0.5, 0, 1, 0),
-		Position = UDim2.new(0.5, 0, 0, 0),
-		BackgroundTransparency = 1
-	}), {
-		AddThemeObject(SetProps(MakeElement("Image", "rbxassetid://7072725342"), {
-			Position = UDim2.new(0, 9, 0, 6),
-			Size = UDim2.new(0, 18, 0, 18)
-		}), "Text")
-	})
-
-	local MinimizeBtn = SetChildren(SetProps(MakeElement("Button"), {
-		Size = UDim2.new(0.5, 0, 1, 0),
-		BackgroundTransparency = 1
-	}), {
-		AddThemeObject(SetProps(MakeElement("Image", "rbxassetid://7072719338"), {
-			Position = UDim2.new(0, 9, 0, 6),
-			Size = UDim2.new(0, 18, 0, 18),
-			Name = "Ico"
-		}), "Text")
-	})
-
-	local DragPoint = SetProps(MakeElement("TFrame"), {
-		Size = UDim2.new(1, 0, 0, 50)
-	})
-
-	local WindowStuff = AddThemeObject(SetChildren(SetProps(MakeElement("RoundFrame", Color3.fromRGB(255, 255, 255), 0, 10), {
-		Size = UDim2.new(0, 150, 1, -50),
-		Position = UDim2.new(0, 0, 0, 50)
-	}), {
-		AddThemeObject(SetProps(MakeElement("Frame"), {
-			Size = UDim2.new(1, 0, 0, 10),
-			Position = UDim2.new(0, 0, 0, 0)
-		}), "Second"), 
-		AddThemeObject(SetProps(MakeElement("Frame"), {
-			Size = UDim2.new(0, 10, 1, 0),
-			Position = UDim2.new(1, -10, 0, 0)
-		}), "Second"), 
-		AddThemeObject(SetProps(MakeElement("Frame"), {
-			Size = UDim2.new(0, 1, 1, 0),
-			Position = UDim2.new(1, -1, 0, 0)
-		}), "Stroke"), 
-		TabHolder,
-		SetChildren(SetProps(MakeElement("TFrame"), {
-			Size = UDim2.new(1, 0, 0, 50),
-			Position = UDim2.new(0, 0, 1, -50)
-		}), {
-			AddThemeObject(SetProps(MakeElement("Frame"), {
-				Size = UDim2.new(1, 0, 0, 1)
-			}), "Stroke"), 
-			AddThemeObject(SetChildren(SetProps(MakeElement("Frame"), {
-				AnchorPoint = Vector2.new(0, 0.5),
-				Size = UDim2.new(0, 32, 0, 32),
-				Position = UDim2.new(0, 10, 0.5, 0)
-			}), {
-				SetProps(MakeElement("Image", "https://www.roblox.com/headshot-thumbnail/image?userId=".. LocalPlayer.UserId .."&width=420&height=420&format=png"), {
-					Size = UDim2.new(1, 0, 1, 0)
-				}),
-				AddThemeObject(SetProps(MakeElement("Image", "rbxassetid://4031889928"), {
-					Size = UDim2.new(1, 0, 1, 0),
-				}), "Second"),
-				MakeElement("Corner", 1)
-			}), "Divider"),
-			SetChildren(SetProps(MakeElement("TFrame"), {
-				AnchorPoint = Vector2.new(0, 0.5),
-				Size = UDim2.new(0, 32, 0, 32),
-				Position = UDim2.new(0, 10, 0.5, 0)
-			}), {
-				AddThemeObject(MakeElement("Stroke"), "Stroke"),
-				MakeElement("Corner", 1)
-			}),
-			AddThemeObject(SetProps(MakeElement("Label", LocalPlayer.DisplayName, WindowConfig.HidePremium and 14 or 13), {
-				Size = UDim2.new(1, -60, 0, 13),
-				Position = WindowConfig.HidePremium and UDim2.new(0, 50, 0, 19) or UDim2.new(0, 50, 0, 12),
-				Font = Enum.Font.GothamBold,
-				ClipsDescendants = true
-			}), "Text"),
-			AddThemeObject(SetProps(MakeElement("Label", "", 12), {
-				Size = UDim2.new(1, -60, 0, 12),
-				Position = UDim2.new(0, 50, 1, -25),
-				Visible = not WindowConfig.HidePremium
-			}), "TextDark")
-		}),
-	}), "Second")
-
-	local WindowName = AddThemeObject(SetProps(MakeElement("Label", WindowConfig.Name, 14), {
-		Size = UDim2.new(1, -30, 2, 0),
-		Position = UDim2.new(0, 25, 0, -24),
-		Font = Enum.Font.GothamBlack,
-		TextSize = 20
-	}), "Text")
-
-	local WindowTopBarLine = AddThemeObject(SetProps(MakeElement("Frame"), {
-		Size = UDim2.new(1, 0, 0, 1),
-		Position = UDim2.new(0, 0, 1, -1)
-	}), "Stroke")
-
-	local MainWindow = AddThemeObject(SetChildren(SetProps(MakeElement("RoundFrame", Color3.fromRGB(255, 255, 255), 0, 10), {
-		Parent = Orion,
-		Position = UDim2.new(0.5, -307, 0.5, -172),
-		Size = UDim2.new(0, 615, 0, 344),
-		ClipsDescendants = true
-	}), {
-		--SetProps(MakeElement("Image", "rbxassetid://3523728077"), {
-		--	AnchorPoint = Vector2.new(0.5, 0.5),
-		--	Position = UDim2.new(0.5, 0, 0.5, 0),
-		--	Size = UDim2.new(1, 80, 1, 320),
-		--	ImageColor3 = Color3.fromRGB(33, 33, 33),
-		--	ImageTransparency = 0.7
-		--}),
-		SetChildren(SetProps(MakeElement("TFrame"), {
-			Size = UDim2.new(1, 0, 0, 50),
-			Name = "TopBar"
-		}), {
-			WindowName,
-			WindowTopBarLine,
-			AddThemeObject(SetChildren(SetProps(MakeElement("RoundFrame", Color3.fromRGB(255, 255, 255), 0, 7), {
-				Size = UDim2.new(0, 70, 0, 30),
-				Position = UDim2.new(1, -90, 0, 10)
-			}), {
-				AddThemeObject(MakeElement("Stroke"), "Stroke"),
-				AddThemeObject(SetProps(MakeElement("Frame"), {
-					Size = UDim2.new(0, 1, 1, 0),
-					Position = UDim2.new(0.5, 0, 0, 0)
-				}), "Stroke"), 
-				CloseBtn,
-				MinimizeBtn
-			}), "Second"), 
-		}),
-		DragPoint,
-		WindowStuff
-	}), "Main")
-
-	if WindowConfig.ShowIcon then
-		WindowName.Position = UDim2.new(0, 50, 0, -24)
-		local WindowIcon = SetProps(MakeElement("Image", WindowConfig.Icon), {
-			Size = UDim2.new(0, 20, 0, 20),
-			Position = UDim2.new(0, 25, 0, 15)
-		})
-		WindowIcon.Parent = MainWindow.TopBar
-	end	
 
 	MakeDraggable(DragPoint, MainWindow)
 
-	AddConnection(MobileOpenButton.MouseButton1Click, function() 
-		MobileOpenButton.Visible = false
-		MainWindow.Visible = true
-		UIHidden = false
-	end)
+-- Function to make any UI element draggable
+function MakeDraggable(Frame, Button)
+    local dragging = false
+    local dragInput, mousePos, framePos
 
-	local function showMobileOpenButton()
-		if UserInputService.TouchEnabled and not UserInputService.KeyboardEnabled then
-			if UIHidden then
-				MobileOpenButton.Visible = true
-			else
-				OpenButton.Visible = false
-			end
-		end
-	end
+    Button.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 then
+            dragging = true
+            mousePos = input.Position
+            framePos = Frame.Position
 
-	AddConnection(CloseBtn.MouseButton1Up, function()
-		MainWindow.Visible = false
-		UIHidden = true
-		
-		if WindowConfig.FreeMouse then
-			UnlockMouse(false)
-		end
-		
-		OrionLib:MakeNotification({
-			Name = "Interface Hidden",
-			Content = "Tap "  .. WindowConfig.KeyToOpenWindow .. " to reopen the interface",
-			Time = 3
-		})
+            input.Changed:Connect(function()
+                if input.UserInputState == Enum.UserInputState.End then
+                    dragging = false
+                end
+            end)
+        end
+    end)
 
-		showMobileOpenButton()
-		WindowConfig.CloseCallback()
-	end)
+    Button.InputChanged:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseMovement then
+            dragInput = input
+        end
+    end)
 
-	AddConnection(UserInputService.InputBegan, function(Input, Focus)
-		if not Focus then
-			if Input.KeyCode == Enum.KeyCode[WindowConfig.KeyToOpenWindow] and UIHidden then
-				MainWindow.Visible = true
-				UIHidden = false
-				if WindowConfig.FreeMouse then
-					UnlockMouse(true)
-				end
+    UserInputService.InputChanged:Connect(function(input)
+        if input == dragInput and dragging then
+            local delta = input.Position - mousePos
+            Frame.Position = UDim2.new(framePos.X.Scale, framePos.X.Offset + delta.X, framePos.Y.Scale, framePos.Y.Offset + delta.Y)
+        end
+    end)
+end
 
-				showMobileOpenButton()
-			elseif Input.KeyCode == Enum.KeyCode[WindowConfig.KeyToOpenWindow] and not UIHidden then
-				MainWindow.Visible = false
-				UIHidden = true
+-- Create the MobileReopenButton with image
+local MobileReopenButton = SetChildren(SetProps(MakeElement("Button"), {
+	Parent = Orion,
+	Size = UDim2.new(0, 40, 0, 40),
+	Position = UDim2.new(0.5, -20, 0, 20),
+	BackgroundTransparency = 0,
+	BackgroundColor3 = OrionLib.Themes[OrionLib.SelectedTheme].Main,
+	Visible = false
+}), {
+	-- Replace "Open" with Image
+	AddThemeObject(SetProps(MakeElement("Image", "rbxassetid://17615525476"), {
+		AnchorPoint = Vector2.new(0.5, 0.5),
+		Position = UDim2.new(0.5, 0, 0.5, 0),
+		Size = UDim2.new(0.7, 0, 0.7, 0),
+	}), "Text"),
+	MakeElement("Corner", 1)
+})
 
-				if WindowConfig.FreeMouse then
-					UnlockMouse(false)
-				end
-				OrionLib:MakeNotification({
-					Name = "Interface Hidden",
-					Content = "Tap "  .. WindowConfig.KeyToOpenWindow .. " to reopen the interface",
-					Time = 3
-				})
+-- Add dragging functionality
+function MakeDraggable(guiObject)
+    local dragging = false
+    local dragInput, mousePos, framePos
 
-				showMobileOpenButton()
-			end
-		end
-	end)
+    guiObject.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+            dragging = true
+            mousePos = input.Position
+            framePos = guiObject.Position
+            
+            input.Changed:Connect(function()
+                if input.UserInputState == Enum.UserInputState.End then
+                    dragging = false
+                end
+            end)
+        end
+    end)
+
+    guiObject.InputChanged:Connect(function(input)
+        if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
+            local delta = input.Position - mousePos
+            guiObject.Position = UDim2.new(framePos.X.Scale, framePos.X.Offset + delta.X, framePos.Y.Scale, framePos.Y.Offset + delta.Y)
+        end
+    end)
+end
+
+-- Make the MobileReopenButton draggable
+MakeDraggable(MobileReopenButton)
+
+-- Toggle to hide and show the main window
+AddConnection(CloseBtn.MouseButton1Up, function()
+	MainWindow.Visible = false
+	MobileReopenButton.Visible = true
+	UIHidden = true
+	OrionLib:MakeNotification({
+		Name = "Interface Hidden",
+		Content = "Tap the open button to reopen the interface. Or press Key M to toggle.",
+		Time = 5
+	})
+	WindowConfig.CloseCallback()
+end)
+
+-- Track UI visibility state
+local UIHidden = true
+
+-- Handle key toggle for 'M'
+AddConnection(UserInputService.InputBegan, function(Input)
+    if Input.KeyCode == Enum.KeyCode.M then
+        if UIHidden then
+            MainWindow.Visible = true
+            MobileReopenButton.Visible = false
+            UIHidden = false
+        else
+            MainWindow.Visible = false
+            MobileReopenButton.Visible = true
+            UIHidden = true
+        end
+    end
+end)
+
+-- Button activation functionality
+AddConnection(MobileReopenButton.Activated, function()
+	MainWindow.Visible = true
+	MobileReopenButton.Visible = false
+end)
+
+
+
 	AddConnection(MinimizeBtn.MouseButton1Up, function()
 		if Minimized then
 			TweenService:Create(MainWindow, TweenInfo.new(0.5, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {Size = UDim2.new(0, 615, 0, 344)}):Play()
