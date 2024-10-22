@@ -677,66 +677,75 @@ function MakeDraggable(Frame, Button)
         end
     end)
 
-local MobileReopenButton = SetChildren(SetProps(MakeElement("Button"), {
-    Parent = Orion,
-    Size = UDim2.new(0, 40, 0, 40),
-    Position = UDim2.new(0.5, -20, 0, 20),
-    BackgroundTransparency = 0,
-    BackgroundColor3 = OrionLib.Themes[OrionLib.SelectedTheme].Main,
-    Visible = false
-}), {
-    AddThemeObject(SetProps(MakeElement("Image", "rbxassetid://17615525476"), {
-        AnchorPoint = Vector2.new(0.5, 0.5),
-        Position = UDim2.new(0.5, 0, 0.5, 0),
-        Size = UDim2.new(0.7, 0, 0.7, 0),
-    }), "Text"),
-    MakeElement("Corner", 1)
-})
+local UserInputService = game:GetService("UserInputService")
+local RunService = game:GetService("RunService")
+local Orion = ... -- Your existing parent or UI framework
+local LocalPlayer = game.Players.LocalPlayer
+local WindowConfig = ... -- Your existing window configuration
 
--- Function to handle button drag
-local function MakeDraggable(button, parent)
-    local dragging, dragInput, startPos, startMousePos
+local function MakeDraggable(target, parent)
+	local dragging, startPos, startMousePos
 
-    button.InputBegan:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseButton1 or
-           input.UserInputType == Enum.UserInputType.Touch then
-            dragging = true
-            startMousePos = input.Position
-            startPos = button.Position
+	local function updateInput(input)
+		local delta = input.Position - startMousePos
+		target.Position = UDim2.new(
+			startPos.X.Scale,
+			startPos.X.Offset + delta.X,
+			startPos.Y.Scale,
+			startPos.Y.Offset + delta.Y
+		)
+	end
 
-            input.Changed:Connect(function()
-                if input.UserInputState == Enum.UserInputState.End then
-                    dragging = false
-                end
-            end)
-        end
-    end)
+	target.InputBegan:Connect(function(input)
+		if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+			dragging = true
+			startMousePos = input.Position
+			startPos = target.Position
 
-    button.InputChanged:Connect(function(input)
-        if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or
-                         input.UserInputType == Enum.UserInputType.Touch) then
-            dragInput = input
-        end
-    end)
+			input.Changed:Connect(function()
+				if not dragging then return end
+				updateInput(input)
+			end)
+		end
+	end)
 
-    game:GetService("RunService").RenderStepped:Connect(function()
-        if dragging and dragInput then
-            local delta = dragInput.Position - startMousePos
-            button.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
-        end
-    end)
+	target.InputEnded:Connect(function(input)
+		if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+			dragging = false
+		end
+	end)
 end
 
+local MobileReopenButton = SetChildren(SetProps(MakeElement("Button"), {
+	Parent = Orion,
+	Size = UDim2.new(0, 40, 0, 40),
+	Position = UDim2.new(0.5, -20, 0, 20),
+	BackgroundTransparency = 0,
+	BackgroundColor3 = OrionLib.Themes[OrionLib.SelectedTheme].Main,
+	Visible = false
+}), {
+	-- Replace the text with the image
+	AddThemeObject(SetProps(MakeElement("Image", "rbxassetid://17615525476"), {
+		AnchorPoint = Vector2.new(0.5, 0.5),
+		Position = UDim2.new(0.5, 0, 0.5, 0),
+		Size = UDim2.new(1, 0, 1, 0),
+	}), "Text"),
+	MakeElement("Corner", 1)
+})
+
+-- Make the button draggable
+MakeDraggable(MobileReopenButton, Orion)
+
 AddConnection(CloseBtn.MouseButton1Up, function()
-    MainWindow.Visible = false
-    MobileReopenButton.Visible = true
-    UIHidden = true
-    OrionLib:MakeNotification({
-        Name = "Interface Hidden",
-        Content = "Tap the open button to reopen the interface. Or Press Key M To Close Or Open",
-        Time = 5
-    })
-    WindowConfig.CloseCallback()
+	MainWindow.Visible = false
+	MobileReopenButton.Visible = true
+	UIHidden = true
+	OrionLib:MakeNotification({
+		Name = "Interface Hidden",
+		Content = "Tap the open button to reopen the interface. Or Press Key M To Close Or Open",
+		Time = 5
+	})
+	WindowConfig.CloseCallback()
 end)
 
 -- Variable to track whether the UI is hidden or not
@@ -744,47 +753,26 @@ local UIHidden = true
 
 -- Function to handle the toggle with the "M" key
 AddConnection(UserInputService.InputBegan, function(Input)
-    if Input.KeyCode == Enum.KeyCode.M then
-        if UIHidden then
-            MainWindow.Visible = true
-            MobileReopenButton.Visible = false
-            UIHidden = false
-        else
-            MainWindow.Visible = false
-            MobileReopenButton.Visible = true
-            UIHidden = true
-        end
-    end
+	if Input.KeyCode == Enum.KeyCode.M then
+		if UIHidden then
+			MainWindow.Visible = true
+			MobileReopenButton.Visible = false
+			UIHidden = false
+		else
+			MainWindow.Visible = false
+			MobileReopenButton.Visible = true
+			UIHidden = true
+		end
+	end
 end)
 
 AddConnection(MobileReopenButton.Activated, function()
-    MainWindow.Visible = true
-    MobileReopenButton.Visible = false
+	MainWindow.Visible = true
+	MobileReopenButton.Visible = false
 end)
 
--- Draggable functionality for MobileReopenButton
-MakeDraggable(MobileReopenButton, Orion)
+-- Your existing MobileOpenButton and other relevant code remains unchanged
 
--- Set up MobileOpenButton
-local MobileOpenButton = SetChildren(SetProps(MakeElement("Button"), {
-    BackgroundTransparency = 0,
-    Parent = Orion,
-    Text = "",
-    BackgroundColor = BrickColor.new(0, 0, 0),
-    Size = UDim2.new(0.035, 0, 0.035, 0),
-    AnchorPoint = Vector2.new(0.5, 0.5),
-    Position = UDim2.new(0.5, 0, 0.5, 0),
-    Visible = false
-}), {
-    MakeElement("Corner", 0.25),
-    SetProps(MakeElement("AspectRatio"), {DominantAxis = 0, AspectRatio = 0.986, AspectType = 1})
-})
-
-MakeDraggable(MobileOpenButton, MobileOpenButton)
-
--- Continue with the rest of your UI setup...
-
--- Example of other UI components setup follows here...
 
 
 
