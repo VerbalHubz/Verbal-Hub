@@ -643,13 +643,14 @@ function OrionLib:MakeWindow(WindowConfig)
 		WindowIcon.Parent = MainWindow.TopBar
 	end	
 
-	MakeDraggable(DragPoint, MainWindow)
+	local UserInputService = game:GetService("UserInputService")
 
 -- Function to make any UI element draggable
 function MakeDraggable(Frame, Button)
     local dragging = false
     local dragInput, mousePos, framePos
 
+    -- For mouse input
     Button.InputBegan:Connect(function(input)
         if input.UserInputType == Enum.UserInputType.MouseButton1 then
             dragging = true
@@ -673,6 +674,28 @@ function MakeDraggable(Frame, Button)
     UserInputService.InputChanged:Connect(function(input)
         if input == dragInput and dragging then
             local delta = input.Position - mousePos
+            Frame.Position = UDim2.new(framePos.X.Scale, framePos.X.Offset + delta.X, framePos.Y.Scale, framePos.Y.Offset + delta.Y)
+        end
+    end)
+
+    -- For touch input (mobile)
+    Button.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.Touch then
+            dragging = true
+            local touchPos = input.Position
+            framePos = Frame.Position
+
+            input.Changed:Connect(function()
+                if input.UserInputState == Enum.UserInputState.End then
+                    dragging = false
+                end
+            end)
+        end
+    end)
+
+    UserInputService.InputChanged:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.Touch and dragging then
+            local delta = input.Position - touchPos
             Frame.Position = UDim2.new(framePos.X.Scale, framePos.X.Offset + delta.X, framePos.Y.Scale, framePos.Y.Offset + delta.Y)
         end
     end)
@@ -732,6 +755,7 @@ AddConnection(CloseBtn.MouseButton1Up, function()
     })
     WindowConfig.CloseCallback()
 end)
+
 
 	AddConnection(MinimizeBtn.MouseButton1Up, function()
 		if Minimized then
