@@ -679,30 +679,47 @@ function MakeDraggable(Frame, Button)
 end
 
 local UserInputService = game:GetService("UserInputService")
-local RunService = game:GetService("RunService")
+local TweenService = game:GetService("TweenService")
 
--- Function to make any GUI element draggable
-local function MakeDraggable(DragFrame, Button)
-    local dragging = false
-    local dragInput, mousePos, framePos
+-- MobileReopenButton with Roblox image 17615525476
+local MobileReopenButton = SetChildren(SetProps(MakeElement("Button"), {
+    Parent = Orion,
+    Size = UDim2.new(0, 40, 0, 40),
+    Position = UDim2.new(0.5, -20, 0, 20),
+    BackgroundTransparency = 0,
+    BackgroundColor3 = OrionLib.Themes[OrionLib.SelectedTheme].Main,
+    Visible = false,
+    AnchorPoint = Vector2.new(0.5, 0.5)
+}), {
+    AddThemeObject(SetProps(MakeElement("Image", "rbxassetid://17615525476"), {
+        AnchorPoint = Vector2.new(0.5, 0.5),
+        Position = UDim2.new(0.5, 0, 0.5, 0),
+        Size = UDim2.new(0.7, 0, 0.7, 0)
+    }), "Text"),
+    MakeElement("Corner", 1)
+})
 
-    -- Function to update the dragging smoothly
+-- Smooth drag function for MobileReopenButton
+local function MakeDraggable(button)
+    local dragging
+    local dragInput
+    local dragStart
+    local startPos
+
     local function update(input)
-        local delta = input.Position - mousePos
-        DragFrame.Position = UDim2.new(
-            framePos.X.Scale,
-            framePos.X.Offset + delta.X,
-            framePos.Y.Scale,
-            framePos.Y.Offset + delta.Y
-        )
+        local delta = input.Position - dragStart
+        local newPosition = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+        
+        -- Tween for smooth movement
+        TweenService:Create(button, TweenInfo.new(0.2), {Position = newPosition}):Play()
     end
 
-    Button.InputBegan:Connect(function(input)
+    button.InputBegan:Connect(function(input)
         if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
             dragging = true
-            mousePos = input.Position
-            framePos = DragFrame.Position
-
+            dragStart = input.Position
+            startPos = button.Position
+            
             input.Changed:Connect(function()
                 if input.UserInputState == Enum.UserInputState.End then
                     dragging = false
@@ -711,103 +728,38 @@ local function MakeDraggable(DragFrame, Button)
         end
     end)
 
-    Button.InputChanged:Connect(function(input)
+    button.InputChanged:Connect(function(input)
         if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
             dragInput = input
         end
     end)
 
-    RunService.RenderStepped:Connect(function()
-        if dragging then
-            update(dragInput)
+    UserInputService.InputChanged:Connect(function(input)
+        if input == dragInput and dragging then
+            update(input)
         end
     end)
 end
 
-local UserInputService = game:GetService("UserInputService")
-local TweenService = game:GetService("TweenService")
+-- Apply draggable functionality to the button
+MakeDraggable(MobileReopenButton)
 
--- Set up MobileReopenButton
-local MobileReopenButton = SetChildren(SetProps(MakeElement("Button"), {
-    Parent = Orion,
-    Size = UDim2.new(0, 40, 0, 40),
-    Position = UDim2.new(0.5, -20, 0, 20),
-    BackgroundTransparency = 0,
-    BackgroundColor3 = OrionLib.Themes[OrionLib.SelectedTheme].Main,
-    Visible = false,
-    -- Make the button draggable
-    Draggable = false,
-}), {
-    AddThemeObject(SetProps(MakeElement("Image", "http://www.roblox.com/asset/?id=17615525476"), {
-        AnchorPoint = Vector2.new(0.5, 0.5),
-        Position = UDim2.new(0.5, 0, 0.5, 0),
-        Size = UDim2.new(0.7, 0, 0.7, 0),
-    }), "Text"),
-    MakeElement("Corner", 1)
-})
-
-local isDragging = false
-local dragStart, startPos
-local dragInput, dragPos
-
--- Smooth drag function for the button
-local function UpdateDrag(input)
-    local delta = input.Position - dragStart
-    local newPosition = UDim2.new(
-        startPos.X.Scale,
-        startPos.X.Offset + delta.X,
-        startPos.Y.Scale,
-        startPos.Y.Offset + delta.Y
-    )
-    
-    -- Use Tweening for smooth movement
-    local tween = TweenService:Create(MobileReopenButton, TweenInfo.new(0.15), {Position = newPosition})
-    tween:Play()
-end
-
--- Mobile and PC drag behavior
-MobileReopenButton.InputBegan:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-        isDragging = true
-        dragStart = input.Position
-        startPos = MobileReopenButton.Position
-
-        input.Changed:Connect(function()
-            if input.UserInputState == Enum.UserInputState.End then
-                isDragging = false
-            end
-        end)
-    end
-end)
-
-MobileReopenButton.InputChanged:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
-        dragInput = input
-    end
-end)
-
-UserInputService.InputChanged:Connect(function(input)
-    if input == dragInput and isDragging then
-        UpdateDrag(input)
-    end
-end)
-
--- Close Button Functionality
+-- Close button function
 AddConnection(CloseBtn.MouseButton1Up, function()
     MainWindow.Visible = false
     MobileReopenButton.Visible = true
     UIHidden = true
     OrionLib:MakeNotification({
         Name = "Interface Hidden",
-        Content = "Tap the open button to reopen the interface or Press Key M to toggle.",
+        Content = "Tap the open button to reopen the interface. Or Press Key M To Close Or Open",
         Time = 5
     })
     WindowConfig.CloseCallback()
 end)
 
--- Keyboard Toggle for M
-AddConnection(UserInputService.InputBegan, function(input)
-    if input.KeyCode == Enum.KeyCode.M then
+-- Toggle interface visibility with 'M' key
+AddConnection(UserInputService.InputBegan, function(Input)
+    if Input.KeyCode == Enum.KeyCode.M then
         if UIHidden then
             MainWindow.Visible = true
             MobileReopenButton.Visible = false
@@ -820,11 +772,13 @@ AddConnection(UserInputService.InputBegan, function(input)
     end
 end)
 
--- Toggle MainWindow on button press
+-- Toggle the UI by clicking the MobileReopenButton
 AddConnection(MobileReopenButton.Activated, function()
     MainWindow.Visible = true
     MobileReopenButton.Visible = false
 end)
+
+
 
 
 	AddConnection(MinimizeBtn.MouseButton1Up, function()
