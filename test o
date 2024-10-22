@@ -684,8 +684,8 @@ local TweenService = game:GetService("TweenService")
 -- MobileReopenButton with Roblox image 17615525476
 local MobileReopenButton = SetChildren(SetProps(MakeElement("Button"), {
     Parent = Orion,
-    Size = UDim2.new(0, 35, 0, 35),
-    Position = UDim2.new(0.5, -20, 0, 20),
+    Size = UDim2.new(0, 40, 0, 40),
+    Position = UDim2.new(0.5, -20, 0, 20),  -- Original position
     BackgroundTransparency = 0,
     BackgroundColor3 = OrionLib.Themes[OrionLib.SelectedTheme].Main,
     Visible = false,
@@ -694,7 +694,7 @@ local MobileReopenButton = SetChildren(SetProps(MakeElement("Button"), {
     AddThemeObject(SetProps(MakeElement("Image", "rbxassetid://17615525476"), {
         AnchorPoint = Vector2.new(0.5, 0.5),
         Position = UDim2.new(0.5, 0, 0.5, 0),
-        Size = UDim2.new(0.5, 0, 0.5, 0)
+        Size = UDim2.new(0.7, 0, 0.7, 0)
     }), "Text"),
     MakeElement("Corner", 1)
 })
@@ -702,14 +702,13 @@ local MobileReopenButton = SetChildren(SetProps(MakeElement("Button"), {
 -- Smooth drag function for MobileReopenButton
 local function MakeDraggable(button)
     local dragging
-    local dragInput
     local dragStart
     local startPos
 
     local function update(input)
         local delta = input.Position - dragStart
         local newPosition = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
-        
+
         -- Tween for smooth movement
         TweenService:Create(button, TweenInfo.new(0.2), {Position = newPosition}):Play()
     end
@@ -719,7 +718,7 @@ local function MakeDraggable(button)
             dragging = true
             dragStart = input.Position
             startPos = button.Position
-            
+
             input.Changed:Connect(function()
                 if input.UserInputState == Enum.UserInputState.End then
                     dragging = false
@@ -728,14 +727,8 @@ local function MakeDraggable(button)
         end
     end)
 
-    button.InputChanged:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
-            dragInput = input
-        end
-    end)
-
     UserInputService.InputChanged:Connect(function(input)
-        if input == dragInput and dragging then
+        if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
             update(input)
         end
     end)
@@ -777,8 +770,6 @@ AddConnection(MobileReopenButton.Activated, function()
     MainWindow.Visible = true
     MobileReopenButton.Visible = false
 end)
-
-
 
 
 	AddConnection(MinimizeBtn.MouseButton1Up, function()
