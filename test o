@@ -678,28 +678,42 @@ function MakeDraggable(Frame, Button)
     end)
 end
 
--- Mobile Reopen Button with Image
+-- Create the MobileReopenButton with the specified image and make it draggable
 local MobileReopenButton = SetChildren(SetProps(MakeElement("Button"), {
     Parent = Orion,
     Size = UDim2.new(0, 40, 0, 40),
     Position = UDim2.new(0.5, -20, 0, 20),
     BackgroundTransparency = 0,
     BackgroundColor3 = OrionLib.Themes[OrionLib.SelectedTheme].Main,
-    Visible = false
+    Visible = false,
 }), {
-    AddThemeObject(SetProps(MakeElement("Image", "http://www.roblox.com/asset/?id=17615525476"), {
+    AddThemeObject(SetProps(MakeElement("Image", "rbxassetid://17615525476"), {  -- Set image using the provided ID
         AnchorPoint = Vector2.new(0.5, 0.5),
         Position = UDim2.new(0.5, 0, 0.5, 0),
-        Size = UDim2.new(0.7, 0, 0.7, 0),
+        Size = UDim2.new(1, 0, 1, 0),  -- Full size of the button
     }), "Text"),
     MakeElement("Corner", 1)
 })
 
--- Make the button draggable
+-- Make the button draggable for mobile and PC
 MakeDraggable(MobileReopenButton, MobileReopenButton)
 
--- Functionality to toggle UI visibility with 'M' key
+AddConnection(CloseBtn.MouseButton1Up, function()
+    MainWindow.Visible = false
+    MobileReopenButton.Visible = true
+    UIHidden = true
+    OrionLib:MakeNotification({
+        Name = "Interface Hidden",
+        Content = "Tap the open button to reopen the interface. Or Press Key M To Close Or Open",
+        Time = 5
+    })
+    WindowConfig.CloseCallback()
+end)
+
+-- Variable to track whether the UI is hidden or not
 local UIHidden = true
+
+-- Function to handle the toggle with the "M" key
 AddConnection(UserInputService.InputBegan, function(Input)
     if Input.KeyCode == Enum.KeyCode.M then
         if UIHidden then
@@ -714,24 +728,30 @@ AddConnection(UserInputService.InputBegan, function(Input)
     end
 end)
 
--- Handle reopening the interface by clicking the button
 AddConnection(MobileReopenButton.Activated, function()
     MainWindow.Visible = true
     MobileReopenButton.Visible = false
 end)
 
--- Close button functionality
-AddConnection(CloseBtn.MouseButton1Up, function()
-    MainWindow.Visible = false
-    MobileReopenButton.Visible = true
-    UIHidden = true
-    OrionLib:MakeNotification({
-        Name = "Interface Hidden",
-        Content = "Tap the button to reopen the interface. Or Press Key M To Close Or Open",
-        Time = 5
-    })
-    WindowConfig.CloseCallback()
-end)
+-- Create the MobileOpenButton and make it draggable
+local MobileOpenButton = SetChildren(SetProps(MakeElement("Button"), {
+    BackgroundTransparency = 0, 
+    Parent = Orion, 
+    Text = "",  -- Removed text
+    BackgroundColor = BrickColor.new(0, 0, 0),
+    Size = UDim2.new(0.035, 0, 0.035, 0),
+    AnchorPoint = Vector2.new(0.5, 0.5),
+    Position = UDim2.new(0.5, 0, 0.5, 0), 
+    Visible = false
+}), {
+    MakeElement("Corner", 0.25), 
+    SetProps(MakeElement("AspectRatio"), {DominantAxis = 0, AspectRatio = 0.986, AspectType = 1})
+})
+
+MakeDraggable(MobileOpenButton, MobileOpenButton)
+
+-- Additional code as necessary...
+
 
 	AddConnection(MinimizeBtn.MouseButton1Up, function()
 		if Minimized then
