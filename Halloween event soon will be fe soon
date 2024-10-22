@@ -1,6 +1,7 @@
-local RunService = game:GetService("RunService") 
+local RunService = game:GetService("RunService")
 local Lighting = game:GetService("Lighting")
 local Players = game:GetService("Players")
+local TweenService = game:GetService("TweenService")
 
 -- Store original lighting settings
 local originalLighting = {
@@ -14,19 +15,14 @@ local originalLighting = {
 
 -- Function to reset the lighting to original settings
 local function resetLighting()
-    -- Restore original lighting effects
-    Lighting.Ambient = originalLighting.Ambient
-    Lighting.OutdoorAmbient = originalLighting.OutdoorAmbient
-    Lighting.Brightness = originalLighting.Brightness
-    Lighting.FogColor = originalLighting.FogColor
-    Lighting.FogStart = originalLighting.FogStart
-    Lighting.FogEnd = originalLighting.FogEnd
-
-    -- Optionally, you can remove only specific Sky instances if needed.
     for _, child in pairs(Lighting:GetChildren()) do
         if child:IsA("Sky") then
             child:Destroy()
         end
+    end
+
+    for property, value in pairs(originalLighting) do
+        Lighting[property] = value
     end
 end
 
@@ -40,12 +36,16 @@ local function createFireworks()
         firework.Position = Vector3.new(math.random(-100, 100), math.random(40, 100), math.random(-100, 100))
         firework.Anchored = true
         firework.CanCollide = false
-        firework.Transparency = 1 -- Make the firework invisible
+        firework.Transparency = 1
         firework.Name = "Firework"
         firework.Parent = workspace
 
         local particleEmitter = Instance.new("ParticleEmitter")
-        particleEmitter.Color = ColorSequence.new(Color3.new(1, 0, 0), Color3.new(1, 1, 0), Color3.new(0, 1, 0), Color3.new(0, 1, 1), Color3.new(0, 0, 1), Color3.new(1, 0, 1))
+        particleEmitter.Color = ColorSequence.new({
+            ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 0, 0)),
+            ColorSequenceKeypoint.new(0.5, Color3.fromRGB(0, 255, 0)),
+            ColorSequenceKeypoint.new(1, Color3.fromRGB(0, 0, 255))
+        })
         particleEmitter.Lifetime = NumberRange.new(1, 2)
         particleEmitter.Rate = 150
         particleEmitter.Speed = NumberRange.new(50, 100)
@@ -64,10 +64,10 @@ local function createFireworks()
         table.insert(fireworkList, firework)
     end
 
-    -- Sync fireworks with the song
+    -- Smooth bobbing for fireworks
     RunService.Heartbeat:Connect(function()
         for _, firework in ipairs(fireworkList) do
-            local bobbingHeight = math.sin(tick() * 2) * 5
+            local bobbingHeight = math.sin(tick() * 2) * 0.5 -- Make it smoother
             firework.Position = firework.Position + Vector3.new(0, bobbingHeight, 0)
         end
     end)
@@ -75,9 +75,42 @@ local function createFireworks()
     return fireworkList
 end
 
+-- Function to create a spotlight effect
+local function createSpotlights()
+    local spotlightList = {}
+
+    for i = 1, 6 do
+        local spotlight = Instance.new("Part")
+        spotlight.Size = Vector3.new(1, 1, 1)
+        spotlight.Position = Vector3.new(0, 50, math.random(-100, 100))
+        spotlight.Anchored = true
+        spotlight.CanCollide = false
+        spotlight.Transparency = 1
+        spotlight.Parent = workspace
+
+        local spotLight = Instance.new("SpotLight")
+        spotLight.Angle = 90
+        spotLight.Range = 60
+        spotLight.Color = Color3.fromRGB(math.random(0, 255), math.random(0, 255), math.random(0, 255))
+        spotLight.Brightness = 3
+        spotLight.Parent = spotlight
+
+        coroutine.wrap(function()
+            while spotlight do
+                spotLight.Color = Color3.fromRGB(math.random(0, 255), math.random(0, 255), math.random(0, 255))
+                wait(1)
+            end
+        end)()
+
+        table.insert(spotlightList, spotlight)
+    end
+
+    return spotlightList
+end
+
 -- Function to create a swirling particle effect
 local function createSwirlingParticles()
-    local swirlParts = {} -- Store swirl parts for cleanup
+    local swirlParts = {}
 
     for i = 1, 20 do
         local swirlPart = Instance.new("Part")
@@ -85,7 +118,7 @@ local function createSwirlingParticles()
         swirlPart.Position = Vector3.new(math.random(-50, 50), math.random(40, 100), math.random(-50, 50))
         swirlPart.Anchored = true
         swirlPart.CanCollide = false
-        swirlPart.Transparency = 1 -- Make the swirl part invisible
+        swirlPart.Transparency = 1
         swirlPart.Parent = workspace
 
         local particleEmitter = Instance.new("ParticleEmitter")
@@ -96,7 +129,6 @@ local function createSwirlingParticles()
         particleEmitter.Size = NumberSequence.new(0.5, 2)
         particleEmitter.Parent = swirlPart
 
-        -- Swirl animation
         coroutine.wrap(function()
             while swirlPart do
                 swirlPart.Position = swirlPart.Position + Vector3.new(math.sin(tick()), 0, math.cos(tick())) * 0.5
@@ -104,15 +136,15 @@ local function createSwirlingParticles()
             end
         end)()
 
-        table.insert(swirlParts, swirlPart) -- Add to list for cleanup
+        table.insert(swirlParts, swirlPart)
     end
 
-    return swirlParts -- Return the list of swirl parts
+    return swirlParts
 end
 
 -- Function to create a colorful laser show
 local function createLaserShow()
-    local laserList = {} -- Store lasers for cleanup
+    local laserList = {}
 
     for i = 1, 100 do
         local laser = Instance.new("Part")
@@ -121,24 +153,22 @@ local function createLaserShow()
         laser.Anchored = true
         laser.CanCollide = false
         laser.BrickColor = BrickColor.Random()
-        laser.Transparency = 1 -- Make the laser part invisible
+        laser.Transparency = 1
         laser.Parent = workspace
 
-        local tweenService = game:GetService("TweenService")
-        local tweenInfo = TweenInfo.new(1, Enum.EasingStyle.Linear, Enum.EasingDirection.InOut, -1, true)
-        local tween = tweenService:Create(laser, tweenInfo, {Size = Vector3.new(0.1, 0, 0.1)})
+        local tween = TweenService:Create(laser, TweenInfo.new(1, Enum.EasingStyle.Linear, Enum.EasingDirection.InOut, -1, true), {Size = Vector3.new(0.1, 0, 0.1)})
         tween:Play()
 
-        table.insert(laserList, laser) -- Add to list for cleanup
+        table.insert(laserList, laser)
     end
 
-    return laserList -- Return the list of lasers
+    return laserList
 end
 
--- Function to create music visualizer
+-- Function to create a music visualizer
 local function createMusicVisualizer(sound)
     local visualizerParts = {}
-    
+
     for i = 1, 50 do
         local visualizerPart = Instance.new("Part")
         visualizerPart.Size = Vector3.new(1, 1, 1)
@@ -148,40 +178,21 @@ local function createMusicVisualizer(sound)
         visualizerPart.BrickColor = BrickColor.Random()
         visualizerPart.Parent = workspace
         visualizerPart.Material = Enum.Material.Neon
-        
-        -- Visualizer animation based on sound loudness
+
         coroutine.wrap(function()
             while visualizerPart do
                 local loudness = sound.PlaybackLoudness
-                visualizerPart.Size = Vector3.new(1, loudness / 100, 1) -- Adjust size based on loudness
-                visualizerPart.Color = Color3.fromHSV(math.abs(math.sin(tick())), 1, 1) -- Change color
+                visualizerPart.Size = Vector3.new(1, loudness / 100, 1)
+                visualizerPart.Color = Color3.fromHSV(math.abs(math.sin(tick())), 1, 1)
                 wait(0.1)
             end
         end)()
 
         table.insert(visualizerParts, visualizerPart)
     end
-    
+
     return visualizerParts
 end
-
-
-
--- Lighting Effects for Theme
-Lighting.Ambient = Color3.fromRGB(255, 140, 0)
-Lighting.OutdoorAmbient = Color3.fromRGB(10, 10, 10)
-Lighting.Brightness = 2
-Lighting.FogColor = Color3.fromRGB(255, 100, 0)
-Lighting.FogStart = 200
-Lighting.FogEnd = 800
-local sky = Instance.new("Sky")
-sky.SkyboxBk = "rbxassetid://159454299"
-sky.SkyboxDn = "rbxassetid://159454299"
-sky.SkyboxFt = "rbxassetid://159454299"
-sky.SkyboxLf = "rbxassetid://159454299"
-sky.SkyboxRt = "rbxassetid://159454299"
-sky.SkyboxUp = "rbxassetid://159454299"
-sky.Parent = Lighting
 
 -- Function to create a spinning tornado with rainbow colors
 local function createTornado(sound)
@@ -194,16 +205,12 @@ local function createTornado(sound)
     tornado.BrickColor = BrickColor.Random()
     tornado.Parent = workspace
 
-    -- Tornado spinning and color changing
     coroutine.wrap(function()
         while tornado do
             local loudness = sound.PlaybackLoudness
-            tornado.Size = Vector3.new(5, math.clamp(loudness / 20, 5, 50), 5) -- Adjust height based on loudness
-            tornado.CFrame = tornado.CFrame * CFrame.Angles(0, math.rad(5), 0) -- Spin effect
-            
-            -- Update color
+            tornado.Size = Vector3.new(5, math.clamp(loudness / 20, 5, 50), 5)
+            tornado.CFrame = tornado.CFrame * CFrame.Angles(0, math.rad(5), 0)
             tornado.BrickColor = BrickColor.new(Color3.fromHSV(tick() % 5 / 5, 1, 1))
-
             wait(0.05)
         end
     end)()
@@ -211,60 +218,60 @@ local function createTornado(sound)
     return tornado
 end
 
+-- Lighting Effects for Theme
+Lighting.Ambient = Color3.fromRGB(255, 140, 0)
+Lighting.OutdoorAmbient = Color3.fromRGB(10, 10, 10)
+Lighting.Brightness = 2
+Lighting.FogColor = Color3.fromRGB(255, 100, 0)
+Lighting.FogStart = 200
+Lighting.FogEnd = 800
+local sky = Instance.new("Sky")
+sky.SkyboxBk = "rbxassetid://159454299"
+sky.SkyboxDn = "rbxassetid://159454296"
+sky.SkyboxFt = "rbxassetid://159454293"
+sky.SkyboxLf = "rbxassetid://159454286"
+sky.SkyboxRt = "rbxassetid://159454300"
+sky.SkyboxUp = "rbxassetid://159454288"
+sky.Parent = Lighting
 
-
-
-
--- Sound Setup
-local audioId = "rbxassetid://16190782786"
+-- Start the music
 local sound = Instance.new("Sound")
-sound.SoundId = audioId
-sound.Looped = false
-sound.Volume = 1
+sound.SoundId = "rbxassetid://16190782786"
 sound.Parent = workspace
 sound:Play()
 
--- Create fireworks and effects
-local fireworkList = createFireworks()
-local swirlParts = createSwirlingParticles()  -- Create swirling particles
-local laserList = createLaserShow()          -- Create a laser show
-local visualizerParts = createMusicVisualizer(sound) -- Create music visualizer
-local tornado = createTornado(sound)          -- Create tornado effect
+-- Create effects
+local fireworks = createFireworks()
+local spotlights = createSpotlights()
+local swirlingParticles = createSwirlingParticles()
+local lasers = createLaserShow()
+local visualizerParts = createMusicVisualizer(sound)
+local tornado = createTornado(sound)
 
-
-
-
-
--- Wait for the song to finish and then reset everything
-sound.Ended:Wait()  -- Wait until the sound ends
-
--- Remove only the created effects
-for _, firework in ipairs(fireworkList) do
-    firework:Destroy()
-end
-
-for _, swirlPart in ipairs(swirlParts) do
-    swirlPart:Destroy()
-end
-
-
-
-for _, laser in ipairs(laserList) do
-    laser:Destroy()
-end
-
-
-
-for _, visualizerPart in ipairs(visualizerParts) do
-    visualizerPart:Destroy()
-end
-
-   -- Remove tornado
-    if tornado then
-        tornado:Destroy()
+-- Cleanup after the song finishes
+sound.Ended:Connect(function()
+    for _, firework in ipairs(fireworks) do
+        firework:Destroy()
     end
-    
 
+    for _, spotlight in ipairs(spotlights) do
+        spotlight:Destroy()
+    end
 
--- Reset lighting
-resetLighting()
+    for _, swirlPart in ipairs(swirlingParticles) do
+        swirlPart:Destroy()
+    end
+
+    for _, laser in ipairs(lasers) do
+        laser:Destroy()
+    end
+
+    for _, visualizerPart in ipairs(visualizerParts) do
+        visualizerPart:Destroy()
+    end
+
+    tornado:Destroy()
+
+    -- Reset the lighting
+    resetLighting()
+end)
