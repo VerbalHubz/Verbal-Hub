@@ -678,35 +678,25 @@ function MakeDraggable(Frame, Button)
     end)
 end
 
--- Create the MobileReopenButton with image
-local MobileReopenButton = SetChildren(SetProps(MakeElement("Button"), {
-	Parent = Orion,
-	Size = UDim2.new(0, 40, 0, 40),
-	Position = UDim2.new(0.5, -20, 0, 20),
-	BackgroundTransparency = 0,
-	BackgroundColor3 = OrionLib.Themes[OrionLib.SelectedTheme].Main,
-	Visible = false
-}), {
-	-- Replace "Open" with Image
-	AddThemeObject(SetProps(MakeElement("Image", "rbxassetid://17615525476"), {
-		AnchorPoint = Vector2.new(0.5, 0.5),
-		Position = UDim2.new(0.5, 0, 0.5, 0),
-		Size = UDim2.new(0.7, 0, 0.7, 0),
-	}), "Text"),
-	MakeElement("Corner", 1)
-})
+local UIS = game:GetService("UserInputService")
+local runService = game:GetService("RunService")
+local dragging, dragInput, dragStart, startPos
+local dragSpeed = 0.15 -- Adjust this for smoothness
 
--- Add dragging functionality
-function MakeDraggable(guiObject)
-    local dragging = false
-    local dragInput, mousePos, framePos
+-- Make button draggable with smooth movement for both PC and Mobile
+local function MakeDraggable(frame)
+    local function update(input)
+        local delta = input.Position - dragStart
+        local goalPosition = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+        frame:TweenPosition(goalPosition, Enum.EasingDirection.Out, Enum.EasingStyle.Sine, dragSpeed, true)
+    end
 
-    guiObject.InputBegan:Connect(function(input)
+    frame.InputBegan:Connect(function(input)
         if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
             dragging = true
-            mousePos = input.Position
-            framePos = guiObject.Position
-            
+            dragStart = input.Position
+            startPos = frame.Position
+
             input.Changed:Connect(function()
                 if input.UserInputState == Enum.UserInputState.End then
                     dragging = false
@@ -715,53 +705,39 @@ function MakeDraggable(guiObject)
         end
     end)
 
-    guiObject.InputChanged:Connect(function(input)
-        if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
-            local delta = input.Position - mousePos
-            guiObject.Position = UDim2.new(framePos.X.Scale, framePos.X.Offset + delta.X, framePos.Y.Scale, framePos.Y.Offset + delta.Y)
+    frame.InputChanged:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
+            dragInput = input
+        end
+    end)
+
+    runService.Heartbeat:Connect(function()
+        if dragging and dragInput then
+            update(dragInput)
         end
     end)
 end
 
--- Make the MobileReopenButton draggable
+-- Create your button
+local MobileReopenButton = SetChildren(SetProps(MakeElement("Button"), {
+    Parent = Orion,
+    Size = UDim2.new(0, 40, 0, 40),
+    Position = UDim2.new(0.5, -20, 0, 20),
+    BackgroundTransparency = 0,
+    BackgroundColor3 = OrionLib.Themes[OrionLib.SelectedTheme].Main,
+    Visible = false
+}), {
+    AddThemeObject(SetProps(MakeElement("Image", "http://www.roblox.com/asset/?id=17615525476"), {
+        AnchorPoint = Vector2.new(0.5, 0.5),
+        Position = UDim2.new(0.5, 0, 0.5, 0),
+        Size = UDim2.new(0.7, 0, 0.7, 0),
+    }), "Text"),
+    MakeElement("Corner", 1)
+})
+
+-- Make the button draggable
 MakeDraggable(MobileReopenButton)
 
--- Toggle to hide and show the main window
-AddConnection(CloseBtn.MouseButton1Up, function()
-	MainWindow.Visible = false
-	MobileReopenButton.Visible = true
-	UIHidden = true
-	OrionLib:MakeNotification({
-		Name = "Interface Hidden",
-		Content = "Tap the open button to reopen the interface. Or press Key M to toggle.",
-		Time = 5
-	})
-	WindowConfig.CloseCallback()
-end)
-
--- Track UI visibility state
-local UIHidden = true
-
--- Handle key toggle for 'M'
-AddConnection(UserInputService.InputBegan, function(Input)
-    if Input.KeyCode == Enum.KeyCode.M then
-        if UIHidden then
-            MainWindow.Visible = true
-            MobileReopenButton.Visible = false
-            UIHidden = false
-        else
-            MainWindow.Visible = false
-            MobileReopenButton.Visible = true
-            UIHidden = true
-        end
-    end
-end)
-
--- Button activation functionality
-AddConnection(MobileReopenButton.Activated, function()
-	MainWindow.Visible = true
-	MobileReopenButton.Visible = false
-end)
 
 
 
