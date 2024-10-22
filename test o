@@ -684,7 +684,7 @@ local TweenService = game:GetService("TweenService")
 -- MobileReopenButton with Roblox image 17615525476
 local MobileReopenButton = SetChildren(SetProps(MakeElement("Button"), {
     Parent = Orion,
-    Size = UDim2.new(0, 40, 0, 40),
+    Size = UDim2.new(0, 35, 0, 35),
     Position = UDim2.new(0.5, -20, 0, 20),
     BackgroundTransparency = 0,
     BackgroundColor3 = OrionLib.Themes[OrionLib.SelectedTheme].Main,
@@ -694,7 +694,7 @@ local MobileReopenButton = SetChildren(SetProps(MakeElement("Button"), {
     AddThemeObject(SetProps(MakeElement("Image", "rbxassetid://17615525476"), {
         AnchorPoint = Vector2.new(0.5, 0.5),
         Position = UDim2.new(0.5, 0, 0.5, 0),
-        Size = UDim2.new(0.7, 0, 0.7, 0)
+        Size = UDim2.new(0.5, 0, 0.5, 0)
     }), "Text"),
     MakeElement("Corner", 1)
 })
