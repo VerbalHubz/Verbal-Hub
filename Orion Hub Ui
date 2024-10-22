@@ -678,7 +678,7 @@ function MakeDraggable(Frame, Button)
     end)
 end
 
--- Mobile Reopen Button with Image
+-- Create the MobileReopenButton
 local MobileReopenButton = SetChildren(SetProps(MakeElement("Button"), {
     Parent = Orion,
     Size = UDim2.new(0, 40, 0, 40),
@@ -687,7 +687,7 @@ local MobileReopenButton = SetChildren(SetProps(MakeElement("Button"), {
     BackgroundColor3 = OrionLib.Themes[OrionLib.SelectedTheme].Main,
     Visible = false
 }), {
-    AddThemeObject(SetProps(MakeElement("Image", "http://www.roblox.com/asset/?id=17615525476"), {
+    AddThemeObject(SetProps(MakeElement("Image", "rbxassetid://17615525476"), { -- Changed image ID
         AnchorPoint = Vector2.new(0.5, 0.5),
         Position = UDim2.new(0.5, 0, 0.5, 0),
         Size = UDim2.new(0.7, 0, 0.7, 0),
@@ -695,11 +695,55 @@ local MobileReopenButton = SetChildren(SetProps(MakeElement("Button"), {
     MakeElement("Corner", 1)
 })
 
--- Make the button draggable
-MakeDraggable(MobileReopenButton, MobileReopenButton)
+-- Function to handle button drag
+local function MakeDraggable(Frame)
+    local UserInputService = game:GetService("UserInputService")
+    local Dragging, DragInput, MousePos, StartPos = false, nil, nil, nil
 
--- Functionality to toggle UI visibility with 'M' key
+    Frame.InputBegan:Connect(function(Input)
+        if Input.UserInputType == Enum.UserInputType.MouseButton1 then
+            Dragging = true
+            MousePos = UserInputService:GetMouseLocation() - Frame.AbsolutePosition
+            StartPos = Frame.Position
+
+            DragInput = UserInputService.InputChanged:Connect(function(InputChanged)
+                if Dragging and InputChanged.UserInputType == Enum.UserInputType.MouseMovement then
+                    local NewPos = UserInputService:GetMouseLocation() - MousePos
+                    Frame.Position = UDim2.new(0, NewPos.X, 0, NewPos.Y)
+                end
+            end)
+        end
+    end)
+
+    Frame.InputEnded:Connect(function(Input)
+        if Input.UserInputType == Enum.UserInputType.MouseButton1 then
+            Dragging = false
+            if DragInput then
+                DragInput:Disconnect()
+                DragInput = nil
+            end
+        end
+    end)
+end
+
+MakeDraggable(MobileReopenButton)
+
+AddConnection(CloseBtn.MouseButton1Up, function()
+    MainWindow.Visible = false
+    MobileReopenButton.Visible = true
+    UIHidden = true
+    OrionLib:MakeNotification({
+        Name = "Interface Hidden",
+        Content = "Tap the open button to reopen the interface. Or Press Key M To Close Or Open",
+        Time = 5
+    })
+    WindowConfig.CloseCallback()
+end)
+
+-- Variable to track whether the UI is hidden or not
 local UIHidden = true
+
+-- Function to handle the toggle with the "M" key
 AddConnection(UserInputService.InputBegan, function(Input)
     if Input.KeyCode == Enum.KeyCode.M then
         if UIHidden then
@@ -714,24 +758,12 @@ AddConnection(UserInputService.InputBegan, function(Input)
     end
 end)
 
--- Handle reopening the interface by clicking the button
 AddConnection(MobileReopenButton.Activated, function()
     MainWindow.Visible = true
     MobileReopenButton.Visible = false
 end)
 
--- Close button functionality
-AddConnection(CloseBtn.MouseButton1Up, function()
-    MainWindow.Visible = false
-    MobileReopenButton.Visible = true
-    UIHidden = true
-    OrionLib:MakeNotification({
-        Name = "Interface Hidden",
-        Content = "Tap the button to reopen the interface. Or Press Key M To Close Or Open",
-        Time = 5
-    })
-    WindowConfig.CloseCallback()
-end)
+
 
 	AddConnection(MinimizeBtn.MouseButton1Up, function()
 		if Minimized then
