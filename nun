@@ -1,57 +1,161 @@
 -- Variables
 local player = game.Players.LocalPlayer
 local playerGui = player:WaitForChild("PlayerGui")
+local TweenService = game:GetService("TweenService")
+local RunService = game:GetService("RunService")
 
--- Function to create neon rainbow text
-local function createNeonText()
-    -- Create a ScreenGui
-    local screenGui = Instance.new("ScreenGui")
-    screenGui.Parent = playerGui
-    
-    -- Create the TextLabel for the neon effect
-    local neonText = Instance.new("TextLabel")
-    neonText.Parent = screenGui
-    neonText.Size = UDim2.new(0.8, 0, 0.2, 0) -- Adjust the size to a percentage of the screen
-    neonText.Position = UDim2.new(0.1, 0, 0.4, 0) -- Position towards the center
-    neonText.Text = "Thank you for 100K views on verbal hub here's an event for you ;) ! Loading.. Pls Wait"
-    neonText.Font = Enum.Font.GothamBold -- Use a bold font for neon effect
-    neonText.TextScaled = true -- Automatically scale the text to fit
-    neonText.TextStrokeTransparency = 0 -- To give a neon outline
-    neonText.BackgroundTransparency = 1 -- Remove background
-    neonText.TextColor3 = Color3.fromRGB(255, 255, 255) -- Starting color
+-- Configuration settings
+local textDisplayDuration = 5 -- Duration for which the text is displayed
+local fadeDuration = 0.5  -- Duration for the fade-in and fade-out effect
+local textMessage = "Thank you for 100K views on Verbal Hub! 🎉 Stay tuned: Verbal Hub v2 is in progress with major updates and bug fixes. Loading... Please wait!"
+local secondaryMessage = "Verbal Hub v2 is in progress - expect improvements and bug fixes soon!"
 
-    -- TweenService for color changing
-    local TweenService = game:GetService("TweenService")
-    local colorChange = {
-        Color3.fromRGB(255, 0, 0),    -- Red
-        Color3.fromRGB(255, 165, 0),  -- Orange
-        Color3.fromRGB(255, 255, 0),  -- Yellow
-        Color3.fromRGB(0, 255, 0),    -- Green
-        Color3.fromRGB(0, 0, 255),    -- Blue
-        Color3.fromRGB(75, 0, 130),   -- Indigo
-        Color3.fromRGB(238, 130, 238) -- Violet
-    }
+-- Colors for the rainbow effect
+local colorChange = {
+    Color3.fromRGB(255, 0, 0),    -- Red
+    Color3.fromRGB(255, 165, 0),  -- Orange
+    Color3.fromRGB(255, 255, 0),  -- Yellow
+    Color3.fromRGB(0, 255, 0),    -- Green
+    Color3.fromRGB(0, 0, 255),    -- Blue
+    Color3.fromRGB(75, 0, 130),   -- Indigo
+    Color3.fromRGB(238, 130, 238) -- Violet
+}
 
-    -- Function to tween through rainbow colors
-    local function cycleColors()
+-- Function to create a label with customizable properties
+local function createLabel(parent, size, position, text, font, textColor)
+    local label = Instance.new("TextLabel")
+    label.Parent = parent
+    label.Size = size
+    label.Position = position
+    label.Text = text
+    label.Font = font
+    label.TextScaled = true
+    label.TextStrokeTransparency = 0.1
+    label.BackgroundTransparency = 1
+    label.TextTransparency = 1  -- Initial transparency for fade-in
+    label.TextColor3 = textColor
+    return label
+end
+
+-- Smooth fade-in effect
+local function fadeIn(element)
+    local fadeInTween = TweenService:Create(element, TweenInfo.new(fadeDuration), {TextTransparency = 0})
+    fadeInTween:Play()
+    fadeInTween.Completed:Wait()
+end
+
+-- Smooth fade-out effect
+local function fadeOut(element)
+    local fadeOutTween = TweenService:Create(element, TweenInfo.new(fadeDuration), {TextTransparency = 1})
+    fadeOutTween:Play()
+    fadeOutTween.Completed:Wait()
+end
+
+-- Cycle through colors for a neon effect
+local function cycleColors(textLabel)
+    while textLabel and textLabel.Parent do
         for _, color in ipairs(colorChange) do
-            local tween = TweenService:Create(neonText, TweenInfo.new(0.5), {TextColor3 = color})
+            local tween = TweenService:Create(textLabel, TweenInfo.new(0.5), {TextColor3 = color})
             tween:Play()
             tween.Completed:Wait()
         end
     end
+end
 
-    -- Keep changing colors while the text is on screen
-    spawn(function()
-        while screenGui.Parent do
-            cycleColors()
-        end
+-- Apply the neon effect to a list of labels
+local function applyNeonEffect(labels)
+    for _, label in ipairs(labels) do
+        spawn(function()
+            cycleColors(label)
+        end)
+    end
+end
+
+-- Background star effect
+local function createStarEffect(screenGui)
+    local star = Instance.new("ImageLabel")
+    star.Parent = screenGui
+    star.Image = "rbxassetid://18322110939"  -- Replace with an image ID for a star
+    star.Size = UDim2.new(0.4, 0, 0.4, 0)
+    star.BackgroundTransparency = 1
+    star.Position = UDim2.new(0.3, 0, 0.2, 0)
+    star.ImageColor3 = Color3.fromRGB(255, 255, 0)  -- Neon yellow color
+
+    -- Rotate and move the star smoothly
+    local rotationTween = TweenService:Create(star, TweenInfo.new(2, Enum.EasingStyle.Linear, Enum.EasingDirection.InOut, -1), {Rotation = 360})
+    rotationTween:Play()
+
+    RunService.RenderStepped:Connect(function(delta)
+        star.Position = UDim2.new(0.3 + math.sin(tick()) * 0.1, 0, 0.2 + math.cos(tick()) * 0.1, 0)
     end)
+end
 
-    -- Remove text after 12 seconds
-    wait(2)
+-- Wiggling text effect
+local function wiggleText(element)
+    local wiggleTweenInfo = TweenInfo.new(0.1, Enum.EasingStyle.Linear, Enum.EasingDirection.InOut, -1, true)
+    local wiggleTween = TweenService:Create(element, wiggleTweenInfo, {Rotation = 5})
+    wiggleTween:Play()
+end
+
+-- Display the main message with fade-in, neon effect, wiggle, and fade-out
+local function displayMainMessage(screenGui)
+    local mainLabel = createLabel(screenGui, UDim2.new(0.8, 0, 0.2, 0), UDim2.new(0.1, 0, 0.3, 0), textMessage, Enum.Font.GothamBold, Color3.fromRGB(255, 255, 255))
+    local secondaryLabel = createLabel(screenGui, UDim2.new(0.8, 0, 0.1, 0), UDim2.new(0.1, 0, 0.5, 0), secondaryMessage, Enum.Font.Gotham, Color3.fromRGB(255, 255, 255))
+
+    -- Fade in, wiggle, and neon effect for the main label
+    fadeIn(mainLabel)
+    wiggleText(mainLabel)
+    applyNeonEffect({mainLabel})
+
+    -- Secondary label also fades in and wiggles slightly
+    fadeIn(secondaryLabel)
+    wiggleText(secondaryLabel)
+
+    -- Wait before fade-out
+    wait(textDisplayDuration)
+
+    -- Fade out both labels
+    fadeOut(mainLabel)
+    fadeOut(secondaryLabel)
     screenGui:Destroy()
 end
 
--- Call the function to display the neon text
-createNeonText()
+-- Display additional messages with neon effects and wiggle animation
+local function displayAdditionalMessages(screenGui)
+    local extraLabels = {
+        createLabel(screenGui, UDim2.new(0.7, 0, 0.1, 0), UDim2.new(0.15, 0, 0.6, 0), "More updates on Verbal Hub v2 coming soon!", Enum.Font.GothamBold, Color3.fromRGB(255, 255, 255)),
+        createLabel(screenGui, UDim2.new(0.7, 0, 0.1, 0), UDim2.new(0.15, 0, 0.7, 0), "Thank you for being patient!", Enum.Font.Gotham, Color3.fromRGB(200, 200, 255))
+    }
+
+    -- Fade in, wiggle, and neon effect for additional labels
+    for _, label in ipairs(extraLabels) do
+        fadeIn(label)
+        wiggleText(label)
+    end
+    applyNeonEffect(extraLabels)
+
+    -- Wait before fade-out
+    wait(textDisplayDuration)
+
+    -- Fade out additional labels
+    for _, label in ipairs(extraLabels) do
+        fadeOut(label)
+    end
+end
+
+-- Main function to initiate display of all messages
+local function displayAllMessages()
+    -- Create ScreenGui container
+    local screenGui = Instance.new("ScreenGui")
+    screenGui.Parent = playerGui
+    
+    -- Create and animate the star effect
+    createStarEffect(screenGui)
+
+    -- Display main and additional messages
+    displayMainMessage(screenGui)
+    displayAdditionalMessages(screenGui)
+end
+
+-- Call the main function to display all messages with effects
+displayAllMessages()
