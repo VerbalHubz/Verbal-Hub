@@ -43,6 +43,62 @@ local function GetIcon(IconName)
 		return nil
 	end
 end   
+local Orion = Instance.new("ScreenGui")
+Orion.Name = "Orion"
+Orion.Parent = game.CoreGui
+
+local Tabs = {} -- Store tabs for navigation
+local CurrentTab = nil -- Track current tab
+
+-- Create the search bar
+local SearchBar = Create("TextBox", {
+    PlaceholderText = "Search...",
+    Text = "",
+    Size = UDim2.new(0.3, 0, 0.05, 0),
+    Position = UDim2.new(0.35, 0, 0.02, 0),
+    BackgroundColor3 = Color3.fromRGB(30, 30, 30),
+    TextColor3 = Color3.fromRGB(255, 255, 255),
+    Font = Enum.Font.Gotham,
+    TextSize = 14
+}, {
+    Create("UICorner", { CornerRadius = UDim.new(0, 5) })
+})
+
+SearchBar.Parent = Orion
+
+-- Add the search bar to Orion GUI
+function AddTab(name, tabObject)
+    table.insert(Tabs, {Name = name, Object = tabObject})
+end
+
+-- Implement search functionality
+local function SearchAndOpenTab(query)
+    for _, tab in pairs(Tabs) do
+        if string.lower(tab.Name):find(string.lower(query)) then
+            if CurrentTab then
+                CurrentTab.Visible = false -- Hide current tab
+            end
+            tab.Object.Visible = true -- Show matching tab
+            CurrentTab = tab.Object
+            return
+        end
+    end
+end
+
+-- Trigger search when Enter is pressed
+AddConnection(SearchBar.FocusLost, function(enterPressed)
+    if enterPressed and SearchBar.Text ~= "" then
+        SearchAndOpenTab(SearchBar.Text)
+    end
+end)
+
+-- Example usage:
+-- Assume 'AddTab' function will be called whenever you create a new tab
+-- AddTab("Settings", SettingsTab) -- Replace `SettingsTab` with your actual tab instance
+-- AddTab("Home", HomeTab)
+
+-- Make the search bar draggable
+MakeDraggable(SearchBar, Orion)
 
 local Orion = Instance.new("ScreenGui")
 Orion.Name = "Orion"
@@ -1017,55 +1073,7 @@ end)
 				end	
 
 				return Button
-			end    -- Define the search bar function
-function ElementFunction:AddSearchBar(SearchBarConfig)
-    SearchBarConfig = SearchBarConfig or {}
-    SearchBarConfig.PlaceholderText = SearchBarConfig.PlaceholderText or "Search this page"
-    SearchBarConfig.Callback = SearchBarConfig.Callback or function() end
-    
-    -- Create the main search bar frame
-    local SearchBarFrame = AddThemeObject(SetProps(MakeElement("RoundFrame", Color3.fromRGB(255, 255, 0), 0, 5), {
-        Size = UDim2.new(1, 0, 0, 33),
-        Parent = ItemParent,
-    }), "Second")
-    
-    -- Add the search input box
-    local SearchInput = SetProps(MakeElement("TextBox"), {
-        Size = UDim2.new(1, -12, 1, 0),
-        Position = UDim2.new(0, 6, 0, 0),
-        Text = "",
-        PlaceholderText = SearchBarConfig.PlaceholderText,
-        Font = Enum.Font.GothamBold,
-        TextColor3 = Color3.fromRGB(255, 255, 255),
-        Name = "SearchInput",
-        Parent = SearchBarFrame,
-        TextXAlignment = Enum.TextXAlignment.Left
-    })
-
-    -- Callback for when the user presses Enter
-    SearchInput.FocusLost:Connect(function(enterPressed)
-        if enterPressed and SearchInput.Text ~= "" then
-            SearchBarConfig.Callback(SearchInput.Text)
-        end
-    end)
-
-    return SearchBarFrame
-end
-
--- Example of using the search bar
-local mySearchBar = ElementFunction:AddSearchBar({
-    PlaceholderText = "Search this page",
-    Callback = function(query)
-        -- Navigate to the tab with the name matching `query`
-        local targetTab = OrionLib:FindTab(query)
-        if targetTab then
-            OrionLib:SelectTab(targetTab)
-        else
-            print("No tab found with the name:", query)
-        end
-    end
-})
-
+			end    
 			function ElementFunction:AddToggle(ToggleConfig)
 				ToggleConfig = ToggleConfig or {}
 				ToggleConfig.Name = ToggleConfig.Name or "Toggle"
