@@ -1017,55 +1017,54 @@ end)
 				end	
 
 				return Button
-			end    function ElementFunction:AddSearchBar(SearchConfig)
-    SearchConfig = SearchConfig or {}
-    SearchConfig.Placeholder = SearchConfig.Placeholder or "Search..."
-    SearchConfig.Callback = SearchConfig.Callback or function() end
-
-    -- Search Bar Elements
-    local SearchBar = {}
-
-    -- Create TextBox Element for Search
-    local SearchBox = SetProps(MakeElement("TextBox"), {
-        Size = UDim2.new(1, -10, 0, 30),
-        Position = UDim2.new(0, 5, 0, 5),
-        PlaceholderText = SearchConfig.Placeholder,
-        Font = Enum.Font.Gotham,
-        TextSize = 14,
-        TextXAlignment = Enum.TextXAlignment.Left,
-        BackgroundTransparency = 0.5,
-        BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+			end    -- Define the search bar function
+function ElementFunction:AddSearchBar(SearchBarConfig)
+    SearchBarConfig = SearchBarConfig or {}
+    SearchBarConfig.PlaceholderText = SearchBarConfig.PlaceholderText or "Search this page"
+    SearchBarConfig.Callback = SearchBarConfig.Callback or function() end
+    
+    -- Create the main search bar frame
+    local SearchBarFrame = AddThemeObject(SetProps(MakeElement("RoundFrame", Color3.fromRGB(255, 255, 0), 0, 5), {
+        Size = UDim2.new(1, 0, 0, 33),
+        Parent = ItemParent,
+    }), "Second")
+    
+    -- Add the search input box
+    local SearchInput = SetProps(MakeElement("TextBox"), {
+        Size = UDim2.new(1, -12, 1, 0),
+        Position = UDim2.new(0, 6, 0, 0),
+        Text = "",
+        PlaceholderText = SearchBarConfig.PlaceholderText,
+        Font = Enum.Font.GothamBold,
+        TextColor3 = Color3.fromRGB(255, 255, 255),
+        Name = "SearchInput",
+        Parent = SearchBarFrame,
+        TextXAlignment = Enum.TextXAlignment.Left
     })
 
-    -- Add border and other decorations to the search box
-    local SearchBoxFrame = AddThemeObject(SetChildren(SetProps(MakeElement("RoundFrame", Color3.fromRGB(255, 255, 255), 0, 5), {
-        Size = UDim2.new(1, 0, 0, 30),
-        Parent = ItemParent
-    }), {
-        SetProps(MakeElement("Label", "", 15), {
-            Size = UDim2.new(1, -12, 1, 0),
-            Position = UDim2.new(0, 12, 0, 0),
-            Font = Enum.Font.GothamBold,
-            Name = "SearchLabel"
-        }),
-        SetProps(MakeElement("Stroke"), "Stroke"),
-        SearchBox
-    }), "SearchBarFrame")
-
-    -- Connect TextBox to search functionality
-    AddConnection(SearchBox:GetPropertyChangedSignal("Text"), function()
-        local searchText = SearchBox.Text:lower()
-
-        -- Execute callback function to filter or switch tabs based on searchText
-        SearchConfig.Callback(searchText)
+    -- Callback for when the user presses Enter
+    SearchInput.FocusLost:Connect(function(enterPressed)
+        if enterPressed and SearchInput.Text ~= "" then
+            SearchBarConfig.Callback(SearchInput.Text)
+        end
     end)
 
-    function SearchBar:SetPlaceholder(newText)
-        SearchBox.PlaceholderText = newText
-    end
-
-    return SearchBar
+    return SearchBarFrame
 end
+
+-- Example of using the search bar
+local mySearchBar = ElementFunction:AddSearchBar({
+    PlaceholderText = "Search this page",
+    Callback = function(query)
+        -- Navigate to the tab with the name matching `query`
+        local targetTab = OrionLib:FindTab(query)
+        if targetTab then
+            OrionLib:SelectTab(targetTab)
+        else
+            print("No tab found with the name:", query)
+        end
+    end
+})
 
 			function ElementFunction:AddToggle(ToggleConfig)
 				ToggleConfig = ToggleConfig or {}
