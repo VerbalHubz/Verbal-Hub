@@ -7,8 +7,8 @@ local RunService = game:GetService("RunService")
 -- Configuration settings
 local textDisplayDuration = 5 -- Duration for which the text is displayed
 local fadeDuration = 0.5  -- Duration for the fade-in and fade-out effect
-local textMessage = "Thank you for 100K views on Verbal Hub! 🎉 Stay tuned: Verbal Hub v2 is in progress with major updates and bug fixes. Loading... Please wait!"
-local secondaryMessage = "Verbal Hub v2 is in progress - expect improvements and bug fixes soon!"
+local textMessage = "WELCOME TO VERBAL HUB V2 BETA U R A BETA TESTER Loading... Please wait!"
+local secondaryMessage = "The Verbal Hub V2 is finally here, packed with major updates, enhancements, and new functionality! 💥 This release includes tons of improvements, bug fixes, and powerful additions that will change the way you play and interact with your scripts. 😎"
 
 -- Colors for the rainbow effect
 local colorChange = {
@@ -75,7 +75,7 @@ end
 local function createStarEffect(screenGui)
     local star = Instance.new("ImageLabel")
     star.Parent = screenGui
-    star.Image = "rbxassetid://18322110939"  -- Replace with an image ID for a star
+    star.Image = "rbxassetid://10566923911"  -- Replace with an image ID for a star
     star.Size = UDim2.new(0.4, 0, 0.4, 0)
     star.BackgroundTransparency = 1
     star.Position = UDim2.new(0.3, 0, 0.2, 0)
