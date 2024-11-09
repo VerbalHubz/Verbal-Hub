@@ -94,6 +94,75 @@ task.spawn(function()
 		Connection:Disconnect()
 	end
 end)
+-- Search Bar for Orion Hub
+local SearchBar = Create("Frame", {
+    Name = "SearchBar",
+    Parent = Orion,
+    Size = UDim2.new(0, 250, 0, 40),
+    Position = UDim2.new(0.5, -125, 0.1, 0),
+    BackgroundColor3 = OrionLib.Themes[OrionLib.SelectedTheme].Second,
+    BackgroundTransparency = 0.3,
+    CornerRadius = UDim.new(0, 20),
+    ClipsDescendants = true
+}, {
+    Create("TextBox", {
+        Name = "Input",
+        Size = UDim2.new(1, -10, 1, -10),
+        Position = UDim2.new(0, 5, 0, 5),
+        BackgroundTransparency = 1,
+        Text = "",
+        PlaceholderText = "Search...",
+        TextSize = 18,
+        TextColor3 = OrionLib.Themes[OrionLib.SelectedTheme].Text
+    })
+})
+
+-- Smoothly display the search bar with TweenService
+local function DisplaySearchBar()
+    local Tween = TweenService:Create(SearchBar, TweenInfo.new(0.5, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {Position = UDim2.new(0.5, -125, 0.2, 0)})
+    Tween:Play()
+end
+
+-- Smoothly hide the search bar
+local function HideSearchBar()
+    local Tween = TweenService:Create(SearchBar, TweenInfo.new(0.5, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {Position = UDim2.new(0.5, -125, -0.1, 0)})
+    Tween:Play()
+end
+
+-- Function to Search and Go To Elements
+local function SearchForElement(query)
+    for tabName, tabContent in pairs(OrionLib.Elements) do
+        for elementName, elementObject in pairs(tabContent) do
+            if string.find(elementName:lower(), query:lower()) then
+                OrionLib:SelectTab(tabName) -- Navigate to tab
+                elementObject:Focus() -- Focus on the searched element
+                return
+            end
+        end
+    end
+end
+
+-- Search event
+SearchBar.Input.FocusLost:Connect(function(enterPressed)
+    if enterPressed then
+        local query = SearchBar.Input.Text
+        SearchForElement(query)
+    end
+end)
+
+-- Toggle the search bar visibility with keybind (e.g., "F" key)
+UserInputService.InputBegan:Connect(function(input, isProcessed)
+    if not isProcessed and input.KeyCode == Enum.KeyCode.F then
+        if SearchBar.Visible then
+            HideSearchBar()
+        else
+            DisplaySearchBar()
+        end
+    end
+end)
+
+-- Initial hiding of the search bar
+HideSearchBar()
 
 local function MakeDraggable(DragPoint, Main)
 	pcall(function()
@@ -167,42 +236,6 @@ local function Round(Number, Factor)
 	if Result < 0 then Result = Result + Factor end
 	return Result
 end
-local function CreateSearchBar()
-    -- Create Search Box
-    local searchBox = Create("TextBox", {
-        Name = "SearchBox",
-        PlaceholderText = "Search...",
-        Size = UDim2.new(1, -10, 0, 30),
-        Position = UDim2.new(0, 5, 0, 5),
-        BackgroundTransparency = 0.2,
-        TextColor3 = OrionLib.Themes[OrionLib.SelectedTheme].Text,
-        BackgroundColor3 = OrionLib.Themes[OrionLib.SelectedTheme].Second,
-        TextSize = 18,
-        ClearTextOnFocus = false
-    })
-
-    -- Parent to the main UI or a suitable container
-    searchBox.Parent = Orion
-
-    -- Function to search UI elements
-    local function PerformSearch(query)
-        for _, element in pairs(OrionLib.Elements) do
-            if string.find(string.lower(element.Name), string.lower(query)) then
-                element.Visible = true -- Show elements matching the search
-            else
-                element.Visible = false -- Hide non-matching elements
-            end
-        end
-    end
-
-    -- Event listener for search text
-    searchBox:GetPropertyChangedSignal("Text"):Connect(function()
-        PerformSearch(searchBox.Text)
-    end)
-end
-
--- Initialize Search Bar
-CreateSearchBar()
 
 local function ReturnProperty(Object)
 	if Object:IsA("Frame") or Object:IsA("TextButton") then
