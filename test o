@@ -371,75 +371,6 @@ CreateElement("Label", function(Text, TextSize, Transparency)
 	})
 	return Label
 end)
--- Function to create a search bar for Orion Hub with smooth functionality
-function CreateSearchBar()
-    local SearchBar = Create("Frame", {
-        BackgroundTransparency = 0.2,
-        BackgroundColor3 = Color3.fromRGB(50, 50, 50),
-        Size = UDim2.new(1, -10, 0, 30),
-        ClipsDescendants = true
-    }, {
-        Create("UICorner", {
-            CornerRadius = UDim.new(0.5, 0) -- Smooth oval shape
-        }),
-        Create("UIPadding", {
-            PaddingBottom = UDim.new(0, 5),
-            PaddingLeft = UDim.new(0, 5),
-            PaddingRight = UDim.new(0, 5),
-            PaddingTop = UDim.new(0, 5)
-        })
-    })
-
-    -- Create the text input for search
-    local SearchInput = Create("TextBox", {
-        PlaceholderText = "Search...",
-        TextColor3 = Color3.fromRGB(255, 255, 255),
-        BackgroundTransparency = 1,
-        Size = UDim2.new(1, -40, 1, 0),
-        TextSize = 15,
-        Font = Enum.Font.Roboto
-    })
-    SearchInput.Parent = SearchBar
-
-    -- Search button icon
-    local SearchIcon = Create("ImageButton", {
-        Image = "rbxassetid://6031154874", -- Replace with an appropriate icon ID
-        BackgroundTransparency = 1,
-        Size = UDim2.new(0, 20, 0, 20),
-        Position = UDim2.new(1, -25, 0.5, -10)
-    })
-    SearchIcon.Parent = SearchBar
-
-    -- Search function to go through all elements and highlight matching items
-    local function PerformSearch(query)
-        for _, tab in pairs(OrionHubTabs) do -- Assuming OrionHubTabs is the table containing all tabs
-            for _, element in pairs(tab.Elements) do -- Assuming each tab has an Elements table
-                if string.find(string.lower(element.Name), string.lower(query)) then
-                    -- Scroll to and highlight the element, bring focus to the tab
-                    OrionHub:SelectTab(tab) -- Select the tab containing the item
-                    element.Highlighted = true -- This assumes the element has a way to show it’s highlighted
-                else
-                    element.Highlighted = false
-                end
-            end
-        end
-    end
-
-    -- Event for search input
-    SearchInput.FocusLost:Connect(function(enterPressed)
-        if enterPressed and SearchInput.Text ~= "" then
-            PerformSearch(SearchInput.Text)
-        end
-    end)
-
-    return SearchBar
-end
-
--- Adding the search bar to Orion GUI
-local MainGui = Create("ScreenGui", { Name = "OrionHubMain" }) -- Assuming MainGui is the root GUI for Orion Hub
-local SearchBar = CreateSearchBar()
-SearchBar.Parent = MainGui -- Adding the search bar to the main GUI
-
 
 local NotificationHolder = SetProps(SetChildren(MakeElement("TFrame"), {
 	SetProps(MakeElement("List"), {
@@ -1086,7 +1017,56 @@ end)
 				end	
 
 				return Button
-			end    
+			end    function ElementFunction:AddSearchBar(SearchConfig)
+    SearchConfig = SearchConfig or {}
+    SearchConfig.Placeholder = SearchConfig.Placeholder or "Search..."
+    SearchConfig.Callback = SearchConfig.Callback or function() end
+
+    -- Search Bar Elements
+    local SearchBar = {}
+
+    -- Create TextBox Element for Search
+    local SearchBox = SetProps(MakeElement("TextBox"), {
+        Size = UDim2.new(1, -10, 0, 30),
+        Position = UDim2.new(0, 5, 0, 5),
+        PlaceholderText = SearchConfig.Placeholder,
+        Font = Enum.Font.Gotham,
+        TextSize = 14,
+        TextXAlignment = Enum.TextXAlignment.Left,
+        BackgroundTransparency = 0.5,
+        BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+    })
+
+    -- Add border and other decorations to the search box
+    local SearchBoxFrame = AddThemeObject(SetChildren(SetProps(MakeElement("RoundFrame", Color3.fromRGB(255, 255, 255), 0, 5), {
+        Size = UDim2.new(1, 0, 0, 30),
+        Parent = ItemParent
+    }), {
+        SetProps(MakeElement("Label", "", 15), {
+            Size = UDim2.new(1, -12, 1, 0),
+            Position = UDim2.new(0, 12, 0, 0),
+            Font = Enum.Font.GothamBold,
+            Name = "SearchLabel"
+        }),
+        SetProps(MakeElement("Stroke"), "Stroke"),
+        SearchBox
+    }), "SearchBarFrame")
+
+    -- Connect TextBox to search functionality
+    AddConnection(SearchBox:GetPropertyChangedSignal("Text"), function()
+        local searchText = SearchBox.Text:lower()
+
+        -- Execute callback function to filter or switch tabs based on searchText
+        SearchConfig.Callback(searchText)
+    end)
+
+    function SearchBar:SetPlaceholder(newText)
+        SearchBox.PlaceholderText = newText
+    end
+
+    return SearchBar
+end
+
 			function ElementFunction:AddToggle(ToggleConfig)
 				ToggleConfig = ToggleConfig or {}
 				ToggleConfig.Name = ToggleConfig.Name or "Toggle"
