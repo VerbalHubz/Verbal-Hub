@@ -12,7 +12,7 @@ local orbitSpeed = 500
 local loopkillDelay = 0.5
 
 local whitelist = {
-    ["JESSETC92BACKUP1"] = true,
+    ["JESSETC92BACKUP23"] = true,
     ["hahshsin"] = true,
     ["76rgoyf"] = true,
     ["ggerrtasalt"] = true,
