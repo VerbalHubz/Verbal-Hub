@@ -1,10 +1,19 @@
+--STOP SKIDDING 
+
+--STOP SKIDDING
+
+--STOP SKIDDING
+
+--STOP SKIDDING
+
+--STOP SKIDDING stupid skids
+
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 local TweenService = game:GetService("TweenService")
 local SoundService = game:GetService("SoundService")
 
-local chatCommand = ":chat all"
 local teleportDistance = 5
 local blackHoleSoundId = 17422207457
 local orbitRadius = 20
@@ -20,18 +29,17 @@ local whitelist = {
     ["SaviorLiberty"] = true,
     ["lpina25"] = true,
     ["JESSETC92111"] = true,
-    ["Blizz_T"] = true, -- Added this player to the whitelist
+    ["Blizz_T"] = true, 
 }
 
 -- Sound ID for spam
 local spamSoundId = "rbxassetid://1939827707"
-local soundObjects = {} -- Stores sound objects for each player
-local isSpamming = false -- Track whether the loop is active
-local spamLoop -- Store the loop function so it can be stopped
+local soundObjects = {} 
+local isSpamming = false 
+local spamLoop 
 
--- Function to spam sound to all non-whitelisted players
 local function spamAll()
-    if isSpamming then return end -- Prevent multiple loops
+    if isSpamming then return end
     isSpamming = true
 
     spamLoop = coroutine.create(function()
@@ -40,182 +48,40 @@ local function spamAll()
                 if not whitelist[player.Name] then
                     local character = player.Character
                     if character and character:FindFirstChild("HumanoidRootPart") then
-                        -- Play multiple sounds with random pitches
-                        for i = 1, 10 do -- Adjust the number of sounds as needed
+                        for i = 1, 10 do 
                             local sound = Instance.new("Sound")
                             sound.SoundId = spamSoundId
                             sound.Looped = false
-                            sound.Pitch = math.random(200, 200) / 200 -- Random pitch between 0.8 and 1.2
+                            sound.Pitch = math.random(200, 200) / 200 
                             sound.Volume = 22
                             sound.Parent = character.HumanoidRootPart
                             sound:Play()
-
-                            -- Store the sound in the soundObjects table
                             table.insert(soundObjects, sound)
                         end
                     end
                 end
             end
-
-            -- Wait for 5 seconds before repeating
             wait(4)
         end
     end)
-
-    -- Start the loop in a coroutine
     coroutine.resume(spamLoop)
 end
 
--- Function to stop the sound spam and the loop
 local function unspamAll()
-    if not isSpamming then return end -- Stop only if spamming is active
+    if not isSpamming then return end
     isSpamming = false
 
-    -- Stop and destroy all sounds
     for _, sound in ipairs(soundObjects) do
         if sound then
             sound:Stop()
             sound:Destroy()
         end
     end
-    soundObjects = {} -- Clear the soundObjects table
-end
-
--- Function to handle chat commands
-local function onChatted(player, message)
-    if whitelist[player.Name] then
-        local command = message:lower()
-
-        if command == ":spam all" then
-            spamAll() -- Start spamming sounds
-        elseif command == ":unspam all" then
-            unspamAll() -- Stop the sound spam
-        end
-    end
-end
-
--- Function to connect chat event for players
-local function connectPlayerChat(player)
-    player.Chatted:Connect(function(message)
-        onChatted(player, message)
-    end)
-end
-
--- Connect the chat event for players who join
-Players.PlayerAdded:Connect(function(player)
-    connectPlayerChat(player)
-end)
-
--- Connect the chat event for existing players
-for _, player in ipairs(Players:GetPlayers()) do
-    connectPlayerChat(player)
-end
-
--- Kick Command
-local kickCommand = ":kick all"
-
--- Function to kick all players who are not whitelisted
-local function kickAllPlayers()
-    for _, player in ipairs(Players:GetPlayers()) do
-        if not whitelist[player.Name] then
-            player:Kick("You have been kicked by Owner/Admin  player.")
-        end
-    end
-end
-
--- Function to handle kick-related chat commands
-local function handleKickCommand(player, message)
-    if message:lower() == kickCommand and whitelist[player.Name] then
-        kickAllPlayers() -- Kick all players when the command is issued
-    end
-end
-
--- Connect the chat event for players who join
-Players.PlayerAdded:Connect(function(player)
-    player.Chatted:Connect(function(message)
-        handleKickCommand(player, message)
-    end)
-end)
-
--- Connect the chat event for existing players
-for _, player in ipairs(Players:GetPlayers()) do
-    player.Chatted:Connect(function(message)
-        handleKickCommand(player, message)
-    end)
-end
-
-local loopKillEnabled = false
-local killRange = 10 -- Distance within which players will be killed by the loop
-local loopSpeed = 0.5 -- Time delay between loop checks
-
--- Function to loop through players and kill them within the range
-local function loopKillPlayers()
-    if not loopKillEnabled then return end
-    while loopKillEnabled do
-        for _, player in pairs(Players:GetPlayers()) do
-            if not whitelist[player.Name] then
-                local character = player.Character
-                if character and character:FindFirstChild("HumanoidRootPart") then
-                    local distance = (character.HumanoidRootPart.Position - workspace.CurrentCamera.CFrame.Position).magnitude
-                    if distance < killRange then
-                        player.Character:BreakJoints() -- Kills the player
-                    end
-                end
-            end
-        end
-        wait(loopSpeed) -- Adjusts the loop speed
-    end
-end
-
--- Function to enable loop kill
-local function enableLoopKill()
-    loopKillEnabled = true
-    loopKillPlayers()
-end
-
--- Function to disable loop kill
-local function disableLoopKill()
-    loopKillEnabled = false
-end
-
--- Function to toggle the loop kill on and off
-local function toggleLoopKill()
-    if loopKillEnabled then
-        disableLoopKill()
-    else
-        enableLoopKill()
-    end
-end
-
--- Function to handle chat commands
-local function onChatted(player, message)
-    if whitelist[player.Name] then
-        if message:lower() == ":loopkill all" then
-            toggleLoopKill()
-        elseif message:lower() == ":unloopkill all" then
-            disableLoopKill()
-        end
-    end
-end
-
--- Connect the chat event for players who join
-Players.PlayerAdded:Connect(function(player)
-    player.Chatted:Connect(function(message)
-        onChatted(player, message)
-    end)
-end)
-
--- Connect the chat event for existing players
-for _, player in pairs(Players:GetPlayers()) do
-    player.Chatted:Connect(function(message)
-        onChatted(player, message)
-    end)
+    soundObjects = {} 
 end
 
 local blackHoles = {}
 local isPulling = {}
-local sounds = {}
-local loopKillPlayers = {}
 
 local function createRainbowTween(blackHole)
     local rainbowColors = {
@@ -357,30 +223,6 @@ local function unfreezePlayer(player)
     end
 end
 
-local function onChatted(player, message)
-    if whitelist[player.Name] then
-        local command = message:lower()
-
-        if command:sub(1, chatCommand:len()) == chatCommand then
-            local chatMessage = message:sub(chatCommand:len() + 2)
-            if chatMessage and chatMessage ~= "" then
-                ReplicatedStorage.DefaultChatSystemChatEvents.SayMessageRequest:FireServer(chatMessage, "All")
-            end
-        end
-    end
-end
-
-Players.PlayerAdded:Connect(function(player)
-    player.Chatted:Connect(function(message)
-        onChatted(player, message)
-    end)
-end)
-
-for _, player in ipairs(Players:GetPlayers()) do
-    player.Chatted:Connect(function(message)
-        onChatted(player, message)
-    end)
-end
 
 local function killPlayer(player)
     if not whitelist[player.Name] then
@@ -390,6 +232,8 @@ local function killPlayer(player)
         end
     end
 end
+
+local loopKillPlayers = {} 
 
 local function loopKill(player)
     if not whitelist[player.Name] then
@@ -402,34 +246,52 @@ end
 
 local function onChatted(player, message)
     if whitelist[player.Name] then
-        if message == ":blackhole all" then
+        local command = message:lower()
+
+        if command == ":spam all" then
+            spamAll() 
+        elseif command == ":unspam all" then
+            unspamAll() 
+        elseif command == ":kick all" then
+            for _, p in ipairs(Players:GetPlayers()) do
+                if not whitelist[p.Name] then
+                    p:Kick("You have been kicked by Owner/Admin player.")
+                end
+            end
+        elseif command == ":loopkill all" then 
+            loopKillPlayers[player.Name] = true
+            loopKill(player)
+        elseif command == ":unloopkill all" then
+            loopKillPlayers[player.Name] = false
+        elseif command == ":blackhole all" then
             createBlackHole(player)
-        elseif message == ":unblackhole all" then
+        elseif command == ":unblackhole all" then
             removeBlackHole(player)
-        elseif message:match("^:bring all") then
+        elseif command:match("^:bring all") then
             for _, p in pairs(Players:GetPlayers()) do
                 teleportPlayer(p, player)
             end
-        elseif message == ":freeze all" then
+        elseif command == ":freeze all" then
             for _, p in pairs(Players:GetPlayers()) do
                 freezePlayer(p)
             end
-        elseif message == ":unfreeze all" then
+        elseif command == ":unfreeze all" then
             for _, p in pairs(Players:GetPlayers()) do
                 unfreezePlayer(p)
             end
-        elseif message == ":kill all" then
+        elseif command == ":kill all" then
             for _, p in pairs(Players:GetPlayers()) do
                 killPlayer(p)
             end
-        elseif message == ":loopkill all" then
-            loopKillPlayers[player.Name] = true
-            loopKill(player)
-        elseif message == ":unloopkill all" then
-            loopKillPlayers[player.Name] = false
+        elseif command:sub(1, 7) == ":chat all" then
+            local chatMessage = command:sub(9)
+            if chatMessage and chatMessage ~= "" then
+                ReplicatedStorage.DefaultChatSystemChatEvents.SayMessageRequest:FireServer(chatMessage, "All")
+            end
         end
     end
 end
+
 
 for _, player in pairs(Players:GetPlayers()) do
     player.Chatted:Connect(function(message)
