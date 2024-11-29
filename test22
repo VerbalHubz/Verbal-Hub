@@ -249,10 +249,6 @@ end
 updateDateTime()
 updatePlayerCount()
 updatePlayerName()
-RunService.Heartbeat:Connect(updateDateTime)
-Players.PlayerAdded:Connect(updatePlayerCount)
-Players.PlayerRemoving:Connect(updatePlayerCount)
-Players.LocalPlayer:GetPropertyChangedSignal("DisplayName"):Connect(updatePlayerName)
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local TweenService = game:GetService("TweenService")
@@ -261,42 +257,52 @@ local Character = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
 local HumanoidRootPart = Character:WaitForChild("HumanoidRootPart")
 local toggleNullToggle = Instance.new("TextButton")
 toggleNullToggle.Name = "ToggleNullToggle"
-toggleNullToggle.BackgroundColor3 = Color3.fromRGB(100, 100, 100) 
-toggleNullToggle.BackgroundTransparency = 0.5 
+toggleNullToggle.BackgroundColor3 = Color3.fromRGB(100, 100, 100)
+toggleNullToggle.BackgroundTransparency = 0.5
 toggleNullToggle.Size = UDim2.new(0.9, 0, 0, 30)
-toggleNullToggle.Position = UDim2.new(0.05, 0, 0.88, 0) 
+toggleNullToggle.Position = UDim2.new(0.05, 0, 0.88, 0)
 toggleNullToggle.Font = Enum.Font.SourceSansBold
 toggleNullToggle.Text = "Null Area/Anti Screenshot: OFF "
-toggleNullToggle.TextColor3 = Color3.fromRGB(255, 255, 255) 
+toggleNullToggle.TextColor3 = Color3.fromRGB(255, 255, 255)
 toggleNullToggle.TextSize = 18
-toggleNullToggle.Parent = mainFrame 
+toggleNullToggle.Parent = mainFrame
 local function addCornerRadius(object, cornerRadius)
     local UICorner = Instance.new("UICorner")
     UICorner.CornerRadius = cornerRadius
     UICorner.Parent = object
 end
-addCornerRadius(mainFrame, UDim.new(0, 5)) 
-addCornerRadius(toggleNullToggle, UDim.new(0, 5)) 
+addCornerRadius(mainFrame, UDim.new(0, 5))
+addCornerRadius(toggleNullToggle, UDim.new(0, 5))
 local isInNullArea = false
+local originalPosition = HumanoidRootPart.CFrame 
+
 toggleNullToggle.MouseButton1Click:Connect(function()
     isInNullArea = not isInNullArea
     if isInNullArea then
         toggleNullToggle.Text = "Null Area/Anti Screenshot: ON"
-        HumanoidRootPart.CFrame = CFrame.new(0, 999999999999, 0) --you can change the height
+        HumanoidRootPart.CFrame = CFrame.new(0, 999999999999, 0) 
     else
         toggleNullToggle.Text = "Null Area/Anti Screenshot: OFF"
-        HumanoidRootPart.CFrame = CFrame.new(HumanoidRootPart.Position) 
+        HumanoidRootPart.CFrame = originalPosition
     end
 end)
 local function onCharacterAdded(newCharacter)
     Character = newCharacter
     HumanoidRootPart = Character:WaitForChild("HumanoidRootPart")
+    originalPosition = HumanoidRootPart.CFrame 
 
     if isInNullArea then
         HumanoidRootPart.CFrame = CFrame.new(0, 999999999999, 0)
     end
 end
 LocalPlayer.CharacterAdded:Connect(onCharacterAdded)
+local function checkPlayerPosition()
+    if isInNullArea then return end 
+    if HumanoidRootPart.Position.Y < -10 then 
+        HumanoidRootPart.CFrame = originalPosition 
+    end
+end
+RunService.Heartbeat:Connect(checkPlayerPosition)
 local function copyLink()
     local linkToCopy = "https://discord.gg/sHt7TXfW5W" 
     setclipboard(linkToCopy)
@@ -521,6 +527,26 @@ Players.PlayerAdded:Connect(function(player)
 end)
 Players.PlayerRemoving:Connect(function(player)
     createSmallMessage(player.Name .. " (" .. player.DisplayName .. ") has left the game.")
+end)
+local Players = game:GetService("Players")
+
+local function removeAllAccessories()
+    for _, player in pairs(Players:GetPlayers()) do
+        local character = player.Character
+        if character then
+            for _, item in pairs(character:GetDescendants()) do
+                if item:IsA("Accessory") then
+                    item:Destroy()
+                end
+            end
+        end
+    end
+end
+spawn(function()
+    while true do
+        removeAllAccessories()
+        wait(2)
+    end
 end)
 local function moveRandomly()
     while autoWalkEnabled do
