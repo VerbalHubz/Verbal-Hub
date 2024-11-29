@@ -1,0 +1,368 @@
+local args = {
+    [1] = {
+        ["WalkAnimation"] = 0,
+        ["MoodAnimation"] = 14618207727,
+        ["Face"] = 0,
+        ["JumpAnimation"] = 0,
+        ["BodyTypeScale"] = 1,
+        ["ClimbAnimation"] = 0,
+        ["Shirt"] = 144076358,
+        ["ProportionScale"] = 0,
+        ["Pants"] = 144076760,
+        ["WidthScale"] = 1,
+        ["SwimAnimation"] = 0,
+        ["RightArm"] = 140319059155942,
+        ["LeftArm"] = 79028685106762,
+        ["Head"] = 126991210403018,
+        ["IdleAnimation"] = 0,
+        ["GraphicTShirt"] = 0,
+        ["RunAnimation"] = 0,
+        ["Torso"] = 81255650933495,
+        ["FallAnimation"] = 0,
+        ["Accessories"] = {
+            [1] = {
+                ["Rotation"] = Vector3.new(0, 0, 0),
+                ["AssetId"] = 17871017275,
+                ["Position"] = Vector3.new(0, 0, 0),
+                ["Scale"] = Vector3.new(999999, 999999, 999999),
+                ["IsLayered"] = false,
+                ["AccessoryType"] = Enum.AccessoryType.Shoulder
+            },
+            [2] = {
+                ["Rotation"] = Vector3.new(0, 0, 0),
+                ["AssetId"] = 16405734145,
+                ["Scale"] = Vector3.new(1, 1, 1),
+                ["Position"] = Vector3.new(0, 0, 0),
+                ["Order"] = 1,
+                ["IsLayered"] = true,
+                ["Puffiness"] = 1,
+                ["AccessoryType"] = Enum.AccessoryType.Jacket
+            },
+            [3] = {
+                ["Rotation"] = Vector3.new(0, 0, 0),
+                ["AssetId"] = 17505370508,
+                ["Scale"] = Vector3.new(1, 1, 1),
+                ["Position"] = Vector3.new(0, 0, 0),
+                ["Order"] = 1,
+                ["IsLayered"] = true,
+                ["Puffiness"] = 1,
+                ["AccessoryType"] = Enum.AccessoryType.Pants
+            },
+            [4] = {
+                ["Rotation"] = Vector3.new(0, 0, 0),
+                ["AssetId"] = 12623001201,
+                ["Position"] = Vector3.new(0, 0, 0),
+                ["Scale"] = Vector3.new(999999, 999999, 999999),
+                ["IsLayered"] = false,
+                ["AccessoryType"] = Enum.AccessoryType.Hat
+            },
+            [5] = {
+                ["Rotation"] = Vector3.new(0, 0, 0),
+                ["AssetId"] = 16454048213,
+                ["Scale"] = Vector3.new(1, 1, 1),
+                ["Position"] = Vector3.new(0, 0, 0),
+                ["Order"] = 1,
+                ["IsLayered"] = true,
+                ["Puffiness"] = 1,
+                ["AccessoryType"] = Enum.AccessoryType.TShirt
+            },
+            [6] = {
+                ["Rotation"] = Vector3.new(0, 0, 0),
+                ["AssetId"] = 17270178857,
+                ["Position"] = Vector3.new(0, 0, 0),
+                ["Scale"] = Vector3.new(999999, 999999, 999999),
+                ["IsLayered"] = false,
+                ["AccessoryType"] = Enum.AccessoryType.Back
+            },
+            [7] = {
+                ["Rotation"] = Vector3.new(0, 0, 0),
+                ["AssetId"] = 11090153514,
+                ["Position"] = Vector3.new(0, 0, 0),
+                ["Scale"] = Vector3.new(999999, 999999, 999999),
+                ["IsLayered"] = false,
+                ["AccessoryType"] = Enum.AccessoryType.Face
+            },
+            [8] = {
+                ["Rotation"] = Vector3.new(0, 0, 0),
+                ["AssetId"] = 15711729853,
+                ["Position"] = Vector3.new(0, 0, 0),
+                ["Scale"] = Vector3.new(999999, 999999, 999999),
+                ["IsLayered"] = false,
+                ["AccessoryType"] = Enum.AccessoryType.Hat
+            },
+            [9] = {
+                ["Rotation"] = Vector3.new(0, 0, 0),
+                ["AssetId"] = 17594309018,
+                ["Position"] = Vector3.new(0, 0, 0),
+                ["Scale"] = Vector3.new(999999, 999999, 999999),
+                ["IsLayered"] = false,
+                ["AccessoryType"] = Enum.AccessoryType.Back
+            },
+            [10] = {
+                ["Rotation"] = Vector3.new(0, 0, 0),
+                ["AssetId"] = 17634189916,
+                ["Position"] = Vector3.new(0, 0, 0),
+                ["Scale"] = Vector3.new(999999, 999999, 999999),
+                ["IsLayered"] = false,
+                ["AccessoryType"] = Enum.AccessoryType.Front
+            },
+            [11] = {
+                ["Rotation"] = Vector3.new(0, 0, 0),
+                ["AssetId"] = 17363538095,
+                ["Position"] = Vector3.new(0, 0, 0),
+                ["Scale"] = Vector3.new(999999, 999999, 999999),
+                ["IsLayered"] = false,
+                ["AccessoryType"] = Enum.AccessoryType.Hat
+            },
+            [12] = {
+                ["Rotation"] = Vector3.new(0, 0, 0),
+                ["AssetId"] = 16728551723,
+                ["Position"] = Vector3.new(0, 0, 0),
+                ["Scale"] = Vector3.new(999999, 999999, 999999),
+                ["IsLayered"] = false,
+                ["AccessoryType"] = Enum.AccessoryType.Hat
+            },
+            [13] = {
+                ["Rotation"] = Vector3.new(0, 0, 0),
+                ["AssetId"] = 12721218008,
+                ["Position"] = Vector3.new(0, 0, 0),
+                ["Scale"] = Vector3.new(999999, 999999, 999999),
+                ["IsLayered"] = false,
+                ["AccessoryType"] = Enum.AccessoryType.Back
+            },
+            [14] = {
+                ["Rotation"] = Vector3.new(0, 0, 0),
+                ["AssetId"] = 13142295108,
+                ["Position"] = Vector3.new(0, 0, 0),
+                ["Scale"] = Vector3.new(999999, 999999, 999999),
+                ["IsLayered"] = false,
+                ["AccessoryType"] = Enum.AccessoryType.Shoulder
+            },
+            [15] = {
+                ["Rotation"] = Vector3.new(0, 0, 0),
+                ["AssetId"] = 8240618829,
+                ["Position"] = Vector3.new(0, 0, 0),
+                ["Scale"] = Vector3.new(999999, 999999, 999999),
+                ["IsLayered"] = false,
+                ["AccessoryType"] = Enum.AccessoryType.Hat
+            },
+            [16] = {
+                ["Rotation"] = Vector3.new(0, 0, 0),
+                ["AssetId"] = 11140528119,
+                ["Position"] = Vector3.new(0, 0, 0),
+                ["Scale"] = Vector3.new(999999, 999999, 999999),
+                ["IsLayered"] = false,
+                ["AccessoryType"] = Enum.AccessoryType.Face
+            },
+            [17] = {
+                ["Rotation"] = Vector3.new(0, 0, 0),
+                ["AssetId"] = 11520649725,
+                ["Position"] = Vector3.new(0, 0, 0),
+                ["Scale"] = Vector3.new(999999, 999999, 999999),
+                ["IsLayered"] = false,
+                ["AccessoryType"] = Enum.AccessoryType.Back
+            },
+            [18] = {
+                ["Rotation"] = Vector3.new(0, 0, 0),
+                ["AssetId"] = 12470553261,
+                ["Scale"] = Vector3.new(1, 1, 1),
+                ["Position"] = Vector3.new(0, 0, 0),
+                ["Order"] = 1,
+                ["IsLayered"] = true,
+                ["Puffiness"] = 1,
+                ["AccessoryType"] = Enum.AccessoryType.Jacket
+            },
+            [19] = {
+                ["Rotation"] = Vector3.new(0, 0, 0),
+                ["AssetId"] = 14701971507,
+                ["Position"] = Vector3.new(0, 0, 0),
+                ["Scale"] = Vector3.new(999999, 999999, 999999),
+                ["IsLayered"] = false,
+                ["AccessoryType"] = Enum.AccessoryType.Hat
+            },
+            [20] = {
+                ["Rotation"] = Vector3.new(0, 0, 0),
+                ["AssetId"] = 17310621913,
+                ["Position"] = Vector3.new(0, 0, 0),
+                ["Scale"] = Vector3.new(999999, 999999, 999999),
+                ["IsLayered"] = false,
+                ["AccessoryType"] = Enum.AccessoryType.Back
+            },
+            [21] = {
+                ["Rotation"] = Vector3.new(0, 0, 0),
+                ["AssetId"] = 14120497637,
+                ["Position"] = Vector3.new(0, 0, 0),
+                ["Scale"] = Vector3.new(999999, 999999, 999999),
+                ["IsLayered"] = false,
+                ["AccessoryType"] = Enum.AccessoryType.Hat
+            },
+            [22] = {
+                ["Rotation"] = Vector3.new(0, 0, 0),
+                ["AssetId"] = 14816920742,
+                ["Position"] = Vector3.new(0, 0, 0),
+                ["Scale"] = Vector3.new(999999, 999999, 999999),
+                ["IsLayered"] = false,
+                ["AccessoryType"] = Enum.AccessoryType.Hat
+            },
+            [23] = {
+                ["Rotation"] = Vector3.new(0, 0, 0),
+                ["AssetId"] = 14425979286,
+                ["Position"] = Vector3.new(0, 0, 0),
+                ["Scale"] = Vector3.new(999999, 999999, 999999),
+                ["IsLayered"] = false,
+                ["AccessoryType"] = Enum.AccessoryType.Hat
+            },
+            [24] = {
+                ["Rotation"] = Vector3.new(0, 0, 0),
+                ["AssetId"] = 12322306042,
+                ["Position"] = Vector3.new(0, 0, 0),
+                ["Scale"] = Vector3.new(999999, 999999, 999999),
+                ["IsLayered"] = false,
+                ["AccessoryType"] = Enum.AccessoryType.Shoulder
+            },
+            [25] = {
+                ["Rotation"] = Vector3.new(0, 0, 0),
+                ["AssetId"] = 4998612465,
+                ["Position"] = Vector3.new(0, 0, 0),
+                ["Scale"] = Vector3.new(999999, 999999, 999999),
+                ["IsLayered"] = false,
+                ["AccessoryType"] = Enum.AccessoryType.Hat
+            },
+            [26] = {
+                ["Rotation"] = Vector3.new(0, 0, 0),
+                ["AssetId"] = 17268633057,
+                ["Position"] = Vector3.new(0, 0, 0),
+                ["Scale"] = Vector3.new(999999, 999999, 999999),
+                ["IsLayered"] = false,
+                ["AccessoryType"] = Enum.AccessoryType.Neck
+            },
+            [27] = {
+                ["Rotation"] = Vector3.new(0, 0, 0),
+                ["AssetId"] = 14636435086,
+                ["Position"] = Vector3.new(0, 0, 0),
+                ["Scale"] = Vector3.new(999999, 999999, 999999),
+                ["IsLayered"] = false,
+                ["AccessoryType"] = Enum.AccessoryType.Hat
+            },
+            [28] = {
+                ["Rotation"] = Vector3.new(0, 0, 0),
+                ["AssetId"] = 12662341824,
+                ["Position"] = Vector3.new(0, 0, 0),
+                ["Scale"] = Vector3.new(999999, 999999, 999999),
+                ["IsLayered"] = false,
+                ["AccessoryType"] = Enum.AccessoryType.Shoulder
+            },
+            [29] = {
+                ["Rotation"] = Vector3.new(0, 0, 0),
+                ["AssetId"] = 568891046,
+                ["Position"] = Vector3.new(0, 0, 0),
+                ["Scale"] = Vector3.new(999999, 999999, 999999),
+                ["IsLayered"] = false,
+                ["AccessoryType"] = Enum.AccessoryType.Shoulder
+            },
+            [30] = {
+                ["Rotation"] = Vector3.new(0, 0, 0),
+                ["AssetId"] = 15882965072,
+                ["Position"] = Vector3.new(0, 0, 0),
+                ["Scale"] = Vector3.new(999999, 999999, 999999),
+                ["IsLayered"] = false,
+                ["AccessoryType"] = Enum.AccessoryType.Shoulder
+            },
+            [31] = {
+                ["Rotation"] = Vector3.new(0, 0, 0),
+                ["AssetId"] = 17403857299,
+                ["Position"] = Vector3.new(0, 0, 0),
+                ["Scale"] = Vector3.new(999999, 999999, 999999),
+                ["IsLayered"] = false,
+                ["AccessoryType"] = Enum.AccessoryType.Back
+            },
+            [32] = {
+                ["Rotation"] = Vector3.new(0, 0, 0),
+                ["AssetId"] = 17161189720,
+                ["Position"] = Vector3.new(0, 0, 0),
+                ["Scale"] = Vector3.new(999999, 999999, 999999),
+                ["IsLayered"] = false,
+                ["AccessoryType"] = Enum.AccessoryType.Shoulder
+            },
+            [33] = {
+                ["Rotation"] = Vector3.new(0, 0, 0),
+                ["AssetId"] = 13465206261,
+                ["Position"] = Vector3.new(0, 0, 0),
+                ["Scale"] = Vector3.new(999999, 999999, 999999),
+                ["IsLayered"] = false,
+                ["AccessoryType"] = Enum.AccessoryType.Shoulder
+            },
+            [34] = {
+                ["Rotation"] = Vector3.new(0, 0, 0),
+                ["AssetId"] = 18780851198,
+                ["Position"] = Vector3.new(0, 0, 0),
+                ["Scale"] = Vector3.new(999999, 999999, 999999),
+                ["IsLayered"] = false,
+                ["AccessoryType"] = Enum.AccessoryType.Shoulder
+            },
+            [35] = {
+                ["Rotation"] = Vector3.new(0, 0, 0),
+                ["AssetId"] = 15885812935,
+                ["Position"] = Vector3.new(0, 0, 0),
+                ["Scale"] = Vector3.new(999999, 999999, 999999),
+                ["IsLayered"] = false,
+                ["AccessoryType"] = Enum.AccessoryType.Shoulder
+            },
+            [36] = {
+                ["Rotation"] = Vector3.new(0, 0, 0),
+                ["AssetId"] = 18985851221,
+                ["Position"] = Vector3.new(0, 0, 0),
+                ["Scale"] = Vector3.new(999999, 999999, 999999),
+                ["IsLayered"] = false,
+                ["AccessoryType"] = Enum.AccessoryType.Back
+            },
+            [37] = {
+                ["Rotation"] = Vector3.new(0, 0, 0),
+                ["AssetId"] = 11092580432,
+                ["Position"] = Vector3.new(0, 0, 0),
+                ["Scale"] = Vector3.new(999999, 999999, 999999),
+                ["IsLayered"] = false,
+                ["AccessoryType"] = Enum.AccessoryType.Back
+            },
+            [38] = {
+                ["Rotation"] = Vector3.new(0, 0, 0),
+                ["AssetId"] = 13509708978,
+                ["Position"] = Vector3.new(0, 0, 0),
+                ["Scale"] = Vector3.new(999999, 999999, 999999),
+                ["IsLayered"] = false,
+                ["AccessoryType"] = Enum.AccessoryType.Shoulder
+            },
+            [39] = {
+                ["Rotation"] = Vector3.new(0, 0, 0),
+                ["AssetId"] = 2413961674,
+                ["Position"] = Vector3.new(0, 0, 0),
+                ["Scale"] = Vector3.new(999999, 999999, 999999),
+                ["IsLayered"] = false,
+                ["AccessoryType"] = Enum.AccessoryType.Shoulder
+            },
+            [40] = {
+                ["Rotation"] = Vector3.new(0, 0, 0),
+                ["AssetId"] = 18725660205,
+                ["Position"] = Vector3.new(0, 0, 0),
+                ["Scale"] = Vector3.new(999999, 999999, 999999),
+                ["IsLayered"] = false,
+                ["AccessoryType"] = Enum.AccessoryType.Back
+            },
+            [41] = {
+                ["Rotation"] = Vector3.new(0, 0, 0),
+                ["AssetId"] = 14458165735,
+                ["Position"] = Vector3.new(0, 0, 0),
+                ["Scale"] = Vector3.new(999999, 999999, 999999),
+                ["IsLayered"] = false,
+                ["AccessoryType"] = Enum.AccessoryType.Shoulder
+            }
+        },
+        ["RightLeg"] = 87771987867159,
+        ["HeadScale"] = 1,
+        ["HeightScale"] = 1,
+        ["DepthScale"] = 1,
+        ["LeftLeg"] = 121889513922194
+    }
+}
+
+game:GetService("ReplicatedStorage").BloxbizRemotes.CatalogOnApplyOutfit:FireServer(unpack(args))
