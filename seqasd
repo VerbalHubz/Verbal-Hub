@@ -397,8 +397,8 @@ if checkForBloxbiz() then
     local toggleButton = Instance.new("TextButton", ScreenGui)
     toggleButton.Name = "ToggleButton"
     toggleButton.BackgroundColor3 = Color3.new(0.2, 0.2, 0.2)
-    toggleButton.Size = UDim2.new(0.15, 0, 0.05, 0)
-    toggleButton.Position = UDim2.new(0.4, 0, 0.99, 0)
+    toggleButton.Size = UDim2.new(0.15, 0, 0.5, 0)
+    toggleButton.Position = UDim2.new(0.4, 0, 0.60, 0)
     toggleButton.Font = Enum.Font.SourceSansBold
     toggleButton.Text = "Enable Crasher"
     toggleButton.TextColor3 = Color3.new(1, 1, 1)
