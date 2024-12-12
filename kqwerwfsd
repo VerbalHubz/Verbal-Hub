@@ -1,0 +1,329 @@
+loadstring([[
+	function LPH_NO_VIRTUALIZE(f) return f end;
+
+	function LPH_JIT(f) return f end;
+
+	function LPH_JIT_MAX(f) return f end;
+]])(); 
+
+-- TODO: Please read the comments
+
+-- Variables
+local ServiceIdentifier = "infinix" or "(__YourServiceIdentifier__)"
+local ServiceName = "Infinixity" or "(__YourServiceName__)"
+local APIToken = "Meow?" or "(__YourAPIToken__)"
+local KeyPrefix = "Infinix_" or "(__YourKeyPrefix__)"
+local KeyFileDirectory = "InfiniX" or "(__YourKeyFileDirectory__)"
+
+local PandaAuth = (function()
+	if true then
+		local cloneref = cloneref or function(...) return ... end
+
+		local service = setmetatable({}, {
+			__index = function(self, key)
+				return cloneref(game.GetService(game, key))
+			end
+		})
+
+		local HttpService = service.HttpService
+
+		local LibraryName = "VAL"
+
+		local CachePath = "VALCache"
+		
+		if makefolder then
+			makefolder(CachePath)
+		end
+		
+		local URLSource = "https://raw.githubusercontent.com/Panda-Repositories/PandaKS_Libraries/main/library/LuaLib/ROBLOX/VAL"
+
+		local Source = nil
+
+		local response = game:HttpGet("https://api.github.com/repos/Panda-Repositories/PandaKS_Libraries/contents/library/LuaLib/ROBLOX/VAL")
+		
+		local CacheSource = function()
+			Source = game:HttpGet(URLSource)
+
+			if writefile then
+				writefile(CachePath .. "/" .. LibraryName, HttpService:JSONEncode({
+					Source = Source;
+					Commit = response;
+				}))
+			end
+			
+			warn("Loaded Fresh", LibraryName)
+
+			return loadstring(Source)()
+		end
+
+		if isfile then
+			if isfile(CachePath .. "/" .. LibraryName) then
+				if HttpService:JSONDecode(readfile(CachePath .. "/" .. LibraryName)).Commit == response then
+					Source = HttpService:JSONDecode(readfile(CachePath .. "/" .. LibraryName)).Source
+
+					warn("Loaded Cache", LibraryName)
+
+					return loadstring(Source)()
+				else
+					return CacheSource()
+				end
+			else
+				return CacheSource()
+			end
+		else
+			return CacheSource()
+		end
+	else
+		return loadstring(game:HttpGet("https://raw.githubusercontent.com/Panda-Repositories/PandaKS_Libraries/main/library/LuaLib/ROBLOX/VAL", true))()
+	end
+end)()
+
+--[[ 
+PandaAuth:SetFetchId(function(self, idType) -- Custom HWID handler
+	return hwid
+end)
+--]]
+
+local VALVersion = "1.1.0"
+
+if PandaAuth then
+	if PandaAuth.Version ~= VALVersion then
+		warn(("[VAL] Script's VAL use version %s not matching with VAL's version %s."):format(VALVersion, PandaAuth.Version))
+	end
+end
+
+local IndexCount = {}
+
+local InternalValues =  setmetatable({ -- // Change
+	Service = ("%s"):format(ServiceIdentifier);
+	APIToken = ("%s"):format(APIToken);
+	VigenereKey = tostring({}) .. tostring(function() end) .. tostring(workspace["GetServerTimeNow" .. ("\0"):rep(math.random(2, 32))](workspace) + math.random(os.clock(), 999999999 or os.time())) .. ("\0"):rep(math.random(2, 32));
+	TrueEndpoint = tostring({}) .. tostring(function() end) .. tostring(workspace["GetServerTimeNow" .. ("\0"):rep(math.random(2, 32))](workspace) + math.random(os.clock(), 999999999 or os.time())) .. ("\0"):rep(math.random(2, 32));
+	FalseEndpoint = tostring({}) .. tostring(function() end) .. tostring(workspace["GetServerTimeNow" .. ("\0"):rep(math.random(2, 32))](workspace) + math.random(os.clock(), 999999999 or os.time())) .. ("\0"):rep(math.random(2, 32));
+	KickWebhook = nil;
+	ValidWebhook = nil;
+	InvalidWebhook = nil;
+	Debug = false;
+}, {
+	__newindex = function(self, key, value)
+		while true do end return
+	end;
+	__tostring = function(self)
+		while true do end return
+	end;
+});
+
+local InternalTable = setmetatable({}, {
+	__index = function(self, key)
+		IndexCount[key] = IndexCount[key] and IndexCount[key] + 1 or 1
+
+		return InternalValues[key]
+	end;
+	__newindex = function(self, key, value)
+		while true do end return
+	end;
+	__tostring = function(self)
+		while true do end return
+	end;
+})
+
+local Internal = setmetatable({}, {
+	__index = function(self, key)
+		return InternalTable[key]
+	end;
+	__newindex = function(self, key, value)
+		while true do end return
+	end;
+	__tostring = function(self)
+		while true do end return
+	end;
+})
+
+local SetInternal = PandaAuth.SetInternal;
+PandaAuth:SetInternal(Internal)
+
+local FetchedInternal = PandaAuth:GetInternal()
+
+local Crypt = FetchedInternal.Crypt
+local SHA256 = Crypt:SHA256(Internal.TrueEndpoint, Internal.VigenereKey, nil, nil)
+local SyncTrue = Crypt:EncryptC(SHA256, Internal.VigenereKey, nil)
+
+-- TODO: Do not change these below unless told
+-- Below is the entire validation process meaning you can place it in a button for example submit/validate a key
+
+local Directory = KeyFileDirectory -- TODO: Your directory here for write/read key
+
+local result = PandaAuth:ValidateKey(isfile(Directory) and readfile(Directory) or ("(Variable or Key to validate here)")) -- TODO: Change this to what you want to validate
+
+local IteratedTables = {}
+
+local ValueSpoofed; ValueSpoofed = function(val, tbl)
+	local ret = nil
+	
+	for i = 1, #tbl do
+		local v = tbl[i]
+
+		if v == val then
+			ret = true 
+			
+			break
+		elseif (
+			pcall(function()
+				return v[""]
+			end)
+			and not pcall(function()
+				return v .. v
+			end)
+		) and not IteratedTables[v] then
+			IteratedTables[v] = true
+			
+			ret = ValueSpoofed(val, v)
+			
+			break
+		end
+	end
+	
+	IteratedTables = {}
+	
+	return ret
+end
+
+if ValueSpoofed(result["KEY"], {result, SHA256, SyncTrue}) 
+or ValueSpoofed(result["Encrypted"], {result, SHA256}) then
+	while true do end do return end
+end
+
+local SanityCheck = (function(a1, a2)
+	return (
+		(
+			getfenv(a1)["getrenv\0"]
+			and getmetatable(getfenv(a1)["getrenv\0"])["__newindex"]
+			and getmetatable(getfenv(a1)["getrenv\0"])["__newindex"]() == SetInternal 
+			and a1 ~= SetInternal 
+			and getmetatable(getfenv(select(2, PandaAuth:SetInternal(Internal)))["getrenv\0"])["__newindex"]() == SetInternal 
+			and PandaAuth:SetInternal(Internal) == SetInternal
+		)
+		and (
+			getfenv(a2)["getrenv\0"]
+			and getfenv(a2)["getrenv\0"][1] == getfenv(a2)["getrenv\0"][1]
+			and getfenv(a2)["getrenv\0"][2]() == getfenv(a2)["getrenv\0"][1]
+			and getfenv(a2)["getrenv\0"][3]() == getfenv(a2)["getrenv\0"][1]
+			and getfenv(a2)["getrenv\0"][3][1] == getfenv(a2)["getrenv\0"][1]
+			and getfenv(a2)["getrenv\0"][4] == getfenv(a2)["getrenv\0"][4]
+			and (function()
+				getfenv(a2)["getrenv\0"][3][1] = "nil"
+	
+				return true
+			end)()
+			and getfenv(a2)["getrenv\0"][5] == getfenv(a2)["getrenv\0"][1]
+			and getfenv(getfenv(a2)["getrenv\0"][2])["getrenv\0"] == getmetatable(getfenv(a2)["getrenv\0"][3])
+		)
+	), true
+end)
+
+if (function()
+	local s, r = SanityCheck(PandaAuth.SetInternal, PandaAuth.ValidateKey)
+
+	return s == true and r == true
+end)()
+and not (function()
+	local s, r = SanityCheck(PandaAuth.GetInternal, PandaAuth.ValidateKey)
+
+	return s == true and r == true
+end)() then
+	if result
+	and (
+		(
+			result["KEY"] 
+			and type(result["ENV"]) == type(getfenv(1)) 
+			and result["Raw"] == Internal.TrueEndpoint 
+			and result["Encrypted"] == SyncTrue 
+			and result["Unencrypted"] == SHA256
+			and type(result["Premium"]) == "boolean" 
+			and #PandaAuth.Validated == 0
+			and (
+				not PandaAuth.Validated[0]
+				and (PandaAuth.Validated[1] == Internal.TrueEndpoint)
+				and (PandaAuth.Validated[2] == true)
+				and (PandaAuth.Validated[3] == false)
+			)
+			and (
+				(PandaAuth.Validated[result] == result)
+				and (PandaAuth.Validated[0] == result["Sanity"])
+				and (PandaAuth.Validated[1] == SyncTrue)
+				and (PandaAuth.Validated[2] == SHA256)
+				and (PandaAuth.Validated[3] == result)
+			)
+			and (
+				PandaAuth.Validated[0]
+				and not (PandaAuth.Validated[1] == SyncTrue)
+				and not (PandaAuth.Validated[2] == SHA256)
+				and not (PandaAuth.Validated[3] == result)
+				and (PandaAuth.Validated[result] == result)
+			)
+			and (PandaAuth.Validated[0] == result)
+			and not PandaAuth.Validated[0]
+			and (PandaAuth.Validated[-1] == result["Sanity"])
+			and (PandaAuth.Validated[1] == result)
+			and (PandaAuth.Validated[-1] ~= nil)
+			and (
+				(
+					getmetatable(result["Sanity"])
+					and getfenv(getmetatable(PandaAuth.Validated[0])(result["Encrypted"], result))[result["Encrypted"]]
+					and result["Sanity"][result["Encrypted"]]
+					and getfenv(PandaAuth.Validated[0](result["Encrypted"], result))[result["Encrypted"]]
+					and (function()
+						local s, r = SanityCheck(result["Sanity"][result["Encrypted"]][1], PandaAuth.Validated[0][result["Encrypted"]][2])
+					
+						return s == true and r == true
+					end)()
+				)
+			and (
+					(PandaAuth.Validated:CleanUp() == result)
+				)
+			and (
+					(function()
+						for i, v in pairs({
+							InternalValues;
+							InternalTable;
+							Internal;
+						}) do
+							setmetatable(v, nil)
+						end
+
+						return true
+					end)()
+				)
+			)
+		)
+	) then
+		writefile(Directory, result["KEY"])
+		
+		print("Key is valid:", result["KEY"])
+		
+		print("Is key premium:", result["Premium"])
+
+		-- TODO: Your script here after SUCCEEDING validation [SUCCESS: Option 1]
+	elseif result
+	and result["Raw"] == Internal.FalseEndpoint
+	and PandaAuth.Validated[1] == Internal.FalseEndpoint
+	and PandaAuth.Validated[2] == false then
+		print("Key is invalid.")
+
+		-- TODO: Your script here after FAILING validation [FAILURE: Option 1]
+
+		return false
+	else
+		while true do end do return end
+	end
+else
+	while true do end do return end
+end
+
+--[[
+-- Above is the entire validation process meaning you can place it in a button for example submit/validate a key
+-- TODO: Do not change these above unless told
+
+-- You can even put a script here below after the validation process because the validation process does a "return false" when it fails
+-- TODO: Your script here after SUCCEEDING validation [SUCCESS: Option 2]
+--]]
