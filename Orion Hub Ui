@@ -11,13 +11,13 @@ local OrionLib = {
 	Connections = {},
 	Flags = {},
 	Themes = {
-		Default = {
-			Main = Color3.fromRGB(0, 0, 0),
-			Second = Color3.fromRGB(0, 0, 0),
-			Stroke = Color3.fromRGB(0, 255, 0),
-			Divider = Color3.fromRGB(0, 0, 0),
-			Text = Color3.fromRGB(255, 255, 255),
-			TextDark = Color3.fromRGB(0, 255, 255)
+			Default = {
+			Main = Color3.fromRGB(25, 25, 25),
+			Second = Color3.fromRGB(32, 32, 32),
+			Stroke = Color3.fromRGB(60, 60, 60),
+			Divider = Color3.fromRGB(60, 60, 60),
+			Text = Color3.fromRGB(240, 240, 240),
+			TextDark = Color3.fromRGB(150, 150, 150)
 		}
 	},
 	SelectedTheme = "Default",
@@ -874,7 +874,182 @@ end)
 		AddConnection(Container.UIListLayout:GetPropertyChangedSignal("AbsoluteContentSize"), function()
 			Container.CanvasSize = UDim2.new(0, 0, 0, Container.UIListLayout.AbsoluteContentSize.Y + 30)
 		end)
-
+        function OrionLib:MakeWindow(WindowConfig)
+            local FirstTab = true
+            local Minimized = false
+            local Loaded = false
+            local UIHidden = false
+        
+            WindowConfig = WindowConfig or {}
+            WindowConfig.Name = WindowConfig.Name or "ScriptCentral Universal"
+            WindowConfig.ConfigFolder = WindowConfig.ConfigFolder or WindowConfig.Name
+            WindowConfig.SaveConfig = WindowConfig.SaveConfig or false
+            WindowConfig.HidePremium = WindowConfig.HidePremium or false
+            if WindowConfig.IntroEnabled == nil then
+                WindowConfig.IntroEnabled = true
+            end
+            WindowConfig.IntroText = WindowConfig.IntroText or "ScriptCentral Universal"
+            WindowConfig.CloseCallback = WindowConfig.CloseCallback or function() end
+            WindowConfig.ShowIcon = WindowConfig.ShowIcon or false
+            WindowConfig.Icon = WindowConfig.Icon or "rbxassetid://103928780885515"
+            WindowConfig.IntroIcon = WindowConfig.IntroIcon or "rbxassetid://103928780885515"
+            WindowConfig.SearchBar = WindowConfig.SearchBar or nil
+            OrionLib.Folder = WindowConfig.ConfigFolder
+            OrionLib.SaveCfg = WindowConfig.SaveConfig
+        
+            if WindowConfig.SaveConfig then
+                if (isfolder and makefolder) and not isfolder(WindowConfig.ConfigFolder) then
+                    makefolder(WindowConfig.ConfigFolder)
+                end	
+            end
+        
+            local TabHolder = AddThemeObject(SetChildren(SetProps(MakeElement("ScrollFrame", Color3.fromRGB(255, 255, 255), 4),
+                WindowConfig.SearchBar and {
+                    Size = UDim2.new(1, 0, 1, -90),
+                    Position = UDim2.new(0, 0, 0, 40)
+                } or {
+                    Size = UDim2.new(1, 0, 1, -50)
+                }),
+                {
+                    MakeElement("List"),
+                    MakeElement("Padding", 8, 0, 0, 8)
+                }), "Divider")
+        
+            AddConnection(TabHolder.UIListLayout:GetPropertyChangedSignal("AbsoluteContentSize"), function()
+                TabHolder.CanvasSize = UDim2.new(0, 0, 0, TabHolder.UIListLayout.AbsoluteContentSize.Y + 16)
+            end)
+        
+            local CloseBtn = SetChildren(SetProps(MakeElement("Button"), {
+                Size = UDim2.new(0.5, 0, 1, 0),
+                Position = UDim2.new(0.5, 0, 0, 0),
+                BackgroundTransparency = 1
+            }), {
+                AddThemeObject(SetProps(MakeElement("Image", "rbxassetid://7072725342"), {
+                    Position = UDim2.new(0, 9, 0, 6),
+                    Size = UDim2.new(0, 18, 0, 18)
+                }), "Text")
+            })
+        
+            local MinimizeBtn = SetChildren(SetProps(MakeElement("Button"), {
+                Size = UDim2.new(0.5, 0, 1, 0),
+                BackgroundTransparency = 1
+            }), {
+                AddThemeObject(SetProps(MakeElement("Image", "rbxassetid://7072719338"), {
+                    Position = UDim2.new(0, 9, 0, 6),
+                    Size = UDim2.new(0, 18, 0, 18),
+                    Name = "Ico"
+                }), "Text")
+            })
+        
+            local DragPoint = SetProps(MakeElement("TFrame"), {
+                Size = UDim2.new(1, 0, 0, 50)
+            })
+        
+            local WindowStuff = AddThemeObject(SetChildren(SetProps(MakeElement("RoundFrame", Color3.fromRGB(255, 255, 255), 0, 10), {
+                Size = UDim2.new(0, 150, 1, -50),
+                Position = UDim2.new(0, 0, 0, 50)
+            }), {
+                AddThemeObject(SetProps(MakeElement("Frame"), {
+                    Size = UDim2.new(1, 0, 0, 10),
+                    Position = UDim2.new(0, 0, 0, 0)
+                }), "Second"), 
+                AddThemeObject(SetProps(MakeElement("Frame"), {
+                    Size = UDim2.new(0, 10, 1, 0),
+                    Position = UDim2.new(1, -10, 0, 0)
+                }), "Second"), 
+                AddThemeObject(SetProps(MakeElement("Frame"), {
+                    Size = UDim2.new(0, 1, 1, 0),
+                    Position = UDim2.new(1, -1, 0, 0)
+                }), "Stroke"), 
+                TabHolder,
+                SetChildren(SetProps(MakeElement("TFrame"), {
+                    Size = UDim2.new(1, 0, 0, 50),
+                    Position = UDim2.new(0, 0, 1, -50)
+                }), {
+                    AddThemeObject(SetProps(MakeElement("Frame"), {
+                        Size = UDim2.new(1, 0, 0, 1)
+                    }), "Stroke"), 
+                    AddThemeObject(SetChildren(SetProps(MakeElement("Frame"), {
+                        AnchorPoint = Vector2.new(0, 0.5),
+                        Size = UDim2.new(0, 32, 0, 32),
+                        Position = UDim2.new(0, 10, 0.5, 0)
+                    }), {
+                        SetProps(MakeElement("Image", "https://www.roblox.com/headshot-thumbnail/image?userId=".. LocalPlayer.UserId .."&width=420&height=420&format=png"), {
+                            Size = UDim2.new(1, 0, 1, 0)
+                        }),
+                        AddThemeObject(SetProps(MakeElement("Image", "rbxassetid://4031889928"), {
+                            Size = UDim2.new(1, 0, 1, 0),
+                        }), "Second"),
+                        MakeElement("Corner", 1)
+                    }), "Divider"),
+                    SetChildren(SetProps(MakeElement("TFrame"), {
+                        AnchorPoint = Vector2.new(0, 0.5),
+                        Size = UDim2.new(0, 32, 0, 32),
+                        Position = UDim2.new(0, 10, 0.5, 0)
+                    }), {
+                        AddThemeObject(MakeElement("Stroke"), "Stroke"),
+                        MakeElement("Corner", 1)
+                    }),
+                    AddThemeObject(SetProps(MakeElement("Label", LocalPlayer.DisplayName, WindowConfig.HidePremium and 14 or 13), {
+                        Size = UDim2.new(1, -60, 0, 13),
+                        Position = WindowConfig.HidePremium and UDim2.new(0, 50, 0, 19) or UDim2.new(0, 50, 0, 12),
+                        Font = Enum.Font.GothamBold,
+                        ClipsDescendants = true
+                    }), "Text"),
+                    AddThemeObject(SetProps(MakeElement("Label", "", 12), {
+                        Size = UDim2.new(1, -60, 0, 12),
+                        Position = UDim2.new(0, 50, 1, -25),
+                        Visible = not WindowConfig.HidePremium
+                    }), "TextDark")
+                }),
+            }), "Second")
+        
+            -- @ SearchBar (Zv-yz/github);
+            local Tabs = {};
+        
+            if WindowConfig.SearchBar then
+                local SearchBox = Create("TextBox", {
+                    Size = UDim2.new(1, 0, 1, 0),
+                    BackgroundTransparency = 1,
+                    TextColor3 = Color3.fromRGB(255, 255, 255),
+                    PlaceholderColor3 = Color3.fromRGB(210,210,210),
+                    PlaceholderText = WindowConfig.SearchBar.Default or "🔍 Search",
+                    Font = Enum.Font.GothamBold,
+                    TextWrapped = true,
+                    Text = '',
+                    TextXAlignment = Enum.TextXAlignment.Center,
+                    TextSize = 14,
+                    ClearTextOnFocus = WindowConfig.SearchBar.ClearTextOnFocus or true
+                })
+        
+                local TextboxActual = AddThemeObject(SearchBox, "Text")
+        
+                local SearchBar = AddThemeObject(SetChildren(SetProps(MakeElement("RoundFrame", Color3.fromRGB(255, 255, 255), 1, 6), {
+                    Parent = WindowStuff,
+                    Size = UDim2.new(0, 130, 0, 24),
+                    Position = UDim2.new(1.013, -12, 0.075, 0),
+                    AnchorPoint = Vector2.new(1, 0.5)
+                }), {
+                    AddThemeObject(MakeElement("Stroke"), "Stroke"),
+                    TextboxActual
+                }), "Main")
+        
+                local function SearchHandle()
+                    local Text = string.lower(SearchBox.Text);
+        
+                    for i,v in pairs(Tabs) do
+                        if v:IsA('TextButton') then
+                            if string.find(string.lower(i), Text) then
+                                v.Visible = true
+                            else
+                                v.Visible = false
+                            end
+                        end
+                    end
+                end
+        
+                AddConnection(TextboxActual:GetPropertyChangedSignal("Text"), SearchHandle);
+            end 
 		if FirstTab then
 			FirstTab = false
 			TabFrame.Ico.ImageTransparency = 0
