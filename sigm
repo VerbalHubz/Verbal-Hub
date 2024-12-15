@@ -614,7 +614,7 @@ if WindowConfig.SearchBar then
 		Position = UDim2.new(1.013, -12, 0.075, 0),
 		AnchorPoint = Vector2.new(1, 0.5)
 	}), {
-		AddThemeObject(MakeElement("Stroke"), "Stroke")
+		AddThemeObject(MakeElement("Stroke"), "Stroke"),
 	}), "Main")
 
 	local SearchBox = Create("TextBox", {
@@ -629,20 +629,18 @@ if WindowConfig.SearchBar then
 		Text = '',
 		TextXAlignment = Enum.TextXAlignment.Center,
 		TextSize = 14,
-		ClearTextOnFocus = WindowConfig.SearchBar.ClearTextOnFocus or false -- Keep text by default
+		ClearTextOnFocus = WindowConfig.SearchBar.ClearTextOnFocus or false
 	})
 
 	local TextboxActual = AddThemeObject(SearchBox, "Text")
 
-	local function SearchHandle()
-		local Text = string.lower(SearchBox.Text);
+	local function SearchHandle(property)
+		if property == "Text" then
+			local Text = string.lower(SearchBox.Text);
 
-		for i,v in pairs(Tabs) do
-			if v:IsA('TextButton') then
-				if string.find(string.lower(i), Text) then
-					v.Visible = true
-				else
-					v.Visible = false
+			for i,v in pairs(Tabs) do
+				if v:IsA('TextButton') then
+					v.Visible = string.find(string.lower(i), Text)
 				end
 			end
 		end
@@ -650,7 +648,6 @@ if WindowConfig.SearchBar then
 
 	AddConnection(TextboxActual:GetPropertyChangedSignal("Text"), SearchHandle);
 end
-
 	local WindowName = AddThemeObject(SetProps(MakeElement("Label", WindowConfig.Name, 14), {
 		Size = UDim2.new(1, -30, 2, 0),
 		Position = UDim2.new(0, 25, 0, -24),
