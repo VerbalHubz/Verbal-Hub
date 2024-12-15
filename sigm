@@ -1519,12 +1519,90 @@ end)
 					TextContainer,
 					Click
 				}), "Second")
+-- Configure window defaults
+WindowConfig.IntroText = WindowConfig.IntroText or "ScriptCentral Universal"
+WindowConfig.CloseCallback = WindowConfig.CloseCallback or function() end
+WindowConfig.ShowIcon = WindowConfig.ShowIcon or false
+WindowConfig.Icon = WindowConfig.Icon or "rbxassetid://103928780885515"
+WindowConfig.IntroIcon = WindowConfig.IntroIcon or "rbxassetid://103928780885515"
+WindowConfig.SearchBar = WindowConfig.SearchBar or nil
+OrionLib.Folder = WindowConfig.ConfigFolder
+OrionLib.SaveCfg = WindowConfig.SaveConfig
+
+-- Create configuration folder if needed
+if WindowConfig.SaveConfig then
+    if isfolder and makefolder and not isfolder(WindowConfig.ConfigFolder) then
+        makefolder(WindowConfig.ConfigFolder)
+    end
+end
+
+-- Initialize UI elements
+local TabHolder = AddThemeObject(SetChildren(SetProps(MakeElement("ScrollFrame", Color3.fromRGB(255, 255, 255), 4),
+    WindowConfig.SearchBar and {
+        Size = UDim2.new(1, 0, 1, -90),
+        Position = UDim2.new(0, 0, 0, 40)
+    } or {
+        Size = UDim2.new(1, 0, 1, -50)
+    }),
+    {
+        MakeElement("List"),
+        MakeElement("Padding", 8, 0, 0, 8)
+    }), "Divider")
+
+-- Adjust canvas size dynamically based on content
+AddConnection(TabHolder.UIListLayout:GetPropertyChangedSignal("AbsoluteContentSize"), function()
+    TabHolder.CanvasSize = UDim2.new(0, 0, 0, TabHolder.UIListLayout.AbsoluteContentSize.Y + 16)
+end)
+
+-- Close button configuration
+local CloseBtn = SetChildren(SetProps(MakeElement("Button"), {
+    Size = UDim2.new(0.5, 0, 1, 0),
+    Position = UDim2.new(0.5, 0, 0, 0),
+    BackgroundTransparency = 1
+}), {
+    AddThemeObject(SetProps(MakeElement("Image", "rbxassetid://7072725342"), {
+        Position = UDim2.new(0, 9, 0, 6),
+        Size = UDim2.new(0, 18, 0, 18)
+    }), "Text")
+})
+
+-- Minimize button configuration
+local MinimizeBtn = SetChildren(SetProps(MakeElement("Button"), {
+    Size = UDim2.new(0.5, 0, 1, 0),
+    BackgroundTransparency = 1
+}), {
+    AddThemeObject(SetProps(MakeElement("Image", "rbxassetid://7072719338"), {
+        Position = UDim2.new(0, 9, 0, 6),
+        Size = UDim2.new(0, 18, 0, 18),
+        Name = "Ico"
+    }), "Text")
+})
+
+-- Drag handle
+local DragPoint = SetProps(MakeElement("TFrame"), {
+    Size = UDim2.new(1, 0, 0, 50)
+})
+
+-- Window container
+local WindowStuff = AddThemeObject(SetChildren(SetProps(MakeElement("RoundFrame", Color3.fromRGB(255, 255, 255), 0, 10), {
+    Size = UDim2.new(0, 150, 1, -50),
+    Position = UDim2.new(0, 0, 0, 50)
+}), {
+    AddThemeObject(SetProps(MakeElement("Frame"), {
+        Size = UDim2.new(1, 0, 0, 10),
+        Position = UDim2.new(0, 0, 0, 0)
+    }), "Second"),
+    TabHolder
+}), "Second")
+
+-- Search bar handling
+local Tabs = {}
 if WindowConfig.SearchBar then
     local SearchBox = Create("TextBox", {
         Size = UDim2.new(1, 0, 1, 0),
         BackgroundTransparency = 1,
         TextColor3 = Color3.fromRGB(255, 255, 255),
-        PlaceholderColor3 = Color3.fromRGB(210,210,210),
+        PlaceholderColor3 = Color3.fromRGB(210, 210, 210),
         PlaceholderText = WindowConfig.SearchBar.Default or "🔍 Search",
         Font = Enum.Font.GothamBold,
         TextWrapped = true,
@@ -1535,7 +1613,6 @@ if WindowConfig.SearchBar then
     })
 
     local TextboxActual = AddThemeObject(SearchBox, "Text")
-
     local SearchBar = AddThemeObject(SetChildren(SetProps(MakeElement("RoundFrame", Color3.fromRGB(255, 255, 255), 1, 6), {
         Parent = WindowStuff,
         Size = UDim2.new(0, 130, 0, 24),
@@ -1546,21 +1623,18 @@ if WindowConfig.SearchBar then
         TextboxActual
     }), "Main")
 
+    -- Search filtering logic
     local function SearchHandle()
-        local Text = string.lower(SearchBox.Text);
+        local Text = string.lower(SearchBox.Text)
 
-        for i,v in pairs(Tabs) do
+        for i, v in pairs(Tabs) do
             if v:IsA('TextButton') then
-                if string.find(string.lower(i), Text) then
-                    v.Visible = true
-                else
-                    v.Visible = false
-                end
+                v.Visible = string.find(string.lower(i), Text) and true or false
             end
         end
     end
 
-    AddConnection(TextboxActual:GetPropertyChangedSignal("Text"), SearchHandle);
+    AddConnection(TextboxActual:GetPropertyChangedSignal("Text"), SearchHandle)
 end
 				AddConnection(TextboxActual:GetPropertyChangedSignal("Text"), function()
 					--TextContainer.Size = UDim2.new(0, TextboxActual.TextBounds.X + 16, 0, 24)
