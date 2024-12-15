@@ -488,7 +488,7 @@ function OrionLib:MakeWindow(WindowConfig)
 	if WindowConfig.IntroEnabled == nil then
 		WindowConfig.IntroEnabled = true
 	end
-	WindowConfig.IntroText = WindowConfig.IntroText or "ScriptCentral Universal"
+WindowConfig.IntroText = WindowConfig.IntroText or "ScriptCentral Universal"
 WindowConfig.CloseCallback = WindowConfig.CloseCallback or function() end
 WindowConfig.ShowIcon = WindowConfig.ShowIcon or false
 WindowConfig.Icon = WindowConfig.Icon or "rbxassetid://103928780885515"
@@ -614,13 +614,12 @@ if WindowConfig.SearchBar then
 		Position = UDim2.new(1.013, -12, 0.075, 0),
 		AnchorPoint = Vector2.new(1, 0.5)
 	}), {
-		AddThemeObject(MakeElement("Stroke"), "Stroke"),
+		AddThemeObject(MakeElement("Stroke"), "Stroke")
 	}), "Main")
 
 	local SearchBox = Create("TextBox", {
 		Parent = SearchBar,
-		Size = UDim2.new(1, -10, 1, -4),
-		Position = UDim2.new(0, 5, 0, 2),
+		Size = UDim2.new(1, 0, 1, 0),
 		BackgroundTransparency = 1,
 		TextColor3 = Color3.fromRGB(255, 255, 255),
 		PlaceholderColor3 = Color3.fromRGB(210,210,210),
@@ -628,15 +627,18 @@ if WindowConfig.SearchBar then
 		Font = Enum.Font.GothamBold,
 		TextWrapped = true,
 		Text = '',
-		TextXAlignment = Enum.TextXAlignment.Left,
-		TextSize = 12,
-		ClearTextOnFocus = WindowConfig.SearchBar.ClearTextOnFocus or true
+		TextXAlignment = Enum.TextXAlignment.Center,
+		TextSize = 14,
+		ClearTextOnFocus = WindowConfig.SearchBar.ClearTextOnFocus or false
 	})
-	
-	local TextboxActual = AddThemeObject(SearchBox, "Text")
+    
+    -- Prevent the TextBox from clearing on focus
+    SearchBox.Focused:Connect(function()
+        SearchBox.Text = SearchBox.Text
+    end)
 
-	local function SearchHandle(text)
-		local Text = string.lower(text);
+	local function SearchHandle()
+		local Text = string.lower(SearchBox.Text);
 
 		for i,v in pairs(Tabs) do
 			if v:IsA('TextButton') then
@@ -649,9 +651,7 @@ if WindowConfig.SearchBar then
 		end
 	end
 
-	AddConnection(TextboxActual:GetPropertyChangedSignal("Text"), function()
-		SearchHandle(SearchBox.Text)
-	end)
+	AddConnection(SearchBox:GetPropertyChangedSignal("Text"), SearchHandle);
 end
 	local WindowName = AddThemeObject(SetProps(MakeElement("Label", WindowConfig.Name, 14), {
 		Size = UDim2.new(1, -30, 2, 0),
