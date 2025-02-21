@@ -1,4 +1,3 @@
---mproved 
 
 local player = game.Players.LocalPlayer
 local playerGui = player:WaitForChild("PlayerGui")
@@ -28,10 +27,10 @@ local function createLabel(parent, size, position, text, font, textColor)
 	label.Position = position
 	label.Text = text
 	label.Font = font
-	label.TextScaled = true     
-	label.TextStrokeTransparency = 0  
-	label.BackgroundTransparency = 1 
-	label.TextTransparency = 1     
+	label.TextScaled = true      -- Text scales to fit the label
+	label.TextStrokeTransparency = 0  -- Fully visible stroke, makes text stand out more
+	label.BackgroundTransparency = 1  -- Transparent background
+	label.TextTransparency = 1     -- Start fully transparent for fade-in
 	label.TextColor3 = textColor
 	return label
 end
@@ -40,10 +39,11 @@ local function fade(element, targetTransparency)
 	local tweenInfo = TweenInfo.new(fadeDuration)
 	local tween = TweenService:Create(element, tweenInfo, {TextTransparency = targetTransparency})
 	tween:Play()
-	tween.Completed:Wait() 
+	tween.Completed:Wait() -- Wait for the tween to finish before continuing
+end
 
 local function cycleColors(textLabel)
-	while textLabel and textLabel.Parent do  
+	while textLabel and textLabel.Parent do  -- Check if the label still exists
 		for _, color in ipairs(colorChange) do
 			local tweenInfo = TweenInfo.new(0.5)
 			local tween = TweenService:Create(textLabel, tweenInfo, {TextColor3 = color})
@@ -68,9 +68,11 @@ local function createStarEffect(screenGui)
 	star.Position = UDim2.new(0.3, 0, 0.2, 0)
 	star.ImageColor3 = Color3.fromRGB(255, 255, 0)  -- Yellow star
 
+	-- Rotate the star (smooth, continuous rotation)
 	local rotationTween = TweenService:Create(star, TweenInfo.new(2, Enum.EasingStyle.Linear, Enum.EasingDirection.InOut, -1), {Rotation = 360})
 	rotationTween:Play()
 
+	-- Animate star position using RenderStepped (more reliable than wait() for animations)
 	RunService.RenderStepped:Connect(function()
 		local time = tick()
 		star.Position = UDim2.new(0.3 + math.sin(time) * 0.1, 0, 0.2 + math.cos(time) * 0.1, 0)
@@ -78,27 +80,31 @@ local function createStarEffect(screenGui)
 end
 
 local function wiggleText(element)
-	local wiggleTweenInfo = TweenInfo.new(0.3, Enum.EasingStyle.Elastic, Enum.EasingDirection.Out, -1, true)  
+    -- Use a more descriptive variable name (wiggleTweenInfo)
+	local wiggleTweenInfo = TweenInfo.new(0.3, Enum.EasingStyle.Elastic, Enum.EasingDirection.Out, -1, true)  -- -1 repeats indefinitely, true auto-reverses
 	local wiggleTween = TweenService:Create(element, wiggleTweenInfo, {Rotation = 3})  --Wiggle to +3 and -3 degree.
 	wiggleTween:Play()
 end
+
+
 local function displayMainMessage(screenGui)
 	local mainLabel = createLabel(screenGui, UDim2.new(0.8, 0, 0.2, 0), UDim2.new(0.1, 0, 0.3, 0), textMessage, Enum.Font.GothamBold, Color3.fromRGB(255, 255, 255))
 	local secondaryLabel = createLabel(screenGui, UDim2.new(0.8, 0, 0.1, 0), UDim2.new(0.1, 0, 0.5, 0), secondaryMessage, Enum.Font.Gotham, Color3.fromRGB(255, 255, 255))
 
-	fade(mainLabel, 0)    
+	fade(mainLabel, 0)     -- Fade in
 	wiggleText(mainLabel)
-	applyNeonEffect({mainLabel})
+	applyNeonEffect({mainLabel}) -- Apply neon to only the main label
 
 	fade(secondaryLabel, 0) -- Fade in
 	wiggleText(secondaryLabel)
 
 	wait(textDisplayDuration)
 
-	fade(mainLabel, 1)     
-	fade(secondaryLabel, 1) 
+	fade(mainLabel, 1)     -- Fade out
+	fade(secondaryLabel, 1) -- Fade out
 
 end
+
 local function displayAdditionalMessages(screenGui)
 	local extraLabels = {
 		createLabel(screenGui, UDim2.new(0.7, 0, 0.1, 0), UDim2.new(0.15, 0, 0.6, 0), "More updates on Verbal Hub v2 coming soon!", Enum.Font.GothamBold, Color3.fromRGB(255, 255, 255)),
@@ -109,18 +115,20 @@ local function displayAdditionalMessages(screenGui)
 		fade(label, 0)      -- Fade in
 		wiggleText(label)
 	end
-	applyNeonEffect(extraLabels) 
+	applyNeonEffect(extraLabels) -- Apply neon to extra labels
 
 	wait(textDisplayDuration)
+
 	for _, label in ipairs(extraLabels) do
-		fade(label, 1)      
+		fade(label, 1)      -- Fade out
 	end
 end
+
 local function displayAllMessages()
 	-- Create ScreenGui (only create it once)
 	local screenGui = Instance.new("ScreenGui")
 	screenGui.Parent = playerGui
-	screenGui.ResetOnSpawn = false 
+	screenGui.ResetOnSpawn = false  
 	createStarEffect(screenGui)
 	displayMainMessage(screenGui)
 	displayAdditionalMessages(screenGui)
