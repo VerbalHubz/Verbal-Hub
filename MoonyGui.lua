@@ -576,3 +576,4 @@ end)
 
 
 print("little script testy hehee")
+print("asda script testy hehee")
