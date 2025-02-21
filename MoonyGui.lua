@@ -1,4 +1,3 @@
-
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
@@ -216,118 +215,113 @@ local blackHoles = {}
 local isPulling = {}
 
 local function createRainbowTween(blackHole)
-	local rainbowColors = {
-		Color3.fromRGB(255, 0, 0),
-		Color3.fromRGB(255, 165, 0),
-		Color3.fromRGB(255, 255, 0),
-		Color3.fromRGB(0, 255, 0),
-		Color3.fromRGB(0, 0, 255),
-		Color3.fromRGB(75, 0, 130),
-		Color3.fromRGB(238, 130, 238)
-	}
-	
-	local colorIndex = 1
+    local rainbowColors = {
+        Color3.fromRGB(255, 0, 0),
+        Color3.fromRGB(255, 165, 0),
+        Color3.fromRGB(255, 255, 0),
+        Color3.fromRGB(0, 255, 0),
+        Color3.fromRGB(0, 0, 255),
+        Color3.fromRGB(75, 0, 130),
+        Color3.fromRGB(238, 130, 238)
+    }
+    
+    local colorIndex = 1
 
-	local function tweenColor()
-		local nextColor = rainbowColors[colorIndex]
-		colorIndex = (colorIndex % #rainbowColors) + 1
+    local function tweenColor()
+        local nextColor = rainbowColors[colorIndex]
+        colorIndex = (colorIndex % #rainbowColors) + 1
 
-		local tween = TweenService:Create(
-			blackHole,
-			TweenInfo.new(0.3, Enum.EasingStyle.Linear, Enum.EasingDirection.InOut),
-			{Color = nextColor}
-		)
-		tween:Play()
-		tween.Completed:Connect(function()
-			tweenColor()
-		end)
-	end
+        local tween = TweenService:Create(
+            blackHole,
+            TweenInfo.new(0.3, Enum.EasingStyle.Linear, Enum.EasingDirection.InOut),
+            {Color = nextColor}
+        )
+        tween:Play()
+        tween.Completed:Connect(function()
+            tweenColor()
+        end)
+    end
 
-	tweenColor()
+    tweenColor()
 end
 
-local function createBlackHole(targetPlayer, requestingPlayer)
-    -- Don't create a black hole *on* the requesting player.
-    if targetPlayer == requestingPlayer then return end
-    if not whitelist[targetPlayer.Name] then  -- Only non-whitelisted players get a black hole.
+local function createBlackHole(targetPlayer)
+    local character = targetPlayer.Character
+    if not character or blackHoles[targetPlayer.Name] then return end
+    
+    local blackHole = Instance.new("Part")
+    blackHole.Size = Vector3.new(25, 25, 25)
+    blackHole.Shape = Enum.PartType.Ball
+    blackHole.Material = Enum.Material.Neon
+    blackHole.Color = Color3.fromRGB(0, 0, 0)
+    blackHole.Anchored = true
+    blackHole.CanCollide = false
+    blackHole.Parent = workspace
 
-	    local character = targetPlayer.Character
-	    if not character or blackHoles[targetPlayer.Name] then return end
+    local aura = Instance.new("ParticleEmitter")
+    aura.Texture = "rbxassetid://1344771186"
+    aura.Lifetime = NumberRange.new(1, 1)
+    aura.Rate = 250
+    aura.Size = NumberSequence.new(1)
+    aura.Speed = NumberRange.new(500, 500)
+    aura.Parent = blackHole
 
+    blackHoles[targetPlayer.Name] = blackHole
+    isPulling[targetPlayer.Name] = true
 
-	    local blackHole = Instance.new("Part")
-	    blackHole.Size = Vector3.new(25, 25, 25)
-	    blackHole.Shape = Enum.PartType.Ball
-	    blackHole.Material = Enum.Material.Neon
-	    blackHole.Color = Color3.fromRGB(0, 0, 0)
-	    blackHole.Anchored = true
-	    blackHole.CanCollide = false
-	    blackHole.Parent = workspace
+    local sound = Instance.new("Sound")
+    sound.SoundId = "rbxassetid://" .. blackHoleSoundId
+    sound.Looped = true
+    sound.Parent = SoundService
+    sound:Play()
 
-	    local aura = Instance.new("ParticleEmitter")
-	    aura.Texture = "rbxassetid://1344771186"
-	    aura.Lifetime = NumberRange.new(1, 1)
-	    aura.Rate = 250
-	    aura.Size = NumberSequence.new(1)
-	    aura.Speed = NumberRange.new(500, 500)
-	    aura.Parent = blackHole
+    createRainbowTween(blackHole)
 
-	    blackHoles[targetPlayer.Name] = blackHole
-	    isPulling[targetPlayer.Name] = true
+    local angle = 0
+    RunService.Heartbeat:Connect(function()
+        if isPulling[targetPlayer.Name] and blackHoles[targetPlayer.Name] then
+            local hrp = character:FindFirstChild("HumanoidRootPart")
+            if hrp then
+                angle = angle + orbitSpeed * RunService.Heartbeat:Wait()
+                local offset = Vector3.new(math.cos(angle) * orbitRadius, 0, math.sin(angle) * orbitRadius)
+                blackHole.Position = hrp.Position + offset
 
-	    local sound = Instance.new("Sound")
-	    sound.SoundId = "rbxassetid://" .. blackHoleSoundId
-	    sound.Looped = true
-	    sound.Parent = SoundService  -- Put in SoundService so all hear.
-	    sound:Play()
+                for _, p in pairs(Players:GetPlayers()) do
+                    if not whitelist[p.Name] then
+                        if p.Character and p.Character:FindFirstChild("HumanoidRootPart") then
+                            local distance = (p.Character.HumanoidRootPart.Position - blackHole.Position).magnitude
+                            if distance < 100 then
+                                local force = Instance.new("BodyPosition")
+                                force.MaxForce = Vector3.new(1e9, 1e9, 1e9)
+                                force.Position = blackHole.Position
+                                force.Parent = p.Character.HumanoidRootPart
+                                task.wait(0.5)
+                                force:Destroy()
+                            end
+                        end
+                    end
+                end
+            end
+        end
+    end)
+end
 
-	    createRainbowTween(blackHole)
+local function removeBlackHole(targetPlayer)
+    if blackHoles[targetPlayer.Name] then
+        local blackHole = blackHoles[targetPlayer.Name]
+        blackHole:Destroy()
+        blackHoles[targetPlayer.Name] = nil
+        isPulling[targetPlayer.Name] = false
 
-	    local angle = 0
-	    RunService.Heartbeat:Connect(function()
-		    if isPulling[targetPlayer.Name] and blackHoles[targetPlayer.Name] then
-			    local hrp = character:FindFirstChild("HumanoidRootPart")
-			    if hrp then
-				    angle = angle + orbitSpeed * RunService.Heartbeat:Wait()
-				    local offset = Vector3.new(math.cos(angle) * orbitRadius, 0, math.sin(angle) * orbitRadius)
-				    blackHole.Position = hrp.Position + offset
-
-				    for _, p in pairs(Players:GetPlayers()) do
-					    -- Check whitelist before applying the pull effect
-					    if not whitelist[p.Name] then
-						    if p.Character and p.Character:FindFirstChild("HumanoidRootPart") then
-							    local distance = (p.Character.HumanoidRootPart.Position - blackHole.Position).magnitude
-							    if distance < 100 then
-								    local force = Instance.new("BodyPosition")
-								    force.MaxForce = Vector3.new(1e9, 1e9, 1e9)
-								    force.Position = blackHole.Position
-								    force.Parent = p.Character.HumanoidRootPart
-								    task.wait(0.5)
-								    force:Destroy()
-							    end
-						    end
-					    end
-				    end
-			    end
-		    end
-	    end)
+        for _, sound in pairs(SoundService:GetChildren()) do
+            if sound:IsA("Sound") and sound.SoundId == "rbxassetid://" .. blackHoleSoundId then
+                sound:Stop()
+                sound:Destroy()
+            end
+        end
     end
 end
-local function removeBlackHole(targetPlayer)
-	if blackHoles[targetPlayer.Name] then
-		local blackHole = blackHoles[targetPlayer.Name]
-		blackHole:Destroy()
-		blackHoles[targetPlayer.Name] = nil
-		isPulling[targetPlayer.Name] = false
 
-		for _, sound in pairs(SoundService:GetChildren()) do
-			if sound:IsA("Sound") and sound.SoundId == "rbxassetid://" .. blackHoleSoundId then
-				sound:Stop()
-				sound:Destroy()
-			end
-		end
-	end
-end
 
 -- Sound ID for spam
 local spamSoundId = "rbxassetid://8046889679"
