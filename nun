@@ -1,11 +1,11 @@
-local player = game.Players.LocalPlayer
-local playerGui = player:WaitForChild("PlayerGui")
-local TweenService = game:GetService("TweenService")
-local RunService = game:GetService("RunService")
-local textDisplayDuration = 5 -- Duration for which the text is displayed
-local fadeDuration = 0.5  -- Duration for the fade-in and fade-out effect
-local textMessage = "Verbal V2 (Version 670) lastest"
-local secondaryMessage = " Verbal Hub V2 is finally back to updating,  😎"
+ player = game.Players.LocalPlayer
+ playerGui = player:WaitForChild("PlayerGui")
+ TweenService = game:GetService("TweenService")
+ RunService = game:GetService("RunService")
+ textDisplayDuration = 5 -- Duration for which the text is displayed
+ fadeDuration = 0.5  -- Duration for the fade-in and fade-out effect
+ textMessage = "Verbal V2 (Version 670) lastest"
+ secondaryMessage = " Verbal Hub V2 is finally back to updating,  😎"
 local colorChange = {
     Color3.fromRGB(255, 0, 0),    -- Red
     Color3.fromRGB(255, 165, 0),  -- Orange
@@ -62,12 +62,11 @@ end
 local function createStarEffect(screenGui)
     local star = Instance.new("ImageLabel")
     star.Parent = screenGui
-    star.Image = "rbxassetid://10566923911"  -- Replace with an image ID for a star
+    star.Image = "rbxassetid://111051465696915"  
     star.Size = UDim2.new(0.4, 0, 0.4, 0)
     star.BackgroundTransparency = 1
     star.Position = UDim2.new(0.3, 0, 0.2, 0)
-    star.ImageColor3 = Color3.fromRGB(255, 255, 0)  -- Neon yellow color
-
+    star.ImageColor3 = Color3.fromRGB(255, 255, 0)  
     local rotationTween = TweenService:Create(star, TweenInfo.new(2, Enum.EasingStyle.Linear, Enum.EasingDirection.InOut, -1), {Rotation = 360})
     rotationTween:Play()
 
