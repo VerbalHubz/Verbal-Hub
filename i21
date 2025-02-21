@@ -210,20 +210,9 @@ local function showObjects()
 	    end
     end
 end
+
 local blackHoles = {}
 local isPulling = {}
-
--- Create RemoteEvent to manage client-specific visibility
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local Players = game:GetService("Players")
-local RunService = game:GetService("RunService")
-local TweenService = game:GetService("TweenService")
-local SoundService = game:GetService("SoundService")
-
--- RemoteEvent for showing black holes to specific clients
-local showBlackHoleEvent = ReplicatedStorage:FindFirstChild("ShowBlackHole") 
-    or Instance.new("RemoteEvent", ReplicatedStorage)
-showBlackHoleEvent.Name = "ShowBlackHole"
 
 local function createRainbowTween(blackHole)
 	local rainbowColors = {
@@ -248,29 +237,85 @@ local function createRainbowTween(blackHole)
 			{Color = nextColor}
 		)
 		tween:Play()
-		tween.Completed:Connect(tweenColor)
+		tween.Completed:Connect(function()
+			tweenColor()
+		end)
 	end
 
 	tweenColor()
 end
 
 local function createBlackHole(targetPlayer, requestingPlayer)
+    -- Don't create a black hole *on* the requesting player.
     if targetPlayer == requestingPlayer then return end
     if not whitelist[targetPlayer.Name] then  -- Only non-whitelisted players get a black hole.
 
-        local character = targetPlayer.Character
-        if not character or blackHoles[targetPlayer.Name] then return end
+	    local character = targetPlayer.Character
+	    if not character or blackHoles[targetPlayer.Name] then return end
 
-        blackHoles[targetPlayer.Name] = true
-        isPulling[targetPlayer.Name] = true
 
-        -- Send the event to the whitelisted player only
-        showBlackHoleEvent:FireClient(requestingPlayer, targetPlayer.Name)
+	    local blackHole = Instance.new("Part")
+	    blackHole.Size = Vector3.new(25, 25, 25)
+	    blackHole.Shape = Enum.PartType.Ball
+	    blackHole.Material = Enum.Material.Neon
+	    blackHole.Color = Color3.fromRGB(0, 0, 0)
+	    blackHole.Anchored = true
+	    blackHole.CanCollide = false
+	    blackHole.Parent = workspace
+
+	    local aura = Instance.new("ParticleEmitter")
+	    aura.Texture = "rbxassetid://1344771186"
+	    aura.Lifetime = NumberRange.new(1, 1)
+	    aura.Rate = 250
+	    aura.Size = NumberSequence.new(1)
+	    aura.Speed = NumberRange.new(500, 500)
+	    aura.Parent = blackHole
+
+	    blackHoles[targetPlayer.Name] = blackHole
+	    isPulling[targetPlayer.Name] = true
+
+	    local sound = Instance.new("Sound")
+	    sound.SoundId = "rbxassetid://" .. blackHoleSoundId
+	    sound.Looped = true
+	    sound.Parent = SoundService  -- Put in SoundService so all hear.
+	    sound:Play()
+
+	    createRainbowTween(blackHole)
+
+	    local angle = 0
+	    RunService.Heartbeat:Connect(function()
+		    if isPulling[targetPlayer.Name] and blackHoles[targetPlayer.Name] then
+			    local hrp = character:FindFirstChild("HumanoidRootPart")
+			    if hrp then
+				    angle = angle + orbitSpeed * RunService.Heartbeat:Wait()
+				    local offset = Vector3.new(math.cos(angle) * orbitRadius, 0, math.sin(angle) * orbitRadius)
+				    blackHole.Position = hrp.Position + offset
+
+				    for _, p in pairs(Players:GetPlayers()) do
+					    -- Check whitelist before applying the pull effect
+					    if not whitelist[p.Name] then
+						    if p.Character and p.Character:FindFirstChild("HumanoidRootPart") then
+							    local distance = (p.Character.HumanoidRootPart.Position - blackHole.Position).magnitude
+							    if distance < 100 then
+								    local force = Instance.new("BodyPosition")
+								    force.MaxForce = Vector3.new(1e9, 1e9, 1e9)
+								    force.Position = blackHole.Position
+								    force.Parent = p.Character.HumanoidRootPart
+								    task.wait(0.5)
+								    force:Destroy()
+							    end
+						    end
+					    end
+				    end
+			    end
+		    end
+	    end)
     end
 end
-
 local function removeBlackHole(targetPlayer)
 	if blackHoles[targetPlayer.Name] then
+		local blackHole = blackHoles[targetPlayer.Name]
+		blackHole:Destroy()
 		blackHoles[targetPlayer.Name] = nil
 		isPulling[targetPlayer.Name] = false
 
@@ -282,7 +327,6 @@ local function removeBlackHole(targetPlayer)
 		end
 	end
 end
-
 
 -- Sound ID for spam
 local spamSoundId = "rbxassetid://8046889679"
