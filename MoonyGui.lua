@@ -23,7 +23,7 @@ local whitelist = {
 	["76rgoyf"] = true,
 	["ggerrtasalt"] = true,
 	["Lokick07"] = true,
-	[""] = true,
+	["Xx_sabrina726"] = true,
 	["lpina25"] = true,
 	["realsticsoccerowner"] = true,
 	["Blizz_T"] = true,
@@ -561,33 +561,7 @@ Players.PlayerAdded:Connect(function(player)
         onChatted(player, message)
     end)
 
-    -- Handle character loading for new players (also very important!)
-    player.CharacterAdded:Connect(function(character)
-        -- Connect CharacterRemoving to handle character death/respawn *within* CharacterAdded
-        player.CharacterRemoving:Connect(function(character)
-            if loopKillPlayers[player.Name] then
-                unloopKill(player)
-            end
-            removeBlackHole(player);
-        end)
-    end)
-
-     player.CharacterRemoving:Connect(function(character) --handles the character removing if it exists before character added.
-        if loopKillPlayers[player.Name] then
-            unloopKill(player)
-        end
-         removeBlackHole(player);
-    end)
-end)
-
-Players.PlayerRemoving:Connect(function(player)
-    -- Clean up if a player leaves the game
-    if loopKillPlayers[player.Name] then
-        unloopKill(player) -- Make absolutely sure loopkill is stopped
-    end
-    removeBlackHole(player); -- Ensure any black hole is removed.
-    unspamAll(); -- good practice to stop if admin leaves.
-end)
+  
 
 RunService.RenderStepped:Connect(function(dt)
     if Intensity > 0 then
