@@ -2,7 +2,7 @@
  playerGui = player:WaitForChild("PlayerGui")
  TweenService = game:GetService("TweenService")
  RunService = game:GetService("RunService")
- textDisplayDuration = 5 -- Duration for which the text is displayed
+ textDisplayDuration = 3.5 -- Duration for which the text is displayed
  fadeDuration = 0.5  -- Duration for the fade-in and fade-out effect
  textMessage = "Verbal V2 (Version 670) lastest"
  secondaryMessage = " Verbal Hub V2 is finally back to updating,  😎"
