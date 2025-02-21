@@ -527,54 +527,16 @@ local function onChatted(player, message)
     end
 end
 
--- Connect event handlers
-
--- Handle players who are already in the game when the script starts
-for _, player in ipairs(Players:GetPlayers()) do
+for _, player in pairs(Players:GetPlayers()) do
     player.Chatted:Connect(function(message)
         onChatted(player, message)
     end)
-
-    -- Handle character loading for existing players (important!)
-    if player.Character then
-        -- If the character exists, connect the CharacterRemoving event
-        player.CharacterRemoving:Connect(function(character)
-             if loopKillPlayers[player.Name] then  --check before unlooping
-                unloopKill(player) -- Clean up loopkill if character dies
-            end
-            removeBlackHole(player); --clean up blackhole
-        end)
-    else
-        -- If character doesn't exist yet, wait for it to be added
-        player.CharacterAdded:Wait()
-         player.CharacterRemoving:Connect(function(character)
-             if loopKillPlayers[player.Name] then
-                unloopKill(player) -- Clean up loopkill if character dies
-             end
-             removeBlackHole(player);
-        end)
-    end
 end
 
--- Handle players who join the game *after* the script starts
 Players.PlayerAdded:Connect(function(player)
     player.Chatted:Connect(function(message)
         onChatted(player, message)
     end)
-
-  
-
-RunService.RenderStepped:Connect(function(dt)
-    if Intensity > 0 then
-        TimeElapsed = TimeElapsed + dt
-        local SquishX = 1 + math.sin(TimeElapsed * 30) * Intensity
-        local SquishY = 1 + math.cos(TimeElapsed * 30) * Intensity
-
-        local MAGIC_FORMULA = CFrame.new(0, 0, 0, SquishX, 0, 0, 0, SquishY, 0, 0, 0, 1)
-        Cam.CFrame = Cam.CFrame * MAGIC_FORMULA
-    end
 end)
-
-
 print("little script testy hehee")
 print("asda script testy hehee")
