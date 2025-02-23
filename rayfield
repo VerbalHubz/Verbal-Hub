@@ -2916,47 +2916,38 @@ function RayfieldLibrary:CreateWindow(Settings)
 
             UserInputService.InputBegan:Connect(function(input, processed)
                 if CheckingForKey then
-                    -- Ensure input has a valid KeyCode
+                    -- Ensure KeyCode is valid
                     if input.KeyCode and input.KeyCode ~= Enum.KeyCode.Unknown then
                         local SplitMessage = string.split(tostring(input.KeyCode), ".")
-                        local NewKeyNoEnum = SplitMessage[#SplitMessage] -- Ensures it gets the correct part of the split
-            
-                        -- Ensure UI elements exist before assigning values
-                        if Keybind and Keybind.KeybindFrame and Keybind.KeybindFrame.KeybindBox then
-                            Keybind.KeybindFrame.KeybindBox.Text = NewKeyNoEnum or "None"
-                        end
-            
-                        KeybindSettings.CurrentKeybind = NewKeyNoEnum or ""
-            
-                        -- Release focus from the input box
-                        if Keybind and Keybind.KeybindFrame and Keybind.KeybindFrame.KeybindBox then
+                        local NewKeyNoEnum = SplitMessage[3] or SplitMessage[#SplitMessage] -- Fallback in case indexing fails
+                        
+                        if NewKeyNoEnum then
+                            Keybind.KeybindFrame.KeybindBox.Text = tostring(NewKeyNoEnum)
+                            KeybindSettings.CurrentKeybind = tostring(NewKeyNoEnum)
                             Keybind.KeybindFrame.KeybindBox:ReleaseFocus()
-                        end
-            
-                        -- Save configuration if necessary
-                        if not KeybindSettings.Ext then
-                            SaveConfiguration()
-                        end
-            
-                        -- Call the callback function if enabled
-                        if KeybindSettings.CallOnChange and KeybindSettings.Callback then
-                            KeybindSettings.Callback(NewKeyNoEnum)
-                        end
-                    end
-                elseif not processed and KeybindSettings.CurrentKeybind and KeybindSettings.CurrentKeybind ~= "" then
-                    -- Check if the pressed key matches the current keybind
-                    if input.KeyCode == Enum.KeyCode[KeybindSettings.CurrentKeybind] then
-                        local Held = true
-                        local Connection
-                        Connection = input.Changed:Connect(function(prop)
-                            if prop == "UserInputState" then
-                                Connection:Disconnect()
-                                Held = false
+                            
+                            if not KeybindSettings.Ext then
+                                SaveConfiguration()
                             end
-                        end)
+            
+                            if KeybindSettings.CallOnChange and KeybindSettings.Callback then
+                                KeybindSettings.Callback(tostring(NewKeyNoEnum))
+                            end
+                        end
                     end
+                elseif not processed and KeybindSettings.CurrentKeybind and input.KeyCode == Enum.KeyCode[KeybindSettings.CurrentKeybind] then
+                    local Held = true
+                    local Connection
+            
+                    Connection = input.Changed:Connect(function(prop)
+                        if prop == "UserInputState" then
+                            Connection:Disconnect()
+                            Held = false
+                        end
+                    end)
                 end
             end)
+            
 
 					if not KeybindSettings.HoldToInteract then
 						local Success, Response = pcall(KeybindSettings.Callback)
