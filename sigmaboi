@@ -11,8 +11,8 @@ local OrionLib = {
 	Connections = {},
 	Flags = {},
 	Themes = {
-		Default = {
-			Main = Color3.fromRGB(25, 25, 25),
+			Default = {
+			Main = Color3.fromRGB(0, 0, 255),
 			Second = Color3.fromRGB(32, 32, 32),
 			Stroke = Color3.fromRGB(60, 60, 60),
 			Divider = Color3.fromRGB(60, 60, 60),
@@ -24,84 +24,6 @@ local OrionLib = {
 	Folder = nil,
 	SaveCfg = false
 }
-
-local RunService = game:GetService("RunService")
-
--- 🌀 Smooth Rainbow Color Generator
-local function getRainbowColor(t)
-	local r = math.sin(t) * 127 + 128
-	local g = math.sin(t + 2) * 127 + 128
-	local b = math.sin(t + 4) * 127 + 128
-	return Color3.fromRGB(r, g, b)
-end
-
--- 🖌️ Apply Rainbow Theme Smoothly
-task.spawn(function()
-	while true do
-		local t = tick()
-		local rainbow = getRainbowColor(t / 4) -- slower change
-		local theme = OrionLib.Themes.Default
-
-		-- slowly interpolate to rainbow
-		local function lerpColor(c1, c2, alpha)
-			return Color3.new(
-				c1.R + (c2.R - c1.R) * alpha,
-				c1.G + (c2.G - c1.G) * alpha,
-				c1.B + (c2.B - c1.B) * alpha
-			)
-		end
-
-		local alpha = 0.1 -- how smooth the transition is
-		theme.Main = lerpColor(theme.Main, rainbow, alpha)
-		theme.Second = lerpColor(theme.Second, rainbow, alpha)
-		theme.Stroke = lerpColor(theme.Stroke, rainbow, alpha)
-		theme.Divider = lerpColor(theme.Divider, rainbow, alpha)
-		theme.Text = lerpColor(theme.Text, rainbow, alpha)
-		theme.TextDark = lerpColor(theme.TextDark, rainbow:lerp(Color3.new(0, 0, 0), 0.5), alpha)
-
-		RunService.RenderStepped:Wait()
-	end
-end)
-
--- 🧠 Smooth Title Text Switch
-local HubTitle = "Game Land Hub"
-local TextLabel = nil
-
--- Wait until UI is loaded and the label exists
-task.spawn(function()
-	while not TextLabel do
-		for _, v in pairs(game:GetDescendants()) do
-			if v:IsA("TextLabel") and v.Text == HubTitle then
-				TextLabel = v
-				break
-			end
-		end
-		task.wait(0.5)
-	end
-
-	while true do
-		-- Fade out
-		for i = 1, 20 do
-			TextLabel.TextTransparency = i / 20
-			task.wait(0.05)
-		end
-
-		-- Switch text
-		if TextLabel.Text == "Game Land Hub" then
-			TextLabel.Text = "Verbal Hub V3"
-		else
-			TextLabel.Text = "Game Land Hub"
-		end
-
-		-- Fade in
-		for i = 20, 0, -1 do
-			TextLabel.TextTransparency = i / 20
-			task.wait(0.05)
-		end
-
-		task.wait(5)
-	end
-end)
 
 --Feather Icons https://github.com/evoincorp/lucideblox/tree/master/src/modules/util - Created by 7kayoh
 local Icons = {}
