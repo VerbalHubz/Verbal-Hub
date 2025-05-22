@@ -1306,11 +1306,7 @@ function OrionLib:MakeWindow(WindowConfig)
 				local MaxElements = 5
 
 				if not table.find(Dropdown.Options, Dropdown.Value) then
-                    if #Dropdown.Options > 0 then
-                        Dropdown.Value = Dropdown.Options[1]
-                    else
-                        Dropdown.Value = "..."
-                    end
+					Dropdown.Value = "..."
 				end
 
 				local DropdownList = MakeElement("List")
@@ -1359,7 +1355,7 @@ function OrionLib:MakeWindow(WindowConfig)
 							Position = UDim2.new(0, 0, 1, -1),
 							Name = "Line",
 							Visible = false
-						}), "Stroke"),	
+						}), "Stroke"), 
 						Click
 					}), {
 						Size = UDim2.new(1, 0, 0, 38),
@@ -1372,7 +1368,7 @@ function OrionLib:MakeWindow(WindowConfig)
 
 				AddConnection(DropdownList:GetPropertyChangedSignal("AbsoluteContentSize"), function()
 					DropdownContainer.CanvasSize = UDim2.new(0, 0, 0, DropdownList.AbsoluteContentSize.Y)
-				end)	
+				end)  
 
 				local function AddOptions(Options)
 					for _, Option in pairs(Options) do
@@ -1392,8 +1388,9 @@ function OrionLib:MakeWindow(WindowConfig)
 
 						AddConnection(OptionBtn.MouseButton1Click, function()
 							Dropdown:Set(Option)
-							if OrionLib.SaveCfg and DropdownConfig.Save then SaveCfg(game.GameId) end
+							SaveCfg(game.GameId)
 						end)
+
 						Dropdown.Buttons[Option] = OptionBtn
 					end
 				end	
@@ -1401,67 +1398,47 @@ function OrionLib:MakeWindow(WindowConfig)
 				function Dropdown:Refresh(Options, Delete)
 					if Delete then
 						for _,v in pairs(Dropdown.Buttons) do
-                            if v and v.Parent then pcall(function() v:Destroy() end) end
-						end	
+							v:Destroy()
+						end    
 						table.clear(Dropdown.Options)
 						table.clear(Dropdown.Buttons)
 					end
-					Dropdown.Options = Options or {}
+					Dropdown.Options = Options
 					AddOptions(Dropdown.Options)
-				end	
+				end  
 
 				function Dropdown:Set(Value)
 					if not table.find(Dropdown.Options, Value) then
-                        if #Dropdown.Options > 0 then
-                            Dropdown.Value = Dropdown.Options[1]
-                        else
-                            Dropdown.Value = "..."
-                        end
+						Dropdown.Value = "..."
 						DropdownFrame.F.Selected.Text = Dropdown.Value
-						for optKey, optButton in pairs(Dropdown.Buttons) do
-                            if optButton and optButton.Parent then
-							    TweenService:Create(optButton,TweenInfo.new(.15, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),{BackgroundTransparency = 1}):Play()
-							    if optButton.Title then TweenService:Create(optButton.Title,TweenInfo.new(.15, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),{TextTransparency = 0.4}):Play() end
-                            end
+						for _, v in pairs(Dropdown.Buttons) do
+							TweenService:Create(v,TweenInfo.new(.15, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),{BackgroundTransparency = 1}):Play()
+							TweenService:Create(v.Title,TweenInfo.new(.15, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),{TextTransparency = 0.4}):Play()
 						end	
-						pcall(DropdownConfig.Callback, Dropdown.Value)
-                        return
+						return
 					end
 
 					Dropdown.Value = Value
 					DropdownFrame.F.Selected.Text = Dropdown.Value
 
-					for optKey, optButton in pairs(Dropdown.Buttons) do
-                        if optButton and optButton.Parent then
-						    TweenService:Create(optButton,TweenInfo.new(.15, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),{BackgroundTransparency = 1}):Play()
-						    if optButton.Title then TweenService:Create(optButton.Title,TweenInfo.new(.15, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),{TextTransparency = 0.4}):Play() end
-                        end
+					for _, v in pairs(Dropdown.Buttons) do
+						TweenService:Create(v,TweenInfo.new(.15, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),{BackgroundTransparency = 1}):Play()
+						TweenService:Create(v.Title,TweenInfo.new(.15, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),{TextTransparency = 0.4}):Play()
 					end	
-                    if Dropdown.Buttons[Value] and Dropdown.Buttons[Value].Parent then
-					    TweenService:Create(Dropdown.Buttons[Value],TweenInfo.new(.15, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),{BackgroundTransparency = 0}):Play()
-					    if Dropdown.Buttons[Value].Title then TweenService:Create(Dropdown.Buttons[Value].Title,TweenInfo.new(.15, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),{TextTransparency = 0}):Play() end
-                    end
-					pcall(DropdownConfig.Callback, Dropdown.Value)
+					TweenService:Create(Dropdown.Buttons[Value],TweenInfo.new(.15, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),{BackgroundTransparency = 0}):Play()
+					TweenService:Create(Dropdown.Buttons[Value].Title,TweenInfo.new(.15, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),{TextTransparency = 0}):Play()
+					return DropdownConfig.Callback(Dropdown.Value)
 				end
 
 				AddConnection(Click.MouseButton1Click, function()
 					Dropdown.Toggled = not Dropdown.Toggled
 					DropdownFrame.F.Line.Visible = Dropdown.Toggled
 					TweenService:Create(DropdownFrame.F.Ico,TweenInfo.new(.15, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),{Rotation = Dropdown.Toggled and 180 or 0}):Play()
-					
-                    local targetHeight
-                    if Dropdown.Toggled then
-                        local contentHeight = DropdownList.AbsoluteContentSize.Y
-                        if #Dropdown.Options > MaxElements then
-                            targetHeight = 38 + (MaxElements * 28) + (DropdownContainer.UIPadding and DropdownContainer.UIPadding.PaddingTop.Offset + DropdownContainer.UIPadding.PaddingBottom.Offset or 0)
-                        else
-                            targetHeight = 38 + contentHeight + (DropdownContainer.UIPadding and DropdownContainer.UIPadding.PaddingTop.Offset + DropdownContainer.UIPadding.PaddingBottom.Offset or 0)
-                        end
-                        if #Dropdown.Options == 0 then targetHeight = 38 end
-                    else
-                        targetHeight = 38
-                    end
-                    TweenService:Create(DropdownFrame,TweenInfo.new(.15, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),{Size = UDim2.new(1, 0, 0, targetHeight)}):Play()
+					if #Dropdown.Options > MaxElements then
+						TweenService:Create(DropdownFrame,TweenInfo.new(.15, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),{Size = Dropdown.Toggled and UDim2.new(1, 0, 0, 38 + (MaxElements * 28)) or UDim2.new(1, 0, 0, 38)}):Play()
+					else
+						TweenService:Create(DropdownFrame,TweenInfo.new(.15, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),{Size = Dropdown.Toggled and UDim2.new(1, 0, 0, DropdownList.AbsoluteContentSize.Y + 38) or UDim2.new(1, 0, 0, 38)}):Play()
+					end
 				end)
 
 				Dropdown:Refresh(Dropdown.Options, false)
