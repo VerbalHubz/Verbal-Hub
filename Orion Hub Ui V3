@@ -9,6 +9,17 @@ local RunService = game:GetService("RunService")
 local LocalPlayer = game:GetService("Players").LocalPlayer
 local Mouse = LocalPlayer:GetMouse()
 local HttpService = game:GetService("HttpService")
+if not getgenv then
+	getgenv = function() return _G end
+end
+if not game then
+	game = {
+		CoreGui = {},
+		GetService = function(_, name)
+			return {}
+		end
+	}
+end
 getgenv().gethui = function() return game.CoreGui end
 
 local OrionLib = {
