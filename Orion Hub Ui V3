@@ -44,12 +44,9 @@ local OrionLib = {
 
 local Icons = {}
 
-local SuccessIcons, ResponseIcons = pcall(function()
+local SuccessIcons = pcall(function()
 	Icons = HttpService:JSONDecode(game:HttpGetAsync("https://raw.githubusercontent.com/evoincorp/lucideblox/master/src/modules/util/icons.json")).icons
 end)
-
-if not SuccessIcons then
-end	
 
 local function GetIcon(IconName)
 	if Icons[IconName] ~= nil then
@@ -721,7 +718,7 @@ function OrionLib:MakeWindow(WindowConfig)
 		Visible = false,
 		AnchorPoint = Vector2.new(0.5, 0.5)
 	}), {
-		AddThemeObject(SetProps(MakeElement("Image", "rbxassetid://80901559446206"), {
+		AddThemeObject(SetProps(MakeElement("Image", "rbxassetid://125573730934394"), {
 			AnchorPoint = Vector2.new(0.5, 0.5),
 			Position = UDim2.new(0.5, 0, 0.5, 0),
 			Size = UDim2.new(0.7, 0, 0.7, 0)
