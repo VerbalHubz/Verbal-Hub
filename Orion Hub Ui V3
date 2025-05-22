@@ -2,7 +2,6 @@
 --more icons here https://icon-sets.iconify.design/material-symbols/?icon-filter=note
 --more icons here https://www.svgrepo.com/vectors/gui/2
 --made by itjose4 Dc
---fully fixed version 1.5 
 
 local UserInputService = game:GetService("UserInputService")
 local TweenService = game:GetService("TweenService")
@@ -245,6 +244,8 @@ local function LoadCfg(Config)
 				local s,e = pcall(function()
 					if OrionLib.Flags[a].Type == "Colorpicker" then
 						OrionLib.Flags[a]:Set(UnpackColor(b))
+					elseif OrionLib.Flags[a].Type == "Textbox" then
+						OrionLib.Flags[a]:Set(b, true) 
 					else
 						OrionLib.Flags[a]:Set(b)
 					end	
@@ -1406,7 +1407,6 @@ function OrionLib:MakeWindow(WindowConfig)
 				local DropdownContainer = AddThemeObject(SetProps(SetChildren(MakeElement("ScrollFrame", Color3.fromRGB(40, 40, 40), 4), {
 					DropdownList
 				}), {
-					Parent = ItemParent, 
 					Position = UDim2.new(0, 0, 0, 38),
 					Size = UDim2.new(1, 0, 1, -38),
 					ClipsDescendants = true
@@ -1562,9 +1562,12 @@ function OrionLib:MakeWindow(WindowConfig)
 						if DropdownList and DropdownList.AbsoluteContentSize then contentHeight = DropdownList.AbsoluteContentSize.Y end
 						
 						local paddingOffset = 0
-						if DropdownContainer and DropdownContainer.UIPadding then
+						if DropdownContainer and DropdownContainer:FindFirstChildOfClass("UIPadding") then
 							paddingOffset = DropdownContainer.UIPadding.PaddingTop.Offset + DropdownContainer.UIPadding.PaddingBottom.Offset
+						else 
+							paddingOffset = 8 
 						end
+
 
 						if #Dropdown.Options > MaxElements then
 							targetHeight = 38 + (MaxElements * 28) + paddingOffset
@@ -1723,19 +1726,27 @@ function OrionLib:MakeWindow(WindowConfig)
 				TextboxConfig = TextboxConfig or {}
 				TextboxConfig.Name = TextboxConfig.Name or "Textbox"
 				TextboxConfig.Default = TextboxConfig.Default or ""
+				TextboxConfig.ClearTextOnFocus = TextboxConfig.ClearTextOnFocus 
 				TextboxConfig.TextDisappear = TextboxConfig.TextDisappear or false
 				TextboxConfig.Callback = TextboxConfig.Callback or function() end
-				TextboxConfig.Numeric = TextboxConfig.Numeric or false	
+				TextboxConfig.Numeric = TextboxConfig.Numeric or false
 				TextboxConfig.Flag = TextboxConfig.Flag or nil
 				TextboxConfig.Save = TextboxConfig.Save or false
-
-				local Textbox = {Value = TextboxConfig.Default, Save = TextboxConfig.Save, Type = "Textbox"}
-
-
+			
+				local initialValue
+				if TextboxConfig.Numeric then
+					initialValue = tonumber(TextboxConfig.Default) or 0
+				else
+					initialValue = TextboxConfig.Default
+				end
+			
+				local Textbox = {Value = initialValue, Save = TextboxConfig.Save, Type = "Textbox"}
+				local previousText = tostring(Textbox.Value) 
+			
 				local Click = SetProps(MakeElement("Button"), {
 					Size = UDim2.new(1, 0, 1, 0)
 				})
-
+			
 				local TextboxActual = AddThemeObject(Create("TextBox", {
 					Size = UDim2.new(1, 0, 1, 0),
 					BackgroundTransparency = 1,
@@ -1745,9 +1756,10 @@ function OrionLib:MakeWindow(WindowConfig)
 					Font = Enum.Font.GothamSemibold,
 					TextXAlignment = Enum.TextXAlignment.Center,
 					TextSize = 14,
-					ClearTextOnFocus = false
+					Text = previousText,
+					ClearTextOnFocus = TextboxConfig.ClearTextOnFocus or false
 				}), "Text")
-
+			
 				local TextContainer = AddThemeObject(SetChildren(SetProps(MakeElement("RoundFrame", Color3.fromRGB(255, 255, 255), 0, 4), {
 					Size = UDim2.new(0, 24, 0, 24),
 					Position = UDim2.new(1, -12, 0.5, 0),
@@ -1756,8 +1768,7 @@ function OrionLib:MakeWindow(WindowConfig)
 					AddThemeObject(MakeElement("Stroke"), "Stroke"),
 					TextboxActual
 				}), "Main")
-
-
+			
 				local TextboxFrame = AddThemeObject(SetChildren(SetProps(MakeElement("RoundFrame", Color3.fromRGB(255, 255, 255), 0, 5), {
 					Size = UDim2.new(1, 0, 0, 38),
 					Parent = ItemParent
@@ -1772,86 +1783,112 @@ function OrionLib:MakeWindow(WindowConfig)
 					TextContainer,
 					Click
 				}), "Second")
-				
-				local previousText = TextboxConfig.Default or ""
-				if TextboxConfig.Numeric then
-					AddConnection(TextboxActual.FocusLost, function(enterPressed)
-						if enterPressed then
-							local num = tonumber(TextboxActual.Text)
-							if num then
-								Textbox.Value = num
-								pcall(TextboxConfig.Callback, num)
-								previousText = TextboxActual.Text
-							else
-								TextboxActual.Text = previousText	
-							end
-							if TextboxConfig.TextDisappear then TextboxActual.Text = "" end
-						else	
-							local num = tonumber(TextboxActual.Text)
-							if num then Textbox.Value = num; pcall(TextboxConfig.Callback, num); previousText = TextboxActual.Text
-							else TextboxActual.Text = previousText end
+			
+				AddConnection(TextboxActual.FocusLost, function(enterPressed)
+					local currentText = TextboxActual.Text
+					local processedValue
+					local isValid = false
+			
+					if TextboxConfig.Numeric then
+						local num = tonumber(currentText)
+						if num ~= nil then
+							processedValue = num
+							Textbox.Value = num
+							previousText = currentText 
+							isValid = true
+						else
+							TextboxActual.Text = previousText 
+							processedValue = Textbox.Value 
 						end
-						if OrionLib.SaveCfg and TextboxConfig.Save then pcall(SaveCfg, game.GameId) end
-					end)
-					AddConnection(TextboxActual:GetPropertyChangedSignal("Text"), function()
+					else
+						processedValue = currentText
+						Textbox.Value = currentText
+						isValid = true
+					end
+			
+					if isValid then
+						pcall(TextboxConfig.Callback, Textbox.Value, enterPressed)
+					end
+			
+					if TextboxConfig.TextDisappear and isValid then
+						TextboxActual.Text = ""
+					end
+			
+					if OrionLib.SaveCfg and Textbox.Save and isValid then
+						pcall(SaveCfg, game.GameId)
+					end
+				end)
+			
+				AddConnection(TextboxActual:GetPropertyChangedSignal("Text"), function()
+					if TextboxConfig.Numeric then
 						if TextboxActual.Text ~= "" and not tonumber(TextboxActual.Text) then
 							if not (TextboxActual.Text == "-" or string.match(TextboxActual.Text, "^%-?%.?$") or string.match(TextboxActual.Text, "^%-?[0-9]*%.?[0-9]*$")) then
+								local pos = TextboxActual.CursorPosition
 								TextboxActual.Text = previousText
+								TextboxActual.CursorPosition = pos - 1 
 							end
 						else
+							
 						end
-						if TextContainer and TextboxActual then
-							TweenService:Create(TextContainer, TweenInfo.new(0.1, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {Size = UDim2.new(0, TextboxActual.TextBounds.X + 16, 0, 24)}):Play()
-						end
-					end)
-				else
-					AddConnection(TextboxActual.FocusLost, function(enterPressed)	
-						Textbox.Value = TextboxActual.Text
-						pcall(TextboxConfig.Callback, TextboxActual.Text)
-						if TextboxConfig.TextDisappear then
-							TextboxActual.Text = ""
-						end	
-						if OrionLib.SaveCfg and TextboxConfig.Save then pcall(SaveCfg, game.GameId) end
-					end)
-					AddConnection(TextboxActual:GetPropertyChangedSignal("Text"), function()
-						if TextContainer and TextboxActual then
-							TweenService:Create(TextContainer, TweenInfo.new(0.1, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {Size = UDim2.new(0, TextboxActual.TextBounds.X + 16, 0, 24)}):Play()
-						end
-					end)
-				end
-
-
-				TextboxActual.Text = TextboxConfig.Default
+					end
+					if TextContainer and TextboxActual and TextboxActual.TextBounds.X > 0 then
+						TweenService:Create(TextContainer, TweenInfo.new(0.1, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {Size = UDim2.new(0, TextboxActual.TextBounds.X + 16, 0, 24)}):Play()
+					elseif TextContainer then 
+						TweenService:Create(TextContainer, TweenInfo.new(0.1, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {Size = UDim2.new(0, 24, 0, 24)}):Play() 
+					end
+				end)
+			
 				task.wait()
 				if TextboxActual and TextContainer and TextboxActual.TextBounds.X > 0 then
 					TextContainer.Size = UDim2.new(0, TextboxActual.TextBounds.X + 16, 0, 24)
+				elseif TextContainer then
+					TextContainer.Size = UDim2.new(0, 24, 0, 24)
 				end
-
-
+			
 				AddConnection(Click.MouseEnter, function()
 					TweenService:Create(TextboxFrame, TweenInfo.new(0.25, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {BackgroundColor3 = Color3.fromRGB(OrionLib.Themes[OrionLib.SelectedTheme].Second.R * 255 + 3, OrionLib.Themes[OrionLib.SelectedTheme].Second.G * 255 + 3, OrionLib.Themes[OrionLib.SelectedTheme].Second.B * 255 + 3)}):Play()
 				end)
-
+			
 				AddConnection(Click.MouseLeave, function()
 					TweenService:Create(TextboxFrame, TweenInfo.new(0.25, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {BackgroundColor3 = OrionLib.Themes[OrionLib.SelectedTheme].Second}):Play()
 				end)
-
+			
 				AddConnection(Click.MouseButton1Up, function()
 					TweenService:Create(TextboxFrame, TweenInfo.new(0.25, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {BackgroundColor3 = Color3.fromRGB(OrionLib.Themes[OrionLib.SelectedTheme].Second.R * 255 + 3, OrionLib.Themes[OrionLib.SelectedTheme].Second.G * 255 + 3, OrionLib.Themes[OrionLib.SelectedTheme].Second.B * 255 + 3)}):Play()
 					TextboxActual:CaptureFocus()
 				end)
-
+			
 				AddConnection(Click.MouseButton1Down, function()
 					TweenService:Create(TextboxFrame, TweenInfo.new(0.25, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {BackgroundColor3 = Color3.fromRGB(OrionLib.Themes[OrionLib.SelectedTheme].Second.R * 255 + 6, OrionLib.Themes[OrionLib.SelectedTheme].Second.G * 255 + 6, OrionLib.Themes[OrionLib.SelectedTheme].Second.B * 255 + 6)}):Play()
 				end)
-
-				function Textbox:Set(text)
-					Textbox.Value = text
-					TextboxActual.Text = text
-					if OrionLib.SaveCfg and TextboxConfig.Save then pcall(SaveCfg, game.GameId) end
+			
+				function Textbox:Set(value, suppressCallback)
+					local textForDisplay
+					if TextboxConfig.Numeric then
+						local num = tonumber(value)
+						if num ~= nil then
+							self.Value = num
+							textForDisplay = tostring(num)
+							previousText = textForDisplay
+						else
+							textForDisplay = previousText 
+						end
+					else
+						self.Value = value
+						textForDisplay = tostring(value)
+					end
+					TextboxActual.Text = textForDisplay
+			
+					if not suppressCallback then
+						pcall(TextboxConfig.Callback, self.Value, false)
+					end
+			
+					if OrionLib.SaveCfg and self.Save then
+						pcall(SaveCfg, game.GameId)
+					end
 				end
-
-				if TextboxConfig.Flag then
+			
+				if TextboxConfig.Flag then				
 					OrionLib.Flags[TextboxConfig.Flag] = Textbox
 				end
 				return Textbox
