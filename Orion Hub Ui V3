@@ -786,7 +786,7 @@ function OrionLib:MakeWindow(WindowConfig)
 		Visible = false,
 		AnchorPoint = Vector2.new(0.5, 0.5)
 	}), {
-		AddThemeObject(SetProps(MakeElement("Image", "rbxassetid://80901559446206"), {
+		AddThemeObject(SetProps(MakeElement("Image", "rbxassetid://80995426799129"), {
 			AnchorPoint = Vector2.new(0.5, 0.5),
 			Position = UDim2.new(0.5, 0, 0.5, 0),
 			Size = UDim2.new(0.7, 0, 0.7, 0)
